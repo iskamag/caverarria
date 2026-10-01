@@ -20,9 +20,13 @@ separate engine installation.
 Use Terraria movement and item attacks. **E** interacts or advances dialogue,
 **R** retries the campaign save, **I** opens Terraria's inventory, **M** opens the
 story map once acquired, and **V/C** cycle story weapons. Original save points remain active.
-**+ / -** zoom the camera in/out in sharp pixel steps. Camera zoom and player
+Terraria's **+ / -** and world zoom slider zoom the campaign in sharp pixel
+steps. Camera base scale and player
 appearance size are also adjustable in Mod Configuration; the default draws
 your character 50% larger while keeping the movement/collision box unchanged.
+Player scaling applies only to the actual campaign avatar; menus and normal
+worlds keep their ordinary appearance. Enemies retain their original shields
+and vulnerability windows, including the Graveyard keeper's attack phase.
 Story items occupy Terraria inventory slots and use their original campaign
 actions. Life Capsules immediately grant permanent character health, at ten
 Terraria HP per original HP; retrying a checkpoint does not grant the same

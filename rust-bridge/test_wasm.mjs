@@ -35,7 +35,7 @@ e.cave_free(executable,exe.length);
 const head=fs.readFileSync(path.join(dataRoot,'Head.tsc'));
 function cipher(data,sign){let middle=Math.floor(data.length/2),key=data[middle]||7;return Buffer.from(data.map((v,i)=>i===middle?v:(v+sign*key)&255));}
 put('/Head.tsc',cipher(Buffer.concat([cipher(head,-1),Buffer.from(
-    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n')]),1));
+    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<AM+0002:0000<END\r\n')]),1));
 e.cave_set_time(1790800000n);
 const empty=string('');let handle=e.cave_create(empty,empty,320,240);
 assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
@@ -78,6 +78,56 @@ if(process.env.CAVERARRIA_SILENT_AUDIO_TEST){
     assert.ok(energy>0,'current music did not resume');
     console.log(JSON.stringify({module:modulePath,muted_effect_requests:200,queued_and_active_audio_cleared:true,
         silent_song_and_profile_preserved:true,reenable_has_no_stale_effects:true,fresh_pixtone_peak:peak}));
+    e.cave_destroy(handle);process.exit(0);
+}
+if(process.env.CAVERARRIA_LOAD_AUDIO_TEST){
+    command({op:'warp',stage:0,x:160,y:120});
+    command({op:'audio',music_volume:1,sfx_volume:0});
+    command({op:'event',event:9000});
+    command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    assert.equal(21,command({op:'save'}).song);
+    e.cave_destroy(handle);
+    const name=string('');handle=e.cave_create(name,name,320,240);e.cave_free(name,1);
+    assert.ok(handle,read(e.cave_last_error()));
+    // Match the host: create loads the profile, then Start explicitly loads it.
+    assert.equal(21,command({op:'load'}).song);
+    command({op:'audio',music_volume:1,sfx_volume:0});
+    let energy=0;for(let i=0;i<12;i++){
+        const pointer=e.cave_audio(handle,800);
+        for(const sample of new Int16Array(e.memory.buffer,pointer,1600))energy+=sample*sample;
+    }
+    assert.ok(energy>0,'saved music did not start before the first game tick');
+    console.log(JSON.stringify({module:modulePath,saved_song:21,load_pcm_rms:Math.sqrt(energy/19200)}));
+    e.cave_destroy(handle);process.exit(0);
+}
+if(process.env.CAVERARRIA_UI_VIEWPORT_TEST){
+    command({op:'audio',enabled:false});
+    command({op:'warp',stage:0,x:160,y:120});
+    const small=command({op:'resize',width:160,height:120});
+    assert.deepEqual(small.viewport,{width:160,height:120});
+    assert.deepEqual(small.ui_viewport,{width:320,height:240});
+    command({op:'event',event:9016});
+    let equipped;
+    for(let i=0;i<60;i++)equipped=command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    assert.ok(equipped.weapons.some(weapon=>weapon.id===2),'fixture failed to acquire native weapon');
+    let xpAlpha=0;
+    const xpPointer=e.cave_pixels(handle,2),xpRgba=new Uint8Array(e.memory.buffer,xpPointer,320*240*4);
+    for(let y=32;y<40;y++)for(let x=0;x<80;x++)xpAlpha+=xpRgba[(y*320+x)*4+3];
+    assert.ok(xpAlpha>0,'host-controlled avatar lost original native weapon LV/XP bar');
+    command({op:'event',event:9015});
+    let displayed;
+    for(let i=0;i<180;i++)displayed=command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    assert.deepEqual(displayed.viewport,{width:160,height:120},'UI draw leaked its dimensions into world simulation');
+    assert.deepEqual(displayed.ui_viewport,{width:320,height:240});
+    const pointer=e.cave_pixels(handle,2),rgba=new Uint8Array(e.memory.buffer,pointer,320*240*4);
+    let rightHalfAlpha=0;
+    for(let y=120;y<240;y++)for(let x=160;x<320;x++)rightHalfAlpha+=rgba[(y*320+x)*4+3];
+    assert.ok(rightHalfAlpha>0,'dialogue right half was clipped to the zoomed world viewport');
+    const large=command({op:'resize',width:426,height:300});
+    assert.deepEqual(large.viewport,{width:426,height:300});
+    assert.deepEqual(large.ui_viewport,{width:426,height:300});
+    console.log(JSON.stringify({module:modulePath,world_viewport:displayed.viewport,ui_viewport:displayed.ui_viewport,
+        dialogue_right_half_alpha:rightHalfAlpha,weapon_xp_bar_alpha:xpAlpha,world_canvas_restored:true}));
     e.cave_destroy(handle);process.exit(0);
 }
 for(let i=0;i<180;i++)command({op:'tick',controls:0,player:{x:160,y:128,vx:0,vy:0}});

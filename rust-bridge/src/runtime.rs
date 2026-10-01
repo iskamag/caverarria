@@ -477,9 +477,19 @@ impl Runtime {
             self.raster
                 .borrow_mut()
                 .reset(self.state.constants.background_color);
-            self.scene
-                .draw(&mut self.state, &mut self.ctx)
-                .map_err(err)?;
+            // UI drawing may use a larger canvas than a zoomed world viewport.
+            // Restore simulation dimensions even if an authored draw fails.
+            let canvas = self.state.canvas_size;
+            let screen = self.state.screen_size;
+            let context_screen = self.ctx.screen_size;
+            let real_screen = self.ctx.real_screen_size;
+            let draw_result = self.scene.draw(&mut self.state, &mut self.ctx);
+            self.state.canvas_size = canvas;
+            self.state.screen_size = screen;
+            self.ctx.screen_size = context_screen;
+            self.ctx.real_screen_size = real_screen;
+            self.raster.borrow_mut().end_ui();
+            draw_result.map_err(err)?;
         }
         let mut result = self.snapshot(changed)?;
         result["hit_accepted"] = json!(hit_accepted);
@@ -598,6 +608,7 @@ impl Runtime {
         let audio = self.state.sound_manager.audio_trace();
         let mut result = json!({"ok":true,"epoch":self.epoch,"stage_changed":changed,"viewport":{"width":self.raster.borrow().width,"height":self.raster.borrow().height},"control_enabled":self.state.control_flags.control_enabled(),"tick_world":self.state.control_flags.tick_world(),"credits":self.state.control_flags.credits_running(),"script":format!("{:?}",self.state.textscript_vm.state),"script_mode":format!("{:?}",self.state.textscript_vm.mode),"stages":stages,"flags":(0..8000).filter(|&i|self.state.get_flag(i)).collect::<Vec<_>>(),"song":self.state.sound_manager.current_song(),"audio_ready":self.state.sound_manager.audio_ready(),"audio_trace":{"song_events":audio.0,"sfx_events":audio.1,"last_sfx":audio.2,"last_song":audio.3,"music_volume":self.state.settings.bgm_volume,"sfx_volume":self.state.settings.sfx_volume}});
         result["render_layers"] = json!(3);
+        result["ui_viewport"] = json!({"width": self.raster.borrow().ui_width, "height": self.raster.borrow().ui_height});
         result["timing_hz"] = json!(self.state.settings.timing_mode.get_tps());
         let Ok(game) = downcast::Downcast::<GameScene>::downcast_ref(&*self.scene) else {
             result["scene"] = json!("title");
@@ -677,8 +688,20 @@ fn npc_json(n: &NPC, boss: bool, id: usize) -> Value {
 pub fn begin_overlay(ctx: &mut Context) {
     set_capture_layer(ctx, 1);
 }
-pub fn begin_ui(ctx: &mut Context) {
-    set_capture_layer(ctx, 2);
+pub fn begin_ui(ctx: &mut Context, state: &mut SharedGameState) {
+    if let Some(renderer) = &ctx.renderer {
+        if let Some(renderer) = renderer.as_any().downcast_ref::<Renderer>() {
+            let mut raster = renderer.raster.borrow_mut();
+            raster.layer = 2;
+            raster.width = raster.ui_width;
+            raster.height = raster.ui_height;
+            raster.clip = None;
+            state.canvas_size = (raster.width as f32, raster.height as f32);
+            state.screen_size = state.canvas_size;
+            ctx.screen_size = state.canvas_size;
+            ctx.real_screen_size = (raster.width as u32, raster.height as u32);
+        }
+    }
 }
 fn set_capture_layer(ctx: &mut Context, layer: usize) {
     if let Some(renderer) = &ctx.renderer {
@@ -690,6 +713,10 @@ fn set_capture_layer(ctx: &mut Context, layer: usize) {
 struct Raster {
     width: usize,
     height: usize,
+    world_width: usize,
+    world_height: usize,
+    ui_width: usize,
+    ui_height: usize,
     layer: usize,
     buffers: [Vec<u8>; 3],
     clip: Option<Rect>,
@@ -700,8 +727,13 @@ impl Raster {
         Self {
             width,
             height,
+            world_width: width,
+            world_height: height,
+            ui_width: width.max(320),
+            ui_height: height.max(240),
             layer: 0,
-            buffers: std::array::from_fn(|_| vec![0; width * height * 4]),
+            buffers: [vec![0; width * height * 4], vec![0; width * height * 4],
+                vec![0; width.max(320) * height.max(240) * 4]],
             clip: None,
             blend: BlendMode::Alpha,
         }
@@ -719,9 +751,19 @@ impl Raster {
     fn resize(&mut self, width: usize, height: usize) {
         self.width = width;
         self.height = height;
-        for buffer in &mut self.buffers {
-            buffer.resize(width * height * 4, 0);
-        }
+        self.world_width = width;
+        self.world_height = height;
+        self.ui_width = width.max(320);
+        self.ui_height = height.max(240);
+        self.buffers[0].resize(width * height * 4, 0);
+        self.buffers[1].resize(width * height * 4, 0);
+        self.buffers[2].resize(self.ui_width * self.ui_height * 4, 0);
+        self.clip = None;
+    }
+    fn end_ui(&mut self) {
+        self.width = self.world_width;
+        self.height = self.world_height;
+        self.layer = 0;
         self.clip = None;
     }
     fn pixel(&mut self, x: i32, y: i32, c: [u8; 4]) {

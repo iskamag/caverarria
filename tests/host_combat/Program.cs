@@ -14,6 +14,13 @@ void Check(bool condition, string description)
 JsonElement Actor(int life, bool shootable, int left = 0, int right = 20)
     => JsonSerializer.SerializeToElement(new { x = 100, y = 80, left, right, top = 16, bottom = 8, life, shootable });
 
+var identity = new CaveEntity { NativeId = 17, NativeBoss = false, Epoch = 3, Generation = 12 };
+Check(!identity.CheckActive(), "vanilla distance despawning can recycle a still-live guest proxy");
+Check(identity.Owns(17, false, 3, 12), "current proxy identity rejected");
+Check(!identity.Owns(18, false, 3, 12), "recycled host slot accepted a different guest actor");
+Check(!identity.Owns(17, true, 3, 12), "boss/ordinary actor slot collision accepted");
+Check(!identity.Owns(17, false, 4, 12), "proxy from an old scene epoch accepted");
+Check(!identity.Owns(17, false, 3, 13), "guest slot reuse with a new generation accepted");
 Check(CaveEntity.IsCombatTarget(Actor(0, true)), "zero-local-HP vulnerable boss part lost its host target");
 Check(CaveEntity.IsCombatTarget(Actor(5, true)), "ordinary shootable enemy lost its host target");
 Check(!CaveEntity.IsCombatTarget(Actor(1000, false)), "closed/invulnerable native phase became damageable");
@@ -40,4 +47,12 @@ for (int scale = 2; scale <= 6; scale++)
     Check(Math.Abs(nextPixel.X - corner.X - scale) < .001f, "native pixel does not match host integer camera scale");
     Check(output.Width == width * scale && output.Height == height * scale, "native output stretches beyond its integer pixel scale");
 }
+string save = Path.Combine(Path.GetTempPath(), "caverarria-view-probe-" + Guid.NewGuid().ToString("N"));
+Directory.CreateDirectory(save);
+try
+{
+    Terraria.Program.SavePath = save;
+    ViewChecks.Run(Check);
+}
+finally { Directory.Delete(save, recursive: true); }
 Console.WriteLine($"{checks} combat proxy regression checks passed against production targeting/geometry methods.");

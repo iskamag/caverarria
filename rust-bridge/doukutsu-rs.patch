@@ -3,7 +3,7 @@ index 65c8d19..07ab57e 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -42,7 +42,7 @@ osx_minimum_system_version = "10.15"
- 
+
  [features]
  default = ["default-base", "backend-sdl", "render-opengl", "exe", "webbrowser", "discord-rpc"]
 -default-base = ["ogg-playback"]
@@ -21,7 +21,7 @@ index 65c8d19..07ab57e 100644
 +pull-audio = []
  exe = []
  android = []
- 
+
 @@ -65,14 +69,14 @@ byteorder = "1.4"
  clap = { version = "4.5.40", default_features = false, features = ["std", "help", "usage", "error-context", "cargo", "derive"] }
  case_insensitive_hashmap = "1.0.0"
@@ -42,11 +42,11 @@ index 65c8d19..07ab57e 100644
 @@ -95,7 +99,7 @@ webbrowser = { version = "0.8.6", optional = true }
  winit = { git = "https://github.com/doukutsu-rs/winit.git", rev = "878f206d19af01b0977277929eee5e32667453c0", optional = true, default_features = false, features = ["x11"] }
  xmltree = "0.10"
- 
+
 -[target.'cfg(not(target_os = "horizon"))'.dependencies]
 +[target.'cfg(not(any(target_os = "horizon", target_arch = "wasm32")))'.dependencies]
  open = "3.2"
- 
+
  [target.'cfg(target_os = "windows")'.dependencies]
 diff --git a/src/common.rs b/src/common.rs
 index a634459..536ca38 100644
@@ -54,7 +54,7 @@ index a634459..536ca38 100644
 +++ b/src/common.rs
 @@ -407,8 +407,13 @@ pub fn interpolate_fix9_scale(old_val: i32, val: i32, frame_delta: f64) -> f32 {
  }
- 
+
  pub fn get_timestamp() -> u64 {
 +    #[cfg(feature = "portable")]
 +    { return crate::cavebridge::portable::timestamp(); }
@@ -64,10 +64,10 @@ index a634459..536ca38 100644
      now.duration_since(UNIX_EPOCH).unwrap().as_secs() as u64
 +    }
  }
- 
+
  /// A RGBA color in the `sRGB` color space represented as `f32`'s in the range `[0.0-1.0]`
 diff --git a/src/components/hud.rs b/src/components/hud.rs
-index e167bc3..268a104 100644
+index e167bc3..cd0edec 100644
 --- a/src/components/hud.rs
 +++ b/src/components/hud.rs
 @@ -15,6 +15,7 @@ pub struct HUD {
@@ -87,58 +87,79 @@ index e167bc3..268a104 100644
              max_ammo: 0,
              xp: 0,
 @@ -64,6 +66,7 @@ impl HUD {
- 
+
  impl GameEntity<(&Player, &mut Inventory)> for HUD {
      fn tick(&mut self, state: &mut SharedGameState, (player, inventory): (&Player, &mut Inventory)) -> GameResult {
 +        self.external_player = player.external_kinematics;
          let (ammo, max_ammo) = inventory.get_current_ammo();
          let (xp, max_xp, max_level) = inventory.get_current_max_exp(&state.constants);
- 
-@@ -203,12 +206,12 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+
+@@ -203,14 +206,17 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
              0.0
          };
- 
+
 -        if self.max_ammo == 0 {
 +        if self.max_ammo == 0 && !self.external_player {
              batch.add_rect(bar_offset + weap_x + 48.0, 16.0 + top, &Rect::new_size(80, 48, 16, 8));
              batch.add_rect(bar_offset + weap_x + 48.0, 24.0 + top, &Rect::new_size(80, 48, 16, 8));
          }
- 
+
 -        if !self.shock {
-+        if !self.shock && !self.external_player {
-             // per
-             batch.add_rect(bar_offset + weap_x + 32.0, 24.0 + top, &Rect::new_size(72, 48, 8, 8));
+-            // per
+-            batch.add_rect(bar_offset + weap_x + 32.0, 24.0 + top, &Rect::new_size(72, 48, 8, 8));
++        if !self.shock && (!self.external_player || self.weapon_count != 0) {
++            // Terraria owns health/ammo presentation, but native weapon level
++            // and experience still belong to the original campaign.
++            if !self.external_player {
++                batch.add_rect(bar_offset + weap_x + 32.0, 24.0 + top, &Rect::new_size(72, 48, 8, 8));
++            }
              // lv
-@@ -257,7 +260,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+             batch.add_rect(num_offset + weap_x, 32.0 + top, &Rect::new_size(80, 80, 16, 8));
+             // xp box
+@@ -229,7 +235,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+                 batch.add_rect(bar_offset + weap_x + 24.0, 32.0 + top, &Rect::new_size(40, 80, 40, 8));
+             }
+
+-            if self.max_life != 0 {
++            if self.max_life != 0 && !self.external_player {
+                 let yellow_bar_width = (self.life_bar as f32 / self.max_life as f32 * 39.0) as u16;
+                 let bar_width = (self.life as f32 / self.max_life as f32 * 39.0) as u16;
+
+@@ -257,7 +263,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
          batch.draw(ctx)?;
          let batch = state.texture_set.get_or_load_batch(ctx, &state.constants, "ArmsImage")?;
- 
+
 -        if self.weapon_count != 0 {
 +        if self.weapon_count != 0 && !self.external_player {
              let mut rect = Rect::new(0, 0, 0, 16);
- 
+
              // First frame of animation is off by one weapon
-@@ -311,11 +314,11 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -311,13 +317,15 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
              )?;
          }
- 
+
 -        if self.max_ammo != 0 {
 +        if self.max_ammo != 0 && !self.external_player {
              draw_number(bar_offset + weap_x + 64.0, 16.0 + top, self.ammo as usize, Alignment::Right, state, ctx)?;
              draw_number(bar_offset + weap_x + 64.0, 24.0 + top, self.max_ammo as usize, Alignment::Right, state, ctx)?;
          }
 -        if !self.shock {
-+        if !self.shock && !self.external_player {
++        if !self.shock && (!self.external_player || self.weapon_count != 0) {
              draw_number(num_offset + weap_x + 24.0, 32.0 + top, self.current_level, Alignment::Right, state, ctx)?;
-             draw_number(num_offset + 40.0, 40.0 + top, self.life_bar as usize, Alignment::Right, state, ctx)?;
+-            draw_number(num_offset + 40.0, 40.0 + top, self.life_bar as usize, Alignment::Right, state, ctx)?;
++            if !self.external_player {
++                draw_number(num_offset + 40.0, 40.0 + top, self.life_bar as usize, Alignment::Right, state, ctx)?;
++            }
          }
+
+         Ok(())
 diff --git a/src/data/vanilla.rs b/src/data/vanilla.rs
 index 6ef04f9..baa6d38 100644
 --- a/src/data/vanilla.rs
 +++ b/src/data/vanilla.rs
 @@ -35,7 +35,43 @@ impl RangeExt for Range<u32> {
  }
- 
+
  impl VanillaExtractor {
 +    /// The portable host supplies the original executable bytes; resources are
 +    /// extracted with the same parser without filesystem or executable access.
@@ -179,14 +200,14 @@ index 6ef04f9..baa6d38 100644
 +        {
          #[cfg(not(any(target_os = "android", target_os = "horizon")))]
          let mut vanilla_exe_path = env::current_dir().unwrap();
- 
+
 @@ -84,6 +120,7 @@ impl VanillaExtractor {
          }
- 
+
          Some(Self { exe_buffer, data_base_dir, root })
 +        }
      }
- 
+
      pub fn extract_data(&self) -> GameResult {
 diff --git a/src/framework/backend.rs b/src/framework/backend.rs
 index 1c3329d..c542b59 100644
@@ -195,27 +216,27 @@ index 1c3329d..c542b59 100644
 @@ -1,6 +1,7 @@
  use std::any::Any;
  use std::rc::Rc;
- 
+
 +#[cfg(feature = "imgui")]
  use imgui::DrawData;
- 
+
  use crate::common::{Color, Rect};
 @@ -69,12 +70,16 @@ pub trait BackendRenderer {
- 
+
      fn set_clip_rect(&mut self, rect: Option<Rect>) -> GameResult;
- 
+
 +#[cfg(feature = "imgui")]
      fn imgui(&self) -> GameResult<&mut imgui::Context>;
- 
+
 +#[cfg(feature = "imgui")]
      fn imgui_texture_id(&self, texture: &Box<dyn BackendTexture>) -> GameResult<imgui::TextureId>;
- 
+
 +#[cfg(feature = "imgui")]
      fn prepare_imgui(&mut self, ui: &imgui::Ui) -> GameResult;
- 
+
 +#[cfg(feature = "imgui")]
      fn render_imgui(&mut self, draw_data: &DrawData) -> GameResult;
- 
+
      fn supports_vertex_draw(&self) -> bool {
 diff --git a/src/framework/backend_null.rs b/src/framework/backend_null.rs
 index e008bb4..3c87c44 100644
@@ -224,14 +245,14 @@ index e008bb4..3c87c44 100644
 @@ -2,6 +2,7 @@ use std::any::Any;
  use std::cell::RefCell;
  use std::mem;
- 
+
 +#[cfg(feature = "imgui")]
  use imgui::{DrawData, TextureId, Ui};
- 
+
  use crate::common::{Color, Rect};
 @@ -62,11 +63,14 @@ impl BackendEventLoop for NullEventLoop {
      }
- 
+
      fn new_renderer(&self, _ctx: *mut Context) -> GameResult<Box<dyn BackendRenderer>> {
 +        #[cfg(feature = "imgui")]
          let mut imgui = imgui::Context::create();
@@ -240,40 +261,40 @@ index e008bb4..3c87c44 100644
 +        { imgui.io_mut().display_size = [640.0, 480.0]; }
 +        #[cfg(feature = "imgui")]
          imgui.fonts().build_alpha8_texture();
- 
+
 -        Ok(Box::new(NullRenderer(RefCell::new(imgui))))
 +        Ok(Box::new(NullRenderer(#[cfg(feature = "imgui")] RefCell::new(imgui))))
      }
- 
+
      fn as_any(&self) -> &dyn Any {
 @@ -94,7 +98,7 @@ impl BackendTexture for NullTexture {
      }
  }
- 
+
 -pub struct NullRenderer(RefCell<imgui::Context>);
 +pub struct NullRenderer(#[cfg(feature = "imgui")] RefCell<imgui::Context>);
- 
+
  impl BackendRenderer for NullRenderer {
      fn renderer_name(&self) -> String {
 @@ -135,18 +139,22 @@ impl BackendRenderer for NullRenderer {
          Ok(())
      }
- 
+
 +#[cfg(feature = "imgui")]
      fn imgui(&self) -> GameResult<&mut imgui::Context> {
          unsafe { Ok(&mut *self.0.as_ptr()) }
      }
- 
+
 +#[cfg(feature = "imgui")]
      fn imgui_texture_id(&self, _texture: &Box<dyn BackendTexture>) -> GameResult<TextureId> {
          Ok(TextureId::from(0))
      }
- 
+
 +#[cfg(feature = "imgui")]
      fn prepare_imgui(&mut self, _ui: &Ui) -> GameResult {
          Ok(())
      }
- 
+
 +#[cfg(feature = "imgui")]
      fn render_imgui(&mut self, _draw_data: &DrawData) -> GameResult {
          Ok(())
@@ -285,7 +306,7 @@ index b64bdb5..de57df8 100644
 @@ -127,6 +127,7 @@ impl From<strum::ParseError> for GameError {
      }
  }
- 
+
 +#[cfg(feature = "audio-cpal")]
  impl From<cpal::DefaultStreamConfigError> for GameError {
      fn from(s: cpal::DefaultStreamConfigError) -> GameError {
@@ -293,7 +314,7 @@ index b64bdb5..de57df8 100644
 @@ -134,6 +135,7 @@ impl From<cpal::DefaultStreamConfigError> for GameError {
      }
  }
- 
+
 +#[cfg(feature = "audio-cpal")]
  impl From<cpal::PlayStreamError> for GameError {
      fn from(s: cpal::PlayStreamError) -> GameError {
@@ -301,7 +322,7 @@ index b64bdb5..de57df8 100644
 @@ -141,6 +143,7 @@ impl From<cpal::PlayStreamError> for GameError {
      }
  }
- 
+
 +#[cfg(feature = "audio-cpal")]
  impl From<cpal::BuildStreamError> for GameError {
      fn from(s: cpal::BuildStreamError) -> GameError {
@@ -312,8 +333,8 @@ index b912879..809442c 100644
 +++ b/src/framework/graphics.rs
 @@ -136,6 +136,7 @@ pub fn set_clip_rect(ctx: &mut Context, rect: Option<Rect>) -> GameResult {
  }
- 
- 
+
+
 +#[cfg(feature = "imgui")]
  pub fn imgui_context(ctx: &Context) -> GameResult<&mut imgui::Context> {
      if let Some(renderer) = ctx.renderer.as_ref() {
@@ -321,7 +342,7 @@ index b912879..809442c 100644
 @@ -144,6 +145,7 @@ pub fn imgui_context(ctx: &Context) -> GameResult<&mut imgui::Context> {
      Err(GameError::RenderError("Rendering backend hasn't been initialized yet.".to_string()))
  }
- 
+
 +#[cfg(feature = "imgui")]
  pub fn imgui_texture_id(ctx: &Context, texture: &Box<dyn BackendTexture>) -> GameResult<imgui::TextureId> {
      if let Some(renderer) = ctx.renderer.as_ref() {
@@ -329,7 +350,7 @@ index b912879..809442c 100644
 @@ -152,6 +154,7 @@ pub fn imgui_texture_id(ctx: &Context, texture: &Box<dyn BackendTexture>) -> Gam
      Err(GameError::RenderError("Rendering backend hasn't been initialized yet.".to_string()))
  }
- 
+
 +#[cfg(feature = "imgui")]
  pub fn prepare_imgui(ctx: &mut Context, ui: &imgui::Ui) -> GameResult {
      if let Some(renderer) = &mut ctx.renderer {
@@ -337,7 +358,7 @@ index b912879..809442c 100644
 @@ -160,6 +163,7 @@ pub fn prepare_imgui(ctx: &mut Context, ui: &imgui::Ui) -> GameResult {
      Err(GameError::RenderError("Rendering backend hasn't been initialized yet.".to_string()))
  }
- 
+
 +#[cfg(feature = "imgui")]
  pub fn render_imgui(ctx: &mut Context, draw_data: &imgui::DrawData) -> GameResult {
      if let Some(renderer) = &mut ctx.renderer {
@@ -360,7 +381,7 @@ index 5be25e5..808db14 100644
 +++ b/src/game/filesystem_container.rs
 @@ -23,7 +23,7 @@ impl FilesystemContainer {
      }
- 
+
      pub fn mount_fs(&mut self, context: &mut Context) -> GameResult {
 -        #[cfg(not(any(target_os = "android", target_os = "horizon")))]
 +        # [cfg(not(any(target_os = "android", target_os = "horizon", target_arch = "wasm32")))]
@@ -370,20 +391,20 @@ index 5be25e5..808db14 100644
 @@ -63,18 +63,18 @@ impl FilesystemContainer {
              resource_dir
          };
- 
+
 -        #[cfg(not(any(target_os = "android", target_os = "horizon")))]
 +        # [cfg(not(any(target_os = "android", target_os = "horizon", target_arch = "wasm32")))]
          log::info!("Resource directory: {:?}", resource_dir);
- 
+
          log::info!("Initializing engine...");
- 
+
 -        #[cfg(not(any(target_os = "android", target_os = "horizon")))]
 +        # [cfg(not(any(target_os = "android", target_os = "horizon", target_arch = "wasm32")))]
          {
              mount_vfs(context, Box::new(PhysicalFS::new(&resource_dir, true)));
              self.game_path = resource_dir.clone();
          }
- 
+
 -        #[cfg(not(any(target_os = "android", target_os = "horizon")))]
 +        # [cfg(not(any(target_os = "android", target_os = "horizon", target_arch = "wasm32")))]
          let project_dirs = match directories::ProjectDirs::from("", "", "doukutsu-rs") {
@@ -392,7 +413,7 @@ index 5be25e5..808db14 100644
 @@ -124,7 +124,7 @@ impl FilesystemContainer {
              self.game_path = data_path.clone();
          }
- 
+
 -        #[cfg(not(any(target_os = "android", target_os = "horizon")))]
 +        # [cfg(not(any(target_os = "android", target_os = "horizon", target_arch = "wasm32")))]
          {
@@ -400,17 +421,17 @@ index 5be25e5..808db14 100644
              user_dir.pop();
 @@ -191,7 +191,7 @@ impl FilesystemContainer {
      }
- 
+
      fn open_directory(&self, path: PathBuf) -> GameResult {
 -        #[cfg(target_os = "horizon")]
 +        #[cfg(any(target_os = "horizon", target_arch = "wasm32"))]
          return Ok(()); // can't open directories on switch
- 
+
          #[cfg(target_os = "android")]
 @@ -211,7 +211,7 @@ impl FilesystemContainer {
              return Ok(());
          }
- 
+
 -        #[cfg(not(any(target_os = "android", target_os = "horizon")))]
 +        # [cfg(not(any(target_os = "android", target_os = "horizon", target_arch = "wasm32")))]
          open::that(path).map_err(|e| {
@@ -447,30 +468,30 @@ index 00ea1da..21aaa63 100644
 @@ -266,6 +269,7 @@ impl Game {
                  self.fps.act(state_ref, ctx, self.start_time.elapsed().as_nanos())?;
              }
- 
+
 +#[cfg(feature = "imgui")]
              self.ui.draw(state_ref, ctx, scene)?;
          }
- 
+
 diff --git a/src/game/npc/list.rs b/src/game/npc/list.rs
 index 94931a9..6ee5542 100644
 --- a/src/game/npc/list.rs
 +++ b/src/game/npc/list.rs
 @@ -171,6 +171,7 @@ impl NPCList {
- 
+
                  npc.init_rng(self.seed);
- 
+
 +                npc.external_generation = npc_ref.0.borrow().external_generation.wrapping_add(1);
                  *npc_ref.0.borrow_mut() = npc;
- 
+
                  if self.max_npc.get() <= id {
 @@ -201,6 +202,7 @@ impl NPCList {
          npc.init_rng(self.seed);
- 
+
          let npc_ref = self.npcs.get(id as usize).unwrap();
 +        npc.external_generation = npc_ref.0.borrow().external_generation.wrapping_add(1);
          *npc_ref.0.borrow_mut() = npc;
- 
+
          if self.max_npc.get() <= id {
 diff --git a/src/game/npc/mod.rs b/src/game/npc/mod.rs
 index 8a04d06..bbcd7f8 100644
@@ -499,7 +520,7 @@ index 06b4d3d..79a5dfc 100644
 +++ b/src/game/npc/utils.rs
 @@ -51,6 +51,7 @@ impl NPC {
          let npc_flags = NPCFlag(flags.0);
- 
+
          NPC {
 +            external_generation: 0,
              id: 0,
@@ -510,7 +531,7 @@ index 8c5ccd0..58fb52e 100644
 --- a/src/game/player/mod.rs
 +++ b/src/game/player/mod.rs
 @@ -78,6 +78,16 @@ impl DogStack {
- 
+
  #[derive(Clone)]
  pub struct Player {
 +    /// Host supplies normal-play kinematics; scripts still own locked cutscenes.
@@ -528,7 +549,7 @@ index 8c5ccd0..58fb52e 100644
      pub vel_x: i32,
 @@ -132,6 +142,11 @@ impl Player {
          let skin = Box::new(BasicPlayerSkin::new("MyChar".to_string(), state, ctx));
- 
+
          Player {
 +            external_kinematics: false,
 +            external_damage_pending: 0,
@@ -541,7 +562,7 @@ index 8c5ccd0..58fb52e 100644
 @@ -195,7 +210,7 @@ impl Player {
          self.hit_bounds = self.skin.get_hit_bounds();
      }
- 
+
 -    fn tick_normal(&mut self, state: &mut SharedGameState, npc_list: &NPCList) -> GameResult {
 +    fn tick_air(&mut self, state: &mut SharedGameState) {
          if !state.control_flags.interactions_disabled() && state.control_flags.control_enabled() {
@@ -550,7 +571,7 @@ index 8c5ccd0..58fb52e 100644
 @@ -223,6 +238,118 @@ impl Player {
              }
          }
- 
+
 +    }
 +
 +    /// Apply the original acquired booster to externally supplied Terraria motion.
@@ -667,22 +688,22 @@ index 8c5ccd0..58fb52e 100644
              return Ok(());
          }
 @@ -884,7 +1011,11 @@ impl Player {
- 
+
          let final_hp = state.get_damage(hp);
- 
+
 -        self.life = self.life.saturating_sub(final_hp as u16);
 +        if self.external_kinematics {
 +            self.external_damage_pending = self.external_damage_pending.saturating_add(final_hp as u32);
 +        } else {
 +            self.life = self.life.saturating_sub(final_hp as u16);
 +        }
- 
+
          if self.equip.has_whimsical_star() && self.stars > 0 {
              self.stars -= 1;
 @@ -955,12 +1086,56 @@ impl GameEntity<&NPCList> for Player {
              self.exp_popup.update_displayed_value();
          }
- 
+
 +        if self.external_kinematics && state.control_flags.control_enabled() && self.control_mode == ControlMode::Normal {
 +            self.tick_air(state);
 +            if self.external_jump_started && !self.external_support {
@@ -731,7 +752,7 @@ index 8c5ccd0..58fb52e 100644
              (ControlMode::Normal, _) => self.tick_normal(state, npc_list)?,
              (ControlMode::IronHead, _) => self.tick_ironhead(state)?,
          }
- 
+
 +        }
          self.damage_popup.x = self.x;
          self.damage_popup.y = self.y - self.display_bounds.top as i32 + 0x1000;
@@ -743,7 +764,7 @@ index 4a44c01..aaae27c 100644
 @@ -279,6 +279,9 @@ impl Player {
              flags = self.test_hit_npc_non_solid(npc.borrow());
          }
- 
+
 +        if flags.hit_bottom_wall() && (npc.npc_flags.solid_soft() || npc.npc_flags.solid_hard()) && !npc.npc_flags.bouncy() {
 +            self.external_support = true;
 +        }
@@ -763,7 +784,7 @@ index 3d4c6cd..396b5c4 100644
 --- a/src/game/shared_game_state.rs
 +++ b/src/game/shared_game_state.rs
 @@ -208,6 +208,10 @@ pub enum Season {
- 
+
  impl Season {
      pub fn current() -> Season {
 +        #[cfg(feature = "portable")]
@@ -771,7 +792,7 @@ index 3d4c6cd..396b5c4 100644
 +        #[cfg(not(feature = "portable"))]
 +        {
          let now = Local::now();
- 
+
          if (now.month() == 10 && now.day() > 25) || (now.month() == 11 && now.day() < 3) {
 @@ -219,6 +223,7 @@ impl Season {
          } else {
@@ -780,11 +801,11 @@ index 3d4c6cd..396b5c4 100644
 +        }
      }
  }
- 
+
 @@ -423,9 +428,13 @@ impl SharedGameState {
          sound_manager.set_song_volume(settings.bgm_volume);
          sound_manager.set_sfx_volume(settings.sfx_volume);
- 
+
 +        #[cfg(not(feature = "portable"))]
          let current_time = Local::now();
 +        #[cfg(not(feature = "portable"))]
@@ -793,7 +814,7 @@ index 3d4c6cd..396b5c4 100644
 +        #[cfg(feature = "portable")]
 +        let more_rust = settings.more_rust;
 +        let seed = crate::common::get_timestamp() as i32;
- 
+
          #[cfg(feature = "discord-rpc")]
          let discord_rpc_app_id = match option_env!("DISCORD_RPC_APP_ID") {
 @@ -752,7 +761,7 @@ impl SharedGameState {
@@ -827,7 +848,7 @@ index 2d45ecf..8ad76e0 100644
 +#[path = "../../../rust-bridge/src/runtime.rs"]
 +pub mod cavebridge;
 diff --git a/src/scene/game_scene.rs b/src/scene/game_scene.rs
-index 8a2de3c..3b27e40 100644
+index 8a2de3c..7dcb34b 100644
 --- a/src/scene/game_scene.rs
 +++ b/src/scene/game_scene.rs
 @@ -28,6 +28,7 @@ use crate::framework::context::Context;
@@ -857,7 +878,7 @@ index 8a2de3c..3b27e40 100644
              hud_player2: HUD::new(Alignment::Right),
 @@ -1455,12 +1459,14 @@ impl GameScene {
          self.tick_npc_bullet_collissions(state);
- 
+
          if state.control_flags.control_enabled() {
 +            if !self.player1.external_kinematics || self.player1.external_weapon_active {
              self.inventory_player1.tick_weapons(
@@ -910,15 +931,15 @@ index 8a2de3c..3b27e40 100644
 +        }
 +        #[cfg(feature = "cavebridge")]
 +        crate::cavebridge::begin_overlay(ctx);
- 
+
          if !self.player1.cond.hidden() {
              self.whimsical_star.draw(state, ctx, &self.frame)?;
 @@ -2050,6 +2075,9 @@ impl Scene for GameScene {
              graphics::set_clip_rect(ctx, None)?;
          }
- 
+
 +        #[cfg(feature = "cavebridge")]
-+        crate::cavebridge::begin_ui(ctx);
++        crate::cavebridge::begin_ui(ctx, state);
 +
          if self.inventory_dim > 0.0 {
              let rect = Rect::new(0, 0, state.screen_size.0 as isize + 1, state.screen_size.1 as isize + 1);
@@ -936,7 +957,7 @@ index 8a2de3c..3b27e40 100644
 @@ -2313,6 +2342,7 @@ impl Scene for GameScene {
          Ok(())
      }
- 
+
 +#[cfg(feature = "imgui")]
      fn imgui_draw(
          &mut self,
@@ -952,10 +973,10 @@ index 838b121..9fe4dd2 100644
 +#[cfg(feature = "imgui")]
  use crate::framework::ui::Components;
  use crate::game::shared_game_state::SharedGameState;
- 
+
 @@ -36,6 +37,7 @@ pub trait Scene: downcast::Any {
      }
- 
+
      /// Independent draw meant for debug overlay, that lets you mutate the game state.
 +#[cfg(feature = "imgui")]
      fn imgui_draw(
@@ -968,7 +989,7 @@ index 6085e04..6843793 100644
 @@ -5,6 +5,7 @@ use std::sync::mpsc;
  use std::sync::mpsc::{Receiver, Sender};
  use std::time::Instant;
- 
+
 +#[cfg(feature = "audio-cpal")]
  use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
  #[cfg(feature = "ogg-playback")]
@@ -976,7 +997,7 @@ index 6085e04..6843793 100644
 @@ -24,6 +25,10 @@ use crate::sound::organya::Song;
  use crate::sound::pixtone::{PixToneParameters, PixTonePlayback};
  use crate::sound::wave_bank::SoundBank;
- 
+
 +#[cfg(feature = "pull-audio")]
 +#[path = "../../../../rust-bridge/src/audio.rs"]
 +mod pull;
@@ -1001,12 +1022,12 @@ index 6085e04..6843793 100644
 +    #[cfg(feature = "cavebridge")]
 +    cave_last_song: std::cell::Cell<usize>,
  }
- 
+
  enum SongFormat {
 @@ -65,6 +81,27 @@ pub enum InterpolationMode {
      Polyphase,
  }
- 
+
 +#[cfg(feature = "cavebridge")]
 +fn cave_audio_device_name() -> Option<String> {
 +    if let Ok(name) = std::env::var("CAVERARRIA_AUDIO_DEVICE") {
@@ -1049,7 +1070,7 @@ index 6085e04..6843793 100644
 +                cave_last_song: std::cell::Cell::new(0),
              });
          }
- 
+
 @@ -99,13 +147,38 @@ impl SoundManager {
              current_song_id: 0,
              no_audio: false,
@@ -1067,7 +1088,7 @@ index 6085e04..6843793 100644
 +            #[cfg(feature = "cavebridge")]
 +            cave_last_song: std::cell::Cell::new(0),
          };
- 
+
 +        #[cfg(feature = "pull-audio")]
 +        {
 +            sound_manager.pull = Some(pull::PullMixer::new(rx, soundbank));
@@ -1077,7 +1098,7 @@ index 6085e04..6843793 100644
 +        #[cfg(all(feature = "audio-cpal", not(feature = "pull-audio")))]
 +        {
          let host = cpal::default_host();
- 
+
 -        let device_result =
 -            host.default_output_device().ok_or_else(|| AudioError("Error initializing audio device.".to_owned()));
 +        #[cfg(feature = "cavebridge")]
@@ -1088,12 +1109,12 @@ index 6085e04..6843793 100644
 +        let requested_device = None;
 +        let device_result = requested_device.or_else(|| host.default_output_device())
 +            .ok_or_else(|| AudioError("Error initializing audio device.".to_owned()));
- 
+
          if device_result.is_err() {
              log::error!("{}", device_result.err().unwrap().to_string());
 @@ -144,7 +217,10 @@ impl SoundManager {
          }
- 
+
          sound_manager.stream = res.ok();
 -        Ok(sound_manager)
 +        return Ok(sound_manager);
@@ -1101,11 +1122,11 @@ index 6085e04..6843793 100644
 +        #[cfg(not(any(feature = "audio-cpal", feature = "pull-audio")))]
 +        { sound_manager.no_audio = true; Ok(sound_manager) }
      }
- 
+
      pub fn reload(&mut self) -> GameResult<()> {
 @@ -178,18 +254,35 @@ impl SoundManager {
      }
- 
+
      pub fn pause(&mut self) {
 +        #[cfg(feature = "pull-audio")]
 +        if let Some(mixer) = &mut self.pull { mixer.pause(true); }
@@ -1114,7 +1135,7 @@ index 6085e04..6843793 100644
              let _ = stream.pause();
          }
      }
- 
+
      pub fn resume(&mut self) {
 +        #[cfg(feature = "pull-audio")]
 +        if let Some(mixer) = &mut self.pull { mixer.pause(self.no_audio); }
@@ -1123,7 +1144,7 @@ index 6085e04..6843793 100644
              let _ = stream.play();
          }
      }
- 
+
 +    #[cfg(feature = "cavebridge")]
 +    fn trace_sfx(&self, id: u8) {
 +        self.cave_sfx_events.set(self.cave_sfx_events.get().wrapping_add(1));
@@ -1141,7 +1162,7 @@ index 6085e04..6843793 100644
          }
 @@ -198,6 +291,8 @@ impl SoundManager {
      }
- 
+
      pub fn loop_sfx(&self, id: u8) {
 +        #[cfg(feature = "cavebridge")]
 +        self.trace_sfx(id);
@@ -1150,7 +1171,7 @@ index 6085e04..6843793 100644
          }
 @@ -206,6 +301,8 @@ impl SoundManager {
      }
- 
+
      pub fn loop_sfx_freq(&mut self, id: u8, freq: f32) {
 +        #[cfg(feature = "cavebridge")]
 +        self.trace_sfx(id);
@@ -1180,29 +1201,29 @@ index 6085e04..6843793 100644
 +            }
              return Ok(());
          }
- 
+
 @@ -407,6 +519,8 @@ impl SoundManager {
- 
+
      pub fn save_state(&mut self) -> GameResult {
          if self.no_audio {
 +            #[cfg(feature = "pull-audio")]
 +            if self.pull.is_some() { self.prev_song_id = self.current_song_id; }
              return Ok(());
          }
- 
+
 @@ -418,6 +532,8 @@ impl SoundManager {
- 
+
      pub fn restore_state(&mut self) -> GameResult {
          if self.no_audio {
 +            #[cfg(feature = "pull-audio")]
 +            if self.pull.is_some() { self.current_song_id = self.prev_song_id; }
              return Ok(());
          }
- 
+
 @@ -441,6 +557,44 @@ impl SoundManager {
          Ok(())
      }
- 
+
 +    #[cfg(feature = "cavebridge")]
 +    pub fn audio_ready(&self) -> bool {
 +        #[cfg(feature = "pull-audio")]
@@ -1247,13 +1268,13 @@ index 6085e04..6843793 100644
 @@ -594,6 +748,7 @@ impl Default for PlaybackStateType {
      }
  }
- 
+
 +#[cfg(feature = "audio-cpal")]
  fn run<T>(
      rx: Receiver<PlaybackMessage>,
      bank: SoundBank,
 @@ -616,9 +771,11 @@ where
- 
+
      log::info!("Audio format: {} {}", sample_rate, channels);
      org_engine.set_sample_rate(sample_rate as usize);
 +    // Live Organya playback must loop regardless of optional OGG support.
@@ -1264,4 +1285,4 @@ index 6085e04..6843793 100644
 -        org_engine.loops = usize::MAX;
          ogg_engine.set_sample_rate(sample_rate as usize);
      }
- 
+

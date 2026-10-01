@@ -24,6 +24,7 @@ internal sealed class AutomationInput
     public float? AimX { get; set; }
     public float? AimY { get; set; }
     public int? Item { get; set; }
+    public int? FixtureItem { get; set; }
     public JsonElement Engine { get; set; }
 }
 
@@ -50,6 +51,8 @@ internal static class Automation
             var state = new
             {
                 menuMode = Main.menuMode,
+                campaignActive = CampaignRuntime.Active, engineAttached = CampaignRuntime.Engine != null,
+                audioPlaying = CampaignRuntime.HostAudioPlaying,
                 players = Main.PlayerList.Select(data => new { name = data.Name, path = data.Path, life = data.Player.statLife, permanentMaxLife = data.Player.statLifeMax, effectiveMaxLife = data.Player.statLifeMax2, difficulty = data.Player.difficulty }).ToArray(),
                 worlds = Main.WorldList.Select(data => new { name = data.Name, path = data.Path, id = data.UniqueId, campaign = data.TryGetHeaderData<CampaignSystem>(out var header) && header.GetBool("caverarriaCampaign") }).ToArray()
             };
@@ -74,6 +77,14 @@ internal static class Automation
             lastId = next.Id;
             remaining = Math.Clamp(next.Frames, 1, 36000);
             lastCommand = json;
+            if (next.FixtureItem.HasValue)
+            {
+                // Opt-in isolated combat fixture, recorded as a diagnostic.
+                // This is never part of an ordinary-controls progression run.
+                Main.LocalPlayer.inventory[0].SetDefaults(next.FixtureItem.Value);
+                Main.LocalPlayer.selectedItem = 0;
+                debugCommands++;
+            }
             if (next.Retry) CampaignRuntime.Retry();
             if (next.Engine.ValueKind == JsonValueKind.Object)
             {
@@ -131,9 +142,19 @@ internal static class Automation
                 controls = new { left = player.controlLeft, right = player.controlRight, jump = player.controlJump, shoot = player.controlUseItem },
                 frame = CampaignRuntime.Frame, cameraX = Main.screenPosition.X, cameraY = Main.screenPosition.Y,
                 screenWidth = Main.screenWidth, screenHeight = Main.screenHeight, musicVolume = Main.musicVolume, soundVolume = Main.soundVolume, vanillaMusic = Main.curMusic,
+                worldZoom = Main.GameZoomTarget, campaignPixelScale = CampaignView.PixelScale,
                 audioBackend = CampaignRuntime.Engine?.HasPcmAudio == true ? "Terraria/FNA" : "legacy",
                 audioPlaying = CampaignRuntime.HostAudioPlaying, audioFrames = CampaignRuntime.HostAudioFrames, audioBuffers = CampaignRuntime.HostAudioBuffers
             };
+            state["combatProxies"] = Main.npc.Where(npc => npc.active && npc.ModNPC is CaveEntity).Select(npc =>
+            {
+                var proxy = (CaveEntity)npc.ModNPC;
+                return new { slot = npc.whoAmI, id = proxy.NativeId, boss = proxy.NativeBoss, epoch = proxy.Epoch,
+                    generation = proxy.Generation, x = npc.position.X, y = npc.position.Y,
+                    width = npc.width, height = npc.height, life = npc.life, maxLife = npc.lifeMax,
+                    friendly = npc.friendly, chaseable = npc.chaseable, immune = npc.dontTakeDamage,
+                    hittable = npc.CanBeChasedBy() };
+            }).ToArray();
             state["lastCommandId"] = lastId;
             state["commandFramesRemaining"] = remaining;
             state["debugCommandsUsed"] = debugCommands;

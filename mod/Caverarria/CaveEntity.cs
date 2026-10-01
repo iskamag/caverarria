@@ -31,7 +31,7 @@ public sealed class CaveEntity : ModNPC
     public override void SetDefaults()
     {
         NPC.width = NPC.height = 20;
-        NPC.lifeMax = 1000;
+        NPC.lifeMax = 10;
         NPC.damage = 0;
         NPC.defense = 0;
         NPC.noGravity = true;
@@ -43,6 +43,11 @@ public sealed class CaveEntity : ModNPC
         NPC.npcSlots = 0;
         NPC.dontTakeDamage = false;
     }
+    internal bool Owns(int id, bool boss, int epoch, ulong generation)
+        => NativeId == id && NativeBoss == boss && Epoch == epoch && Generation == generation;
+    // The original simulation owns despawning. Vanilla distance despawning can
+    // recycle a proxy slot while its guest actor is still alive off screen.
+    public override bool CheckActive() => false;
     public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) => false;
     public override void AI() { NPC.velocity = Vector2.Zero; NPC.timeLeft = 60; }
     public override bool CheckDead() { NPC.life = 1; return false; }

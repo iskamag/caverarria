@@ -36,11 +36,11 @@ public sealed class CampaignSystem : ModSystem
     public override void PostDrawTiles() => CampaignRuntime.DrawWorld();
     public override void ModifyTransformMatrix(ref Terraria.Graphics.SpriteViewMatrix transform)
     {
-        if (CampaignRuntime.Active) transform.Zoom = new Vector2(CampaignView.HostZoom);
+        if (CampaignView.InWorld) transform.Zoom = new Vector2(CampaignView.HostZoom);
     }
     public override void ModifyScreenPosition()
     {
-        if (!CampaignRuntime.Active) return;
+        if (!CampaignView.InWorld) return;
         var camera = CampaignRuntime.Snapshot.Field("camera");
         Main.screenPosition = CampaignView.WorldScreenPosition(new Vector2(camera.Number("x"), camera.Number("y")),
             CampaignRuntime.Engine!.Width, CampaignRuntime.Engine.Height);
@@ -246,16 +246,16 @@ public sealed class CampaignPlayer : ModPlayer
     }
     public override void HideDrawLayers(PlayerDrawSet drawInfo)
     {
-        if (!CampaignRuntime.Active || CampaignRuntime.Snapshot.Text("scene") == "game" && !CampaignRuntime.Snapshot.Field("player").Boolean("hidden") && CampaignRuntime.Snapshot.Field("player").Boolean("alive", true)) return;
+        if (drawInfo.headOnlyRender || !CampaignView.IsCampaignAvatar(drawInfo.drawPlayer) || CampaignRuntime.Snapshot.Text("scene") == "game" && !CampaignRuntime.Snapshot.Field("player").Boolean("hidden") && CampaignRuntime.Snapshot.Field("player").Boolean("alive", true)) return;
         foreach (var layer in PlayerDrawLayerLoader.Layers) layer.Hide();
     }
     public override void DrawEffects(PlayerDrawSet drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)
     {
-        if (CampaignRuntime.Active) fullBright = true;
+        if (!drawInfo.headOnlyRender && CampaignView.IsCampaignAvatar(drawInfo.drawPlayer)) fullBright = true;
     }
     public override void TransformDrawData(ref PlayerDrawSet drawInfo)
     {
-        if (!CampaignRuntime.Active || drawInfo.headOnlyRender) return;
+        if (drawInfo.headOnlyRender || !CampaignView.IsCampaignAvatar(drawInfo.drawPlayer)) return;
         // Use the host's own all-layer transform about the avatar's feet. This
         // enlarges armor, hair and held items together without altering physics.
         PlayerDrawLayers.DrawPlayer_ScaleDrawData(ref drawInfo, CampaignView.PlayerScale);

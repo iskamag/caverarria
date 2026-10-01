@@ -24,16 +24,31 @@ public sealed class CampaignViewConfig : ModConfig
 public sealed class CampaignView : ModSystem
 {
     private readonly List<Hook> samplingHooks = new();
-    public static int PixelScale => Math.Clamp(ModContent.GetInstance<CampaignViewConfig>().CameraPixelScale, 2, 6);
+    public static bool InWorld => !Main.gameMenu && CampaignRuntime.Active;
+    public static int BasePixelScale => Math.Clamp(ModContent.GetInstance<CampaignViewConfig>().CameraPixelScale, 2, 6);
+    // Keep native pixels crisp while honoring Terraria's world zoom slider.
+    // The slider selects whole-pixel steps instead of stretching individual pixels.
+    public static int PixelScale => EffectivePixelScale(BasePixelScale, Main.GameZoomTarget);
+    internal static int EffectivePixelScale(int baseScale, float worldZoom)
+        => (int)MathF.Round(Math.Clamp(baseScale, 2, 6) * Math.Clamp(worldZoom, 1f, 2f));
     public static float HostZoom => PixelScale / CampaignRuntime.Scale;
     public static int ViewportWidth => Math.Max(160, Main.screenWidth / PixelScale);
     public static int ViewportHeight => Math.Max(120, Main.screenHeight / PixelScale);
     public static float PlayerScale => Math.Clamp(ModContent.GetInstance<CampaignViewConfig>().PlayerVisualScale, 1f, 2f);
-    public static void ChangeZoom(int delta)
-        => ModContent.GetInstance<CampaignViewConfig>().CameraPixelScale = Math.Clamp(PixelScale + delta, 2, 6);
+    internal static bool IsCampaignAvatar(Player player)
+        => InWorld && IsWorldPlayer(player, Main.player) && player.GetModPlayer<CampaignPlayer>().UsingCampaignHealth;
+    internal static bool IsWorldPlayer(Player player, Player[] players)
+        => player.whoAmI >= 0 && player.whoAmI < players.Length && ReferenceEquals(players[player.whoAmI], player);
 
     public static Rectangle OutputRectangle(int width, int height)
         => OutputRectangle(Main.screenWidth, Main.screenHeight, width, height, PixelScale);
+    public static Rectangle InterfaceRectangle(int width, int height)
+        => InterfaceRectangle(Main.screenWidth, Main.screenHeight, width, height, PixelScale);
+    internal static Rectangle InterfaceRectangle(int screenWidth, int screenHeight, int width, int height, int worldScale)
+    {
+        int scale = Math.Max(1, Math.Min(worldScale, Math.Min(screenWidth / width, screenHeight / height)));
+        return OutputRectangle(screenWidth, screenHeight, width, height, scale);
+    }
     internal static Rectangle OutputRectangle(int screenWidth, int screenHeight, int width, int height, int pixelScale)
         => new((screenWidth - width * pixelScale) / 2, (screenHeight - height * pixelScale) / 2, width * pixelScale, height * pixelScale);
 
@@ -55,7 +70,7 @@ public sealed class CampaignView : ModSystem
     private delegate void DrawSpriteRange(SpriteDrawBuffer buffer, int index, int count);
     private static void DrawPixelSprites(DrawSpriteRange original, SpriteDrawBuffer buffer, int index, int count)
     {
-        if (!CampaignRuntime.Active) { original(buffer, index, count); return; }
+        if (!InWorld) { original(buffer, index, count); return; }
         // Player layers issue direct GPU draws through SpriteDrawBuffer after
         // applying their armor/hair shaders. SpriteBatch.Begin's sampler never
         // reaches this path, so select nearest sampling at the actual draw.
@@ -74,9 +89,9 @@ public sealed class CampaignView : ModSystem
         try
         {
             samplingHooks.Add(new Hook(typeof(Camera).GetProperty(nameof(Camera.Sampler))!.GetMethod!,
-                (Func<CameraSampler, Camera, SamplerState>)((original, camera) => CampaignRuntime.Active ? SamplerState.PointClamp : original(camera))));
+                (Func<CameraSampler, Camera, SamplerState>)((original, camera) => InWorld ? SamplerState.PointClamp : original(camera))));
             samplingHooks.Add(new Hook(typeof(LegacyPlayerRenderer).GetProperty(nameof(LegacyPlayerRenderer.MountedSamplerState))!.GetMethod!,
-                (Func<MountedSampler, SamplerState>)(original => CampaignRuntime.Active ? SamplerState.PointClamp : original())));
+                (Func<MountedSampler, SamplerState>)(original => InWorld ? SamplerState.PointClamp : original())));
             samplingHooks.Add(new Hook(typeof(SpriteDrawBuffer).GetMethod(nameof(SpriteDrawBuffer.DrawRange))!,
                 (Action<DrawSpriteRange, SpriteDrawBuffer, int, int>)DrawPixelSprites));
         }

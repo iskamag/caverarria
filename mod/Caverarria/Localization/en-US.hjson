@@ -3,8 +3,6 @@ Mods: {
 		Keybinds: {
 			Interact.DisplayName: Cave Story: interact / advance dialogue
 			Retry.DisplayName: Cave Story: retry from save
-			ZoomIn.DisplayName: Cave Story: zoom in
-			ZoomOut.DisplayName: Cave Story: zoom out
 			Inventory.DisplayName: Terraria inventory / close story item
 			Map.DisplayName: Cave Story: map
 			NextWeapon.DisplayName: Cave Story: next weapon
@@ -16,8 +14,8 @@ Mods: {
 				DisplayName: Campaign camera and appearance
 
 				CameraPixelScale: {
-					Label: Camera zoom
-					Tooltip: Larger values bring the camera closer. Use + / - during play.
+					Label: Camera base pixel scale
+					Tooltip: Larger values bring the camera closer. Terraria's world zoom slider and + / - adjust it in crisp pixel steps.
 				}
 
 				PlayerVisualScale: {

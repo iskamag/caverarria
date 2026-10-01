@@ -22,6 +22,7 @@ internal static class CampaignRuntime
     public static bool ControlsEnabled => !Active || Snapshot.Boolean("control_enabled", true) && Snapshot.Text("script_mode", "Map") == "Map";
     public static bool IronheadMovement => Active && Snapshot.Field("player").Boolean("ironhead");
     private static byte[]? pixels;
+    private static byte[]? interfacePixels;
     private static Texture2D? background, overlay, interfaceImage;
     private static bool SeparateInterface => Snapshot.Integer("render_layers", 2) >= 3;
     private static bool imageDirty;
@@ -68,8 +69,8 @@ internal static class CampaignRuntime
             Main.LocalPlayer.GetModPlayer<CampaignPlayer>().BeginCampaign(nativePlayer.Integer("life", 3), nativePlayer.Integer("max_life", 3), load);
             ApplySnapshot(true);
             SyncAudio();
-            if (Engine.HasPcmAudio && Snapshot.Boolean("audio_ready") && Environment.GetEnvironmentVariable("CAVERARRIA_AUDIO") != "0")
-                audio = new CampaignAudio(Engine.AudioSampleRate, Engine.ReadAudio);
+            // World loading can run on a worker. The main-thread audio hook
+            // owns construction and playback of the FNA stream.
             imageDirty = true;
             Failure = null;
         }
@@ -90,8 +91,6 @@ internal static class CampaignRuntime
         // Use doukutsu-rs' built-in 60 Hz mode alongside Terraria's update loop.
         try
         {
-            if (CaverarriaMod.ZoomIn.JustPressed) CampaignView.ChangeZoom(1);
-            if (CaverarriaMod.ZoomOut.JustPressed) CampaignView.ChangeZoom(-1);
             SyncViewport();
             SyncAudio();
             if (pendingStoryItem > 0)
@@ -320,34 +319,45 @@ internal static class CampaignRuntime
 
     private static void SynchronizeEntities()
     {
-        var present = new HashSet<(int, bool)>();
-        foreach (var entity in Snapshot.Field("npcs").Elements().Concat(Snapshot.Field("bosses").Elements()))
+        int epoch = Snapshot.Integer("epoch");
+        var actors = Snapshot.Field("npcs").Elements().Concat(Snapshot.Field("bosses").Elements())
+            .Where(CaveEntity.IsCombatTarget).ToArray();
+        var identities = actors.ToDictionary(entity => (entity.Integer("id"), entity.Boolean("boss")),
+            entity => entity.Field("generation").ValueKind == JsonValueKind.Number ? entity.Field("generation").GetUInt64() : 0);
+        // Retire old identities before any NewNPC call can reuse their slots.
+        // Never deactivate a slot now owned by another actor or another mod.
+        foreach (var pair in proxySlots.ToArray())
         {
-            if (!CaveEntity.IsCombatTarget(entity)) continue;
-            var key = (entity.Integer("id"), entity.Boolean("boss"));
-            present.Add(key);
-            if (!proxySlots.TryGetValue(key, out int index) || !Main.npc[index].active || Main.npc[index].ModNPC is not CaveEntity)
+            var npc = Main.npc[pair.Value];
+            if (npc.ModNPC is CaveEntity proxy && proxy.NativeId == pair.Key.id && proxy.NativeBoss == pair.Key.boss)
             {
-                index = NPC.NewNPC(new EntitySource_Misc("CaveStoryEntity"), 0, 0, ModContent.NPCType<CaveEntity>());
+                if (npc.active && identities.TryGetValue(pair.Key, out ulong generation)
+                    && proxy.Owns(pair.Key.id, pair.Key.boss, epoch, generation)) continue;
+                npc.active = false;
+            }
+            proxySlots.Remove(pair.Key);
+        }
+        foreach (var entity in actors)
+        {
+            var key = (id: entity.Integer("id"), boss: entity.Boolean("boss"));
+            ulong generation = identities[key];
+            Rectangle bounds = CaveEntity.CombatBounds(entity);
+            if (!proxySlots.TryGetValue(key, out int index))
+            {
+                index = NPC.NewNPC(new EntitySource_Misc("CaveStoryEntity"), bounds.Center.X, bounds.Bottom, ModContent.NPCType<CaveEntity>());
                 if (index >= Main.maxNPCs) continue;
                 proxySlots[key] = index;
             }
             var npc = Main.npc[index];
             var proxy = (CaveEntity)npc.ModNPC;
-            proxy.Generation = entity.Field("generation").ValueKind == JsonValueKind.Number ? entity.Field("generation").GetUInt64() : 0;
-            proxy.NativeId = key.Item1; proxy.NativeBoss = key.Item2; proxy.Epoch = Snapshot.Integer("epoch");
-            Rectangle bounds = CaveEntity.CombatBounds(entity);
+            proxy.Generation = generation;
+            proxy.NativeId = key.id; proxy.NativeBoss = key.boss; proxy.Epoch = epoch;
             npc.width = bounds.Width; npc.height = bounds.Height;
             npc.position = new Vector2(bounds.X, bounds.Y);
             npc.life = Math.Max(1, entity.Integer("life") * 10);
             npc.lifeMax = Math.Max(npc.lifeMax, npc.life);
             npc.velocity = Vector2.Zero;
             npc.dontTakeDamage = false;
-        }
-        foreach (var key in proxySlots.Keys.Where(key => !present.Contains(key)).ToArray())
-        {
-            Main.npc[proxySlots[key]].active = false;
-            proxySlots.Remove(key);
         }
     }
 
@@ -409,12 +419,19 @@ internal static class CampaignRuntime
     }
     public static void UpdateAudio()
     {
-        if (Main.gameMenu || !Active || audio == null) return;
+        if (Main.gameMenu || !Active || Environment.GetEnvironmentVariable("CAVERARRIA_AUDIO") == "0") return;
         long started = FramePerformance.Begin();
-        try { SyncAudio(); audio.Update(); FramePerformance.End("audio", started); }
+        try
+        {
+            SyncAudio();
+            if (audio == null && Engine!.HasPcmAudio && Snapshot.Boolean("audio_ready"))
+                audio = new CampaignAudio(Engine.AudioSampleRate, Engine.ReadAudio, Main.QueueMainThreadAction);
+            audio?.Update();
+            FramePerformance.End("audio", started);
+        }
         catch (Exception exception)
         {
-            audio.Dispose(); audio = null;
+            audio?.Dispose(); audio = null;
             RecordFailure(exception);
         }
     }
@@ -479,8 +496,11 @@ internal static class CampaignRuntime
         Engine.CopyPixels(1, pixels); overlay.SetData(pixels);
         if (SeparateInterface)
         {
-            interfaceImage ??= new Texture2D(Main.instance.GraphicsDevice, Engine.Width, Engine.Height);
-            Engine.CopyPixels(2, pixels); interfaceImage.SetData(pixels);
+            int width = Snapshot.Field("ui_viewport").Integer("width", Engine.Width);
+            int height = Snapshot.Field("ui_viewport").Integer("height", Engine.Height);
+            interfacePixels ??= new byte[width * height * 4];
+            interfaceImage ??= new Texture2D(Main.instance.GraphicsDevice, width, height);
+            Engine.CopyPixels(2, interfacePixels); interfaceImage.SetData(interfacePixels);
         }
         imageDirty = false;
         FramePerformance.End("images", started);
@@ -498,20 +518,22 @@ internal static class CampaignRuntime
     }
     public static bool DrawForeground()
     {
-        if (Active && SeparateInterface) DrawInterfaceImage(overlay);
+        if (Active && SeparateInterface) DrawInterfaceImage(overlay, worldLayer: true);
         return true;
     }
     public static bool DrawOverlay()
     {
-        if (Active) DrawInterfaceImage(SeparateInterface ? interfaceImage : overlay);
+        if (Active) DrawInterfaceImage(SeparateInterface ? interfaceImage : overlay, worldLayer: !SeparateInterface);
         return true;
     }
-    private static void DrawInterfaceImage(Texture2D? image)
+    private static void DrawInterfaceImage(Texture2D? image, bool worldLayer)
     {
         if (image == null) return;
         Main.spriteBatch.End();
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
-        Main.spriteBatch.Draw(image, CampaignView.OutputRectangle(Engine!.Width, Engine.Height), Color.White);
+        Rectangle output = worldLayer ? CampaignView.OutputRectangle(Engine!.Width, Engine.Height)
+            : CampaignView.InterfaceRectangle(image.Width, image.Height);
+        Main.spriteBatch.Draw(image, output, Color.White);
         Main.spriteBatch.End();
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
     }
@@ -526,23 +548,39 @@ internal static class CampaignRuntime
 
     public static void Dispose()
     {
-        audio?.Dispose(); audio = null;
-        if (Engine != null)
+        // Detach the session first. Save & Quit runs on a worker; a teardown
+        // failure must not leave an old engine active in the menu or next world.
+        var previousEngine = Engine;
+        var previousAudio = audio;
+        Engine = null; audio = null;
+        try
         {
-            Main.LocalPlayer.GetModPlayer<CampaignPlayer>().FinishCampaign();
-            Main.mapEnabled = outsideMapEnabled;
-            Main.Configuration.Put("MapEnabled", outsideMapEnabled);
+            previousAudio?.Dispose();
+            if (previousEngine != null)
+            {
+                Main.LocalPlayer.GetModPlayer<CampaignPlayer>().FinishCampaign();
+                Main.mapEnabled = outsideMapEnabled;
+                Main.Configuration.Put("MapEnabled", outsideMapEnabled);
+            }
         }
-        try { Engine?.Dispose(); }
         finally
         {
-            Engine = null;
-            ReleaseImages();
-            pixels = null; Snapshot = default; CurrentMap = default;
-            proxySlots.Clear(); hits.Clear(); terrainHits.Clear(); weaponIds.Clear(); rawControls = shotFrames = pendingStoryItem = 0; nextWeaponHeld = previousWeaponHeld = inventoryHeld = false;
-            musicVolume = soundVolume = float.NaN;
-            Frame = 0; projectedWidth = projectedHeight = previousEpoch = 0;
-            nativeDeathPending = false;
+            try { previousEngine?.Dispose(); }
+            finally
+            {
+                ReleaseImages();
+                pixels = interfacePixels = null; Snapshot = default; CurrentMap = default;
+                foreach (var pair in proxySlots)
+                {
+                    var npc = Main.npc[pair.Value];
+                    if (npc.ModNPC is CaveEntity proxy && proxy.NativeId == pair.Key.id && proxy.NativeBoss == pair.Key.boss)
+                        npc.active = false;
+                }
+                proxySlots.Clear(); hits.Clear(); terrainHits.Clear(); weaponIds.Clear(); rawControls = shotFrames = pendingStoryItem = 0; nextWeaponHeld = previousWeaponHeld = inventoryHeld = false;
+                musicVolume = soundVolume = float.NaN;
+                Frame = 0; projectedWidth = projectedHeight = previousEpoch = 0;
+                nativeDeathPending = false;
+            }
         }
     }
 
@@ -552,6 +590,7 @@ internal static class CampaignRuntime
         var previousOverlay = overlay;
         var previousInterface = interfaceImage;
         background = overlay = interfaceImage = null;
+        interfacePixels = null;
         if (previousBackground == null && previousOverlay == null && previousInterface == null) return;
         // Save & Quit unloads on a worker thread. FNA graphics resources belong
         // to the main thread; detach them now and release those captured objects there.

@@ -59,7 +59,11 @@ not required by the packaged portable mod.
 
 `cave_command(handle, UTF8_JSON)` returns UTF-8 JSON owned by the handle. The return
 pointer remains valid until the next command. `cave_pixels(handle, 0, 1 or 2)` returns
-viewport-sized RGBA bytes, valid until the next command or destruction. Layer 0 is
+RGBA bytes, valid until the next command or destruction. Layers 0 and 1 use the
+snapshot's `viewport` dimensions; layer 2 uses `ui_viewport` dimensions. The UI
+canvas is at least 320×240 so world zoom cannot crop original dialogue or menus.
+Only rendering temporarily uses those UI dimensions; world simulation and camera
+clamping keep the actual `viewport`. Layer 0 is
 the opaque background and native entities. Layer 1 is transparent foreground
 terrain, water and world effects. Layer 2 is HUD, dialogue, menus, fade and credits.
 tModLoader draws its real player and projectiles between layers 0 and 1, then its
@@ -98,7 +102,8 @@ Commands: `new`, `load`, `retry`, `save`, `death`, `snapshot`, `tick`, `hit`,
 `tile_hit`, `audio`, and `resize`. `resize` accepts native canvas `width`/`height`
 (160–1920 by 120–1080), preserves the current scene and cached textures, and
 returns pixels at the new size. All previously returned pixel pointers become
-invalid. The host reallocates its RGBA buffers/textures using returned `viewport`.
+invalid. The host reallocates its RGBA buffers/textures using returned `viewport`
+and `ui_viewport`, copying `width * height * 4` bytes for the respective layer.
 Tick `weapon` selects an acquired original weapon by WeaponType id;
 `controls` shoot then runs its unchanged native projectiles, XP, ammo, recoil and
 terrain interactions. Changing to Spur resets its XP once, as native weapon
@@ -114,7 +119,7 @@ A hit is `{"op":"hit","id":4,"boss":false,"damage":3,"epoch":1,
 feedback, death events, drops, and flag progression. NPC slot generations prevent
 a delayed hit applying to a replacement enemy. Epoch increments on scene reload.
 
-Snapshots contain `viewport`, `camera`, `stage`, `player`, `npcs`, `bosses`,
+Snapshots contain `viewport`, `ui_viewport`, `camera`, `stage`, `player`, `npcs`, `bosses`,
 `weapons`, `items`, `bullets`, `flags`, `script`, `credits`, and the 95-entry
 `stages` table. `bullets` are the original weapon projectiles, including their
 damage, age and position.
@@ -149,6 +154,11 @@ profile writes, resize and a frame timing sample. It is an adapter smoke test.
 Set `CAVERARRIA_SILENT_AUDIO_TEST=1` to check cleared queued/active audio, 200
 unplayed effect requests, silent song/profile restoration, and reenabling without
 stale effects followed by a fresh original PixTone sound.
+Set `CAVERARRIA_UI_VIEWPORT_TEST=1` to check independent world/UI dimensions at
+high zoom, actual original weapon LV/XP pixels, complete original dialogue
+rendering beyond the world buffer's edge, and restoration of world dimensions.
+This uses private TSC fixtures with audio disabled; it does not prove live host
+interaction or campaign progression.
 Set `CAVERARRIA_AUDIO_CORPUS=artifacts/wasm-audio.pcm` to collect all samples from
 three complete original ACCESS loops and verify the musical envelopes, exact
 mute behavior and genuine PixTone jump sound. This checks synthesized PCM;

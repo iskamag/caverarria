@@ -8,6 +8,7 @@ internal sealed class CampaignAudio : IDisposable
     private readonly DynamicSoundEffectInstance stream;
     private readonly Action<byte[]> render;
     private readonly byte[] buffer;
+    private readonly Action<Action> scheduleDisposal;
     private readonly object gate = new();
     private bool disposed;
     private const int QueuedChunks = 6;
@@ -15,9 +16,10 @@ internal sealed class CampaignAudio : IDisposable
     public int PendingBuffers { get { lock (gate) return disposed ? 0 : stream.PendingBufferCount; } }
     public bool Playing { get { lock (gate) return !disposed && stream.State == SoundState.Playing; } }
 
-    public CampaignAudio(int sampleRate, Action<byte[]> render)
+    public CampaignAudio(int sampleRate, Action<byte[]> render, Action<Action>? scheduleDisposal = null)
     {
         this.render = render;
+        this.scheduleDisposal = scheduleDisposal ?? (action => action());
         // 100 ms tolerates occasional slow frames. Keep each chunk short so
         // the device can request a refill before the whole queue runs dry.
         buffer = new byte[(sampleRate / 60) * 2 * sizeof(short)];
@@ -40,7 +42,10 @@ internal sealed class CampaignAudio : IDisposable
                 stream.SubmitBuffer(buffer);
                 SubmittedFrames += buffer.Length / 4;
             }
-            if (stream.State == SoundState.Stopped) stream.Play();
+            // FNA can suspend a stream while the window is inactive. Once the
+            // host resumes its audio updates, resume this stream as well.
+            if (stream.State == SoundState.Paused) stream.Resume();
+            else if (stream.State == SoundState.Stopped) stream.Play();
         }
     }
 
@@ -56,8 +61,15 @@ internal sealed class CampaignAudio : IDisposable
             if (disposed) return;
             disposed = true;
             stream.BufferNeeded -= BufferNeeded;
-            stream.Stop();
-            stream.Dispose();
         }
+        // Terraria unloads worlds on a worker. Suppress refills immediately,
+        // then release this captured FNA resource on the game thread. Never
+        // resolve a later campaign's stream or engine inside the queued action.
+        DynamicSoundEffectInstance capturedStream = stream;
+        scheduleDisposal(() =>
+        {
+            try { capturedStream.Stop(); }
+            finally { capturedStream.Dispose(); }
+        });
     }
 }

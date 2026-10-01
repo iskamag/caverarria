@@ -109,6 +109,13 @@ internal static class Program
         player.statLife = 50;
         Apply(State(9, true));
         Check(player.statLife == 20, "death observed before the native tick was lost");
+        engine.FailDispose = true;
+        try { CampaignRuntime.Dispose(); }
+        catch (InvalidOperationException) { }
+        Check(CampaignRuntime.Engine == null && !CampaignRuntime.Active,
+            "failed resource disposal retained an active campaign engine");
+        Check(CampaignRuntime.Snapshot.ValueKind == JsonValueKind.Undefined && CampaignRuntime.Frame == 0,
+            "failed resource disposal retained campaign snapshot/frame state");
     }
 
     private static void CheckCapsules()
@@ -178,6 +185,7 @@ internal static class Program
     private sealed class FakeEngine : ICampaignEngine
     {
         public JsonElement RetrySnapshot;
+        public bool FailDispose;
         public int Width => 320;
         public int Height => 240;
         public bool HasPcmAudio => false;
@@ -190,6 +198,6 @@ internal static class Program
         public JsonElement Resize(int width, int height) => throw new NotSupportedException();
         public void CopyPixels(int layer, byte[] destination) => throw new NotSupportedException();
         public void ReadAudio(byte[] destination) => throw new NotSupportedException();
-        public void Dispose() { }
+        public void Dispose() { if (FailDispose) throw new InvalidOperationException("fixture disposal failure"); }
     }
 }

@@ -94,6 +94,16 @@ if(process.env.CAVERARRIA_INPUT_TEST){
     console.log(JSON.stringify({module:modulePath,egg_password_is_acknowledgment:true,original_event_ends:true,held_skip_ticks:skipped+1,host_maximum_ignored:true,native_capsule_grants:true}));
     process.exit(0);
 }
+if(process.env.CAVERARRIA_DECOR_TERRAIN_TEST){
+    const idx=initial.map.cell_attributes.findIndex(a=>a===0x40);
+    assert.ok(idx>=0,'fixture room must contain authored decorative cells');
+    const x=idx%initial.stage.width,y=Math.floor(idx/initial.stage.width);
+    const result=command({op:'terrain_edit',epoch:initial.epoch,stage:initial.stage.id,x,y,solid:true,sub_x:0,sub_y:0});
+    assert.equal(true,result.terrain_edit_accepted,'decorative cell rejected partial Terraria placement');
+    assert.equal(1,result.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask);
+    console.log(JSON.stringify({module:modulePath,decorative_subtile_placement:true,stage:initial.stage.id,x,y}));
+    e.cave_destroy(handle);process.exit(0);
+}
 if(process.env.CAVERARRIA_MICRO_TERRAIN_TEST){
     const room=initial.stage.id,width=initial.stage.width;
     command({op:'event',event:9022});

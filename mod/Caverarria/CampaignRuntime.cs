@@ -165,8 +165,9 @@ internal static class CampaignRuntime
             int newMax = nativePlayer.Integer("max_life", maxLife);
             if (newMax != maxLife) player.statLifeMax2 = newMax * 10;
             int rawDamage = nativePlayer.Integer("pending_damage_raw");
-            if (rawDamage > 0 && !player.dead)
-                player.Hurt(PlayerDeathReason.ByCustomReason(Terraria.Localization.NetworkText.FromLiteral(player.name + " fell on the island.")), rawDamage * 10, -player.direction);
+            int scaledDamage = ScaleIncomingDamage(rawDamage, ModContent.GetInstance<CampaignViewConfig>().EnemyDamageScale);
+            if (scaledDamage > 0 && !player.dead)
+                player.Hurt(PlayerDeathReason.ByCustomReason(Terraria.Localization.NetworkText.FromLiteral(player.name + " fell on the island.")), scaledDamage, -player.direction);
             int healing = nativePlayer.Integer("life_delta");
             if (healing > 0) player.statLife = Math.Min(newMax * 10, player.statLife + healing * 10);
             ApplySnapshot(false);
@@ -487,7 +488,21 @@ internal static class CampaignRuntime
         var point = ToCave(projectile.Center + oldVelocity / 2);
         terrainHits.Enqueue(new { op = "tile_hit", x = point.X, y = point.Y, width = projectile.width / Scale + 2, height = projectile.height / Scale + 2 });
     }
-    public static void QueueHit(CaveEntity entity, int damage) => hits.Enqueue((entity.NativeId, entity.Epoch, entity.Generation, entity.NativeBoss, Math.Max(1, (damage + 5) / 10)));
+    internal static int ScaleWeaponDamage(int damage, float multiplier)
+    {
+        double scale = Math.Clamp(multiplier, 0f, 10f);
+        return damage <= 0 || scale <= 0 ? 0
+            : (int)Math.Clamp(Math.Floor(damage * scale / 10 + .5), 1, 32767);
+    }
+    internal static int ScaleIncomingDamage(int damage, float multiplier)
+        => (int)Math.Clamp(Math.Floor(Math.Max(0, damage) * 10d * Math.Clamp(multiplier, 0f, 10f) + .5), 0, int.MaxValue);
+
+    public static void QueueHit(CaveEntity entity, int damage)
+    {
+        int nativeDamage = ScaleWeaponDamage(damage, ModContent.GetInstance<CampaignViewConfig>().TerrariaWeaponDamageScale);
+        if (nativeDamage == 0) return;
+        hits.Enqueue((entity.NativeId, entity.Epoch, entity.Generation, entity.NativeBoss, nativeDamage));
+    }
     public static Vector2 ToWorld(float x, float y) => Origin + new Vector2(x, y) * Scale;
     public static Vector2 ToCave(Vector2 world) => (world - Origin) / Scale;
     private static void SyncViewport()

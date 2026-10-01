@@ -16,8 +16,19 @@ Mods: {
 
 				Headers: {
 					View: Camera and appearance
+					Combat: Campaign combat
 					Audio: Campaign audio
 					Save: Campaign save
+				}
+
+				TerrariaWeaponDamageScale: {
+					Label: Terraria weapon damage multiplier
+					Tooltip: Scales Terraria weapon damage against Cave Story enemies. 1 is normal; 0 disables damage. Original Cave Story guns are unchanged.
+				}
+
+				EnemyDamageScale: {
+					Label: Incoming campaign damage multiplier
+					Tooltip: Scales Cave Story enemy and terrain damage before Terraria armor and hurt effects. 1 is normal; 0 disables damage.
 				}
 
 				MuteCampaignAudio: {

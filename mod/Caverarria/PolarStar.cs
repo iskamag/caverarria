@@ -68,7 +68,10 @@ public sealed class CampaignProjectiles : GlobalProjectile
 {
     public override bool OnTileCollide(Projectile projectile, Vector2 oldVelocity)
     {
-        CampaignRuntime.QueueTerrainHit(projectile, oldVelocity);
+        // Bomb bounces are not native bullet impacts (which play a hit sound).
+        // Vanilla owns their fuse, bounce physics and explosion tile sweep.
+        if (!ProjectileID.Sets.Explosive[projectile.type] && projectile.aiStyle != ProjAIStyleID.Explosive)
+            CampaignRuntime.QueueTerrainHit(projectile, oldVelocity);
         return true;
     }
 }

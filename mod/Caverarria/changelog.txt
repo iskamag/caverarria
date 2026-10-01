@@ -1,3 +1,10 @@
+0.3.0
+- Restore Terraria NPC visibility in the campaign actor layer.
+- Allow small Terraria blocks over non-colliding decorative cells.
+- Enable terrain explosions through synchronized guest edits; remove native impact sounds on bomb bounces.
+- Clear stale native boss health bars on death or target removal.
+- Add Terraria weapon and incoming campaign damage multipliers (0–10x).
+
 0.1.2
 - Clear enlarged avatar overlap after authored door transfers.
 - Keep Cave Story health capacity authoritative to prevent capsule feedback.

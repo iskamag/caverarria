@@ -16,7 +16,7 @@ public sealed class CampaignSolid : ModTile
     }
     public override bool PreDraw(int i, int j, SpriteBatch spriteBatch) => false;
     public override bool CanKillTile(int i, int j, ref bool blockDamaged) => CampaignTerrainEdits.CanMine(i, j);
-    public override bool CanExplode(int i, int j) => false;
+    public override bool CanExplode(int i, int j) => CampaignTerrainEdits.CanMine(i, j);
 }
 
 public sealed class CampaignTerrainProtection : GlobalTile
@@ -41,5 +41,9 @@ public sealed class CampaignTerrainProtection : GlobalTile
         else CampaignTerrainEdits.Place(i, j, type, item);
     }
     public override bool Slope(int i, int j, int type) => !CampaignRuntime.Active;
-    public override bool CanExplode(int i, int j, int type) => !CampaignRuntime.Active;
+    public override bool CanExplode(int i, int j, int type)
+    {
+        bool damaged = false;
+        return !CampaignRuntime.Active || CanKillTile(i, j, type, ref damaged);
+    }
 }

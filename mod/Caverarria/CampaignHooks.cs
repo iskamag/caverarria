@@ -33,7 +33,6 @@ public sealed class CampaignSystem : ModSystem
         totalWeight = 1;
     }
     public override void PostUpdatePlayers() => CampaignRuntime.Tick();
-    public override void PostDrawTiles() => CampaignRuntime.DrawWorld();
     public override void ModifyTransformMatrix(ref Terraria.Graphics.SpriteViewMatrix transform)
     {
         if (CampaignView.InWorld) transform.Zoom = new Vector2(CampaignView.HostZoom);

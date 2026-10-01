@@ -14,6 +14,16 @@ void Check(bool condition, string description)
 JsonElement Actor(int life, bool shootable, int left = 0, int right = 20)
     => JsonSerializer.SerializeToElement(new { x = 100, y = 80, left, right, top = 16, bottom = 8, life, shootable });
 
+Check(CampaignRuntime.ScaleWeaponDamage(25, 1) == 3, "default host-to-native damage rounding preserved");
+Check(CampaignRuntime.ScaleWeaponDamage(25, 2) == 5, "outgoing multiplier precedes native quantization");
+Check(CampaignRuntime.ScaleWeaponDamage(25, 0) == 0, "zero outgoing multiplier cannot inflict minimum damage");
+Check(CampaignRuntime.ScaleWeaponDamage(1, .1f) == 1, "positive damage retains native minimum");
+Check(CampaignRuntime.ScaleWeaponDamage(int.MaxValue, 10) == 32767, "large modded damage cannot overflow guest ABI");
+Check(CampaignRuntime.ScaleIncomingDamage(3, 1) == 30, "default incoming damage conversion preserved");
+Check(CampaignRuntime.ScaleIncomingDamage(3, .5f) == 15, "incoming scaling happens in host HP before armor");
+Check(CampaignRuntime.ScaleIncomingDamage(3, 0) == 0, "zero incoming multiplier suppresses damage");
+Check(CampaignRuntime.ScaleIncomingDamage(3, 10) == 300, "incoming maximum scale applied");
+
 var identity = new CaveEntity { NativeId = 17, NativeBoss = false, Epoch = 3, Generation = 12 };
 Check(!identity.CheckActive(), "vanilla distance despawning can recycle a still-live guest proxy");
 Check(identity.Owns(17, false, 3, 12), "current proxy identity rejected");

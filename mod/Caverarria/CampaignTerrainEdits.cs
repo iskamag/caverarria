@@ -122,7 +122,7 @@ internal static class CampaignTerrainEdits
     }
     // Preserve authored solid/slope art and physics until it is mined as a whole
     // cell. Empty cells and existing edit masks can accept individual host tiles.
-    internal static bool CellAllowsSmallBlock(int attribute, bool edited) => edited || attribute == 0;
+    internal static bool CellAllowsSmallBlock(int attribute, bool edited) => edited || attribute is 0 or 0x40;
     internal static Rectangle PlacementBounds(int i, int j, bool small)
     {
         if (small) return new Rectangle(i * 16, j * 16, 16, 16);

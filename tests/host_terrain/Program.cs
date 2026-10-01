@@ -30,7 +30,7 @@ try
     Check(!CampaignTerrainEdits.Cell(ox, oy + 20, out _, out _), "bottom boundary protected");
     Check(CampaignTerrainEdits.CanMine(ox, oy), "ordinary campaign mining permitted");
     var protection = new CampaignTerrainProtection();
-    Check(!protection.CanExplode(ox, oy, TileID.Stone), "explosives cannot desynchronize guest collision");
+    Check(protection.CanExplode(ox, oy, TileID.Stone), "explosives use synchronized terrain mining");
     Check(!protection.CanReplace(ox, oy, TileID.Stone, TileID.Dirt), "block swap cannot bypass whole-cell transactions");
     Check(!protection.Slope(ox, oy, TileID.Stone), "hammer cannot desynchronize guest collision");
     snapshotProperty.SetValue(null, JsonSerializer.SerializeToElement(new { control_enabled = false, stage = new { width = 20, height = 10 } }));
@@ -82,6 +82,7 @@ try
     Check(wholeVisual.Width == 16 && CampaignTerrainEdits.BlockDrawBounds(7, 9, 0, 0).Left == wholeVisual.Left
         && CampaignTerrainEdits.BlockDrawBounds(7, 9, 1, 1).Right == wholeVisual.Right,
         "two ordinary blocks occupy the same native visual width as one campaign block");
+    Check(CampaignTerrainEdits.CellAllowsSmallBlock(0x40, false), "small blocks allowed over decorative cells");
     Check(CampaignTerrainEdits.CellAllowsSmallBlock(0, false), "small blocks allowed in original empty cells");
     Check(!CampaignTerrainEdits.CellAllowsSmallBlock(0x41, false), "original solid cell must be mined before small placement");
     Check(CampaignTerrainEdits.CellAllowsSmallBlock(0x50, true), "mined slope cell can accept small blocks");

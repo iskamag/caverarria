@@ -21,6 +21,12 @@ public sealed class CampaignViewConfig : ModConfig
     [DefaultValue(1f), Range(.75f, 1.5f), Increment(.25f)]
     public float PlayerBodyScale = 1f;
 
+    [Header("Combat"), DefaultValue(1f), Range(0f, 10f), Increment(.1f)]
+    public float TerrariaWeaponDamageScale = 1f;
+
+    [DefaultValue(1f), Range(0f, 10f), Increment(.1f)]
+    public float EnemyDamageScale = 1f;
+
     [Header("Audio"), DefaultValue(false)]
     public bool MuteCampaignAudio;
 

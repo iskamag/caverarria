@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoMod.RuntimeDetour;
 using Terraria;
 using Terraria.ModLoader;
@@ -44,6 +45,8 @@ public sealed class CampaignWorldDraw : ModSystem
             hooks.Add(new Hook(FindMethod("DrawToMap_Section", typeof(int), typeof(int)),
                 (Action<OriginalMapSection, Main, int, int>)DrawMapSection));
 
+            hooks.Add(new Hook(FindMethod("DoDraw_WallsTilesNPCs"),
+                (Action<OriginalWorldPass, Main>)DrawActors));
             Main.OnPreDraw += BeforeDraw;
             Main.OnPostDraw += AfterDraw;
         }
@@ -62,6 +65,21 @@ public sealed class CampaignWorldDraw : ModSystem
         if (method == null || method.ReturnType != typeof(void))
             throw new MissingMethodException(typeof(Main).FullName, name);
         return method;
+    }
+
+    private static void DrawActors(OriginalWorldPass original, Main main)
+    {
+        if (SkipWorld)
+        {
+            Main.spriteBatch.End();
+            try { CampaignRuntime.DrawWorld(); }
+            finally
+            {
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                    DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+            }
+        }
+        original(main);
     }
 
     private static void DrawWorldPass(OriginalWorldPass original, Main main)

@@ -66,6 +66,78 @@ index a634459..536ca38 100644
  }
  
  /// A RGBA color in the `sRGB` color space represented as `f32`'s in the range `[0.0-1.0]`
+diff --git a/src/components/boss_life_bar.rs b/src/components/boss_life_bar.rs
+index 9a15ba7..772c413 100644
+--- a/src/components/boss_life_bar.rs
++++ b/src/components/boss_life_bar.rs
+@@ -11,7 +11,7 @@ use crate::game::npc::list::{NPCAccessToken, NPCList};
+ #[repr(u8)]
+ enum BossLifeTarget {
+     None,
+-    NPC(u16),
++    NPC(u16, u64),
+     Boss,
+ }
+ 
+@@ -28,11 +28,27 @@ impl BossLifeBar {
+         BossLifeBar { target: BossLifeTarget::None, life: 0, max_life: 0, prev_life: 0, counter: 0 }
+     }
+ 
++    pub fn clear(&mut self) {
++        self.target = BossLifeTarget::None;
++        self.life = 0;
++        self.max_life = 0;
++        self.prev_life = 0;
++        self.counter = 0;
++    }
++
++    pub fn clear_boss(&mut self) {
++        if self.target == BossLifeTarget::Boss { self.clear(); }
++    }
++
++    pub fn clear_npc(&mut self, id: u16, generation: u64) {
++        if self.target == BossLifeTarget::NPC(id, generation) { self.clear(); }
++    }
++
+     pub fn set_npc_target(&mut self, npc_id: u16, npc_list: &NPCList, npc_token: &NPCAccessToken) {
+         if let Some(npc) = npc_list.get_npc(npc_id as usize) {
+             let npc = npc.borrow(npc_token);
+ 
+-            self.target = BossLifeTarget::NPC(npc.id);
++            self.target = BossLifeTarget::NPC(npc.id, npc.external_generation);
+             self.life = npc.life;
+             self.max_life = self.life;
+             self.prev_life = self.life;
+@@ -41,7 +57,7 @@ impl BossLifeBar {
+ 
+     pub fn set_boss_target(&mut self, boss: &BossNPC) {
+         self.target = BossLifeTarget::Boss;
+-        self.life = boss.parts[0].life;
++        self.life = if boss.parts[0].cond.alive() { boss.parts[0].life } else { 0 };
+         self.max_life = self.life;
+         self.prev_life = self.life;
+     }
+@@ -135,15 +151,17 @@ impl BossLifeBar {
+ impl GameEntity<(&NPCList, &NPCAccessToken, &BossNPC)> for BossLifeBar {
+     fn tick(&mut self, _state: &mut SharedGameState, (npc_list, npc_token, boss): (&NPCList, &NPCAccessToken, &BossNPC)) -> GameResult<()> {
+         match self.target {
+-            BossLifeTarget::NPC(npc_id) => {
++            BossLifeTarget::NPC(npc_id, generation) => {
+                 if let Some(npc) = npc_list.get_npc(npc_id as usize) {
+                     let npc = npc.borrow(npc_token);
+                     
+-                    self.life = npc.life;
++                    self.life = if npc.cond.alive() && npc.external_generation == generation { npc.life } else { 0 };
++                } else {
++                    self.life = 0;
+                 }
+             }
+             BossLifeTarget::Boss => {
+-                self.life = boss.parts[0].life;
++                self.life = if boss.parts[0].cond.alive() { boss.parts[0].life } else { 0 };
+             }
+             _ => {
+                 return Ok(());
 diff --git a/src/components/hud.rs b/src/components/hud.rs
 index e167bc3..6cec8ff 100644
 --- a/src/components/hud.rs
@@ -1046,7 +1118,7 @@ index 2d45ecf..8ad76e0 100644
 +#[path = "../../../rust-bridge/src/runtime.rs"]
 +pub mod cavebridge;
 diff --git a/src/scene/game_scene.rs b/src/scene/game_scene.rs
-index 8a2de3c..7dcb34b 100644
+index 8a2de3c..93feb4c 100644
 --- a/src/scene/game_scene.rs
 +++ b/src/scene/game_scene.rs
 @@ -28,6 +28,7 @@ use crate::framework::context::Context;
@@ -1074,7 +1146,23 @@ index 8a2de3c..7dcb34b 100644
              map_system: MapSystem::new(),
              hud_player1: HUD::new(Alignment::Left),
              hud_player2: HUD::new(Alignment::Right),
-@@ -1455,12 +1459,14 @@ impl GameScene {
+@@ -1170,6 +1174,7 @@ impl GameScene {
+                     npc.life = (npc.life as i32).saturating_sub(bullet.damage as i32).clamp(0, u16::MAX as i32) as u16;
+ 
+                     if npc.life == 0 {
++                        self.boss_life_bar.clear_npc(npc.id, npc.external_generation);
+                         if npc.npc_flags.show_damage() {
+                             npc.popup.add_value(-bullet.damage);
+                         }
+@@ -1277,6 +1282,7 @@ impl GameScene {
+                     npc.life = (npc.life as i32).saturating_sub(bullet.damage as i32).clamp(0, u16::MAX as i32) as u16;
+ 
+                     if npc.life == 0 {
++                        if idx == 0 { self.boss_life_bar.clear_boss(); }
+                         npc.life = npc.id;
+ 
+                         if self.player1.cond.alive() && npc.npc_flags.event_when_killed() {
+@@ -1455,12 +1461,14 @@ impl GameScene {
          self.tick_npc_bullet_collissions(state);
  
          if state.control_flags.control_enabled() {
@@ -1089,7 +1177,7 @@ index 8a2de3c..7dcb34b 100644
              self.inventory_player2.tick_weapons(
                  state,
                  &mut self.player2,
-@@ -1889,10 +1895,25 @@ impl Scene for GameScene {
+@@ -1889,10 +1897,25 @@ impl Scene for GameScene {
                  TextScriptVM::run(state, self, ctx)?;
              }
              ScriptMode::Inventory => {
@@ -1119,7 +1207,7 @@ index 8a2de3c..7dcb34b 100644
              }
          }
  
-@@ -2017,7 +2038,11 @@ impl Scene for GameScene {
+@@ -2017,7 +2040,11 @@ impl Scene for GameScene {
          self.draw_npc_layer(state, ctx, NPCLayer::Middleground)?;
          self.draw_bullets(state, ctx)?;
          self.player2.draw(state, ctx, &self.frame)?;
@@ -1132,7 +1220,7 @@ index 8a2de3c..7dcb34b 100644
  
          if !self.player1.cond.hidden() {
              self.whimsical_star.draw(state, ctx, &self.frame)?;
-@@ -2050,6 +2075,9 @@ impl Scene for GameScene {
+@@ -2050,6 +2077,9 @@ impl Scene for GameScene {
              graphics::set_clip_rect(ctx, None)?;
          }
  
@@ -1142,7 +1230,7 @@ index 8a2de3c..7dcb34b 100644
          if self.inventory_dim > 0.0 {
              let rect = Rect::new(0, 0, state.screen_size.0 as isize + 1, state.screen_size.1 as isize + 1);
              let mut dim_color = state.constants.inventory_dim_color;
-@@ -2158,7 +2186,8 @@ impl Scene for GameScene {
+@@ -2158,7 +2188,8 @@ impl Scene for GameScene {
                  }
              }
              ScriptMode::StageSelect => self.stage_select.draw(state, ctx, &self.frame)?,
@@ -1152,7 +1240,7 @@ index 8a2de3c..7dcb34b 100644
              _ => {}
          }
  
-@@ -2313,6 +2342,7 @@ impl Scene for GameScene {
+@@ -2313,6 +2344,7 @@ impl Scene for GameScene {
          Ok(())
      }
  

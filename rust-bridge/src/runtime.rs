@@ -314,7 +314,7 @@ impl Runtime {
                             let prior = self.terrain.get(&stage).and_then(|m| m.get(&index)).copied();
                             // Partial placement never replaces an authored slope,
                             // hazard, water or wall. Mine authored terrain first.
-                            if prior.is_none() && game.stage.map.get_attribute(x, y) != 0 {
+                            if prior.is_none() && !matches!(game.stage.map.get_attribute(x, y), 0 | 0x40) {
                                 return Err("Partial edit requires an empty or player-edited cell".into());
                             }
                             let old = prior.unwrap_or(0);
@@ -616,6 +616,7 @@ impl Runtime {
             let npc = &mut game.boss.parts[idx];
             npc.life = npc.life.saturating_sub(damage);
             if npc.life == 0 {
+                if idx == 0 { game.boss_life_bar.clear_boss(); }
                 npc.life = npc.id;
                 if game.player1.cond.alive() && npc.npc_flags.event_when_killed() {
                     self.state.control_flags.set_tick_world(true);
@@ -663,6 +664,7 @@ impl Runtime {
                 npc.popup.add_value(-(damage as i16));
             }
             if npc.life == 0 {
+                game.boss_life_bar.clear_npc(npc.id, npc.external_generation);
                 if game.player1.cond.alive() && npc.npc_flags.event_when_killed() {
                     self.state.control_flags.set_tick_world(true);
                     self.state.control_flags.set_interactions_disabled(true);

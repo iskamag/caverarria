@@ -5,3 +5,6 @@ artifacts/
 **/target/
 **/__pycache__/
 vendor/
+
+# Local machine setup and private handoff; keep out of public source/releases.
+/AGENTS.md

@@ -42,6 +42,27 @@ assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
 function command(request){const text=JSON.stringify(request),p=string(text);const response=JSON.parse(read(e.cave_command(handle,p)));e.cave_free(p,encode.encode(text+'\0').length);assert.ok(response.ok,JSON.stringify(response));return response;}
 let initial=command({op:'snapshot'});
 assert.equal(95,initial.stages.length);assert.equal(60,initial.timing_hz);assert.equal(3,initial.render_layers);
+if(process.env.CAVERARRIA_PICKUP_TEST){
+    const room=initial.stages.findIndex(s=>s.map==='Cemet');
+    let state=command({op:'warp',stage:room,x:144,y:61.5});
+    const grave=state.npcs.find(n=>n.event===300);
+    assert.ok(grave,'authored Arthur key trigger missing');
+    const pose={x:grave.x,y:grave.y-2.5,vx:0,vy:0,width:10,height:21,grounded:true};
+    // The old two-pixel center sensor misses this floor-level authored trigger.
+    assert.ok(pose.y+2<=grave.y-grave.top);
+    command({op:'tick',controls:0,player:{...pose,y:grave.y-32}});
+    state=command({op:'tick',controls:8,player:{...pose,y:grave.y-32}});
+    assert.equal('Ended',state.script,'interaction fired outside the avatar body');
+    command({op:'tick',controls:0,player:pose});
+    state=command({op:'tick',controls:8,player:pose});
+    assert.notEqual('Ended',state.script,'standing avatar missed the original Arthur key event');
+    for(let i=0;i<600&&!state.items.some(item=>item.id===1);i++)
+        state=command({op:'tick',controls:i%2?64|2048:0,player:pose});
+    assert.ok(state.items.some(item=>item.id===1),'original Arthur key script did not grant the key');
+    e.cave_destroy(handle);
+    console.log(JSON.stringify({module:modulePath,arthur_key_without_digging:true,outside_body_rejected:true}));
+    process.exit(0);
+}
 if(process.env.CAVERARRIA_INPUT_TEST){
     const egg=initial.stages.findIndex(s=>s.map==='EggX');assert.ok(egg>=0);
     const script=cipher(fs.readFileSync(path.join(dataRoot,'Stage/EggX.tsc')),-1).toString('latin1');

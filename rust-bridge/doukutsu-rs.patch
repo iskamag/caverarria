@@ -910,10 +910,37 @@ index 8c5ccd0..58fb52e 100644
          self.damage_popup.y = self.y - self.display_bounds.top as i32 + 0x1000;
          self.damage_popup.tick(state, ())?;
 diff --git a/src/game/player/player_hit.rs b/src/game/player/player_hit.rs
-index 4a44c01..aaae27c 100644
+index 4a44c01..648aed8 100644
 --- a/src/game/player/player_hit.rs
 +++ b/src/game/player/player_hit.rs
-@@ -279,6 +279,9 @@ impl Player {
+@@ -247,11 +247,21 @@ impl Player {
+         let hit_left = if npc.direction == Direction::Left { npc.hit_bounds.left } else { npc.hit_bounds.right } as i32;
+         let hit_right =
+             if npc.direction == Direction::Left { npc.hit_bounds.right } else { npc.hit_bounds.left } as i32;
+-
+-        if self.x + 0x400 > npc.x - hit_left
+-            && self.x - 0x400 < npc.x + hit_right
+-            && self.y + 0x400 > npc.y - npc.hit_bounds.top as i32
+-            && self.y - 0x400 < npc.y + npc.hit_bounds.bottom as i32
++        // Host avatars are taller than Quote's tiny center-based touch sensor.
++        // Reach floor pickups with the actual body plus one pixel of rounding
++        // tolerance; keep the original enemy damage sensor unchanged.
++        let body_touch = self.external_kinematics && npc.damage == 0
++            && (matches!(npc.npc_type, 1 | 86 | 87)
++                || npc.npc_flags.event_when_touched() || npc.npc_flags.interactable());
++        let (left, right, top, bottom) = if body_touch {
++            (self.hit_bounds.left as i32 + 0x200, self.hit_bounds.right as i32 + 0x200,
++             self.hit_bounds.top as i32 + 0x200, self.hit_bounds.bottom as i32 + 0x200)
++        } else { (0x400, 0x400, 0x400, 0x400) };
++
++        if self.x + right > npc.x - hit_left
++            && self.x - left < npc.x + hit_right
++            && self.y + bottom > npc.y - npc.hit_bounds.top as i32
++            && self.y - top < npc.y + npc.hit_bounds.bottom as i32
+         {
+             flags.set_hit_left_wall(true);
+         }
+@@ -279,6 +289,9 @@ impl Player {
              flags = self.test_hit_npc_non_solid(npc.borrow());
          }
  
@@ -923,7 +950,7 @@ index 4a44c01..aaae27c 100644
          if !npc.cond.drs_boss() && flags.0 != 0 {
              match npc.npc_type {
                  // experience pickup
-@@ -370,6 +373,7 @@ impl Player {
+@@ -370,6 +383,7 @@ impl Player {
          boss: &mut BossNPC,
          inventory: &mut Inventory,
      ) {

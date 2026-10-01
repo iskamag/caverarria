@@ -17,7 +17,7 @@ public sealed class CaverarriaMod : Mod
         long started = FramePerformance.Begin();
         CampaignWorldDraw.BeginDraw();
         try { original(main, time); }
-        finally { CampaignWorldDraw.EndDraw(); }
+        finally { CampaignActorPixels.Abort(); CampaignWorldDraw.EndDraw(); }
         if (CampaignRuntime.Active) FramePerformance.End("draw", started);
     }
     private delegate void OriginalAudioUpdate(Main main);

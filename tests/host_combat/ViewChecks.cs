@@ -19,6 +19,7 @@ internal static class ViewChecks
 
     private static void RunChecks(Action<bool, string> check)
     {
+        SnapshotMapChecks.Run(check);
         for (int scale = 2; scale <= 6; scale++)
         {
             check(CampaignView.EffectivePixelScale(scale, 1f) == scale, "100% vanilla zoom changed the base camera scale");
@@ -52,6 +53,13 @@ internal static class ViewChecks
             hooks.BeginCampaign(3, 3, false);
             Main.gameMenu = false;
             check(CampaignView.IsCampaignAvatar(player), "actual campaign avatar lost visual effects");
+            check(player.width == 30 && player.height == 63, "visible 1.5 body still has a 1.0 collision box");
+            Vector2 feet = player.Bottom;
+            CampaignBody.Apply(player);
+            check(player.Bottom == feet, "reapplying body size displaced planted feet");
+            check(CampaignBody.Size(1f) == new Point(20, 42) && CampaignBody.Size(2f) == new Point(40, 84),
+                "body collision disagrees with configured visual dimensions");
+            BodyChecks.Run(player, check);
             CheckScale(player, hooks, 1.5f, check, "campaign avatar scale was not applied");
             Main.gameMenu = true;
             check(CampaignRuntime.Active && !CampaignView.InWorld, "stale engine during menu remained drawable");
@@ -61,6 +69,8 @@ internal static class ViewChecks
             check(!CampaignView.IsCampaignAvatar(preview), "preview clone inherited avatar effects from matching whoAmI");
             CheckScale(preview, hooks, 1f, check, "campaign scale leaked into inventory/dresser preview");
             hooks.RestoreOutsideHealth();
+            check(player.width == 20 && player.height == 42 && player.Bottom == feet,
+                "leaving campaign retained enlarged collision or moved feet");
             CheckScale(player, hooks, 1f, check, "leaving campaign retained visual scale");
             hooks.BeginCampaign(3, 3, false);
             CampaignBootstrap.ClearWorldMarker();

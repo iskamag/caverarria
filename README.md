@@ -22,8 +22,9 @@ Use Terraria movement and item attacks. **E** interacts or advances dialogue,
 story map once acquired, and **V/C** cycle story weapons. Original save points remain active.
 Terraria's **+ / -** and world zoom slider zoom the campaign in sharp pixel
 steps. Camera base scale and player
-appearance size are also adjustable in Mod Configuration; the default draws
-your character 50% larger while keeping the movement/collision box unchanged.
+body size are also adjustable in Mod Configuration; the default scales your
+character and body collision together by 1.5. Terraria world actors and held
+items are rasterized onto the same pixel grid as the original campaign.
 Player scaling applies only to the actual campaign avatar; menus and normal
 worlds keep their ordinary appearance. Enemies retain their original shields
 and vulnerability windows, including the Graveyard keeper's attack phase.
@@ -31,6 +32,14 @@ Story items occupy Terraria inventory slots and use their original campaign
 actions. Life Capsules immediately grant permanent character health, at ten
 Terraria HP per original HP; retrying a checkpoint does not grant the same
 upgrade twice. Cave Story guns fire only inside the campaign.
+
+Use ordinary pickaxes to mine campaign terrain and ordinary solid block items
+to build. Each campaign block covers a 3×3 group of Terraria tiles; one placement
+uses one item, and mining returns one block (original terrain yields stone).
+Terrain edits affect native enemies and bullets as well as Terraria collision.
+Edits persist across room changes, checkpoint retries and re-entry. Digging can
+bypass authored gates; furniture, platforms, falling blocks, hammer reshaping
+and explosives are not supported in campaign worlds yet.
 
 Campaign progress lives in
 `<tModLoader save folder>/Caverarria/Campaigns/<campaignId>/Profile.dat`.
@@ -45,8 +54,8 @@ are recorded there. Campaign and character saves are separate files.
 Open **Settings → Mod Configuration → Caverarria** to adjust camera/avatar
 size and separate Cave Story music/effect volumes, or mute just the campaign.
 While playing a Cave Story world, **Reset campaign... → Confirm reset** starts
-that world's campaign over. It moves the old `Profile.dat` to a timestamped
-`.bak` beside it before starting fresh. Story progress, story items and weapons
+that world's campaign over. It moves the old checkpoint and terrain edit files to timestamped
+`.bak` files beside them before starting fresh. Story progress, terrain, story items and weapons
 restart; permanent Life Capsule health stays on your character. Other worlds'
 checkpoints are untouched. Reset is unavailable from the main menu or a normal
 Terraria world.
@@ -59,7 +68,7 @@ movement/jumping, Start Point → First Cave, save/re-entry and original audio.
 Short actual-client samples reached 60 Hz after the renderer and drawing fixes.
 
 **Full campaign completion, boss progression and every ending remain unverified.**
-Multiplayer and world editing are not supported. Windows/macOS, other
+Multiplayer is not supported. Building currently supports full solid blocks. Windows/macOS, other
 character/world modes and combinations with other mods need playtesting.
 Please [report problems](https://github.com/iskamag/caverarria/issues) with the
 stage, action, controls, error, versions, platform and enabled mods.

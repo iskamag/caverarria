@@ -15,7 +15,19 @@ internal static class CampaignRuntime
     public static Vector2 Origin => new(OriginTileX * 16 + 24, OriginTileY * 16 + 24);
     public static bool Active => Engine != null && CampaignBootstrap.IsCampaignWorld;
     public static ICampaignEngine? Engine { get; private set; }
-    public static JsonElement Snapshot { get; private set; }
+    private static JsonElement snapshot, pendingMap;
+    public static JsonElement Snapshot
+    {
+        get => snapshot;
+        private set
+        {
+            snapshot = value;
+            // Map deltas are emitted once. Audio/hit commands can replace the
+            // snapshot before reconciliation, but must not discard that delta.
+            var map = value.Field("map");
+            if (map.ValueKind == JsonValueKind.Object) pendingMap = map.Clone();
+        }
+    }
     public static JsonElement CurrentMap { get; private set; }
     public static long Frame { get; private set; }
     public static string? Failure { get; private set; }
@@ -62,7 +74,9 @@ internal static class CampaignRuntime
             Main.mapEnabled = false;
             Main.mapFullscreen = false;
             pixels = new byte[width * height * 4];
-            Snapshot = Engine.Send(new { op = !loadProfile || Environment.GetEnvironmentVariable("CAVERARRIA_LOAD") == "0" ? "new" : load ? "load" : "snapshot" });
+            bool fresh = !loadProfile || Environment.GetEnvironmentVariable("CAVERARRIA_LOAD") == "0";
+            Snapshot = Engine.Send(new { op = fresh ? "new" : load ? "load" : "snapshot" });
+            if (fresh) CampaignTerrainEdits.ClearNewGame();
             if (Environment.GetEnvironmentVariable("CAVERARRIA_AUDIO") == "0")
                 Snapshot = Engine.Send(new { op = "audio", enabled = false });
             var nativePlayer = Snapshot.Field("player");
@@ -168,8 +182,7 @@ internal static class CampaignRuntime
     private static void ApplySnapshot(bool initial, bool checkpointReload = false)
     {
         if (!Active) return;
-        var map = Snapshot.Field("map");
-        if (map.ValueKind == JsonValueKind.Object) ProjectMap(map);
+        ProjectPendingMap();
         int epoch = Snapshot.Integer("epoch");
         var p = Snapshot.Field("player");
         if (Snapshot.Text("scene") == "game" && p.ValueKind == JsonValueKind.Object)
@@ -289,6 +302,7 @@ internal static class CampaignRuntime
         int width = stage.Integer("width"), height = stage.Integer("height");
         int[] tiles = map.Field("tiles").Elements().Select(x => x.GetInt32()).ToArray();
         int[] attributes = map.Field("attributes").Elements().Select(x => x.GetInt32()).ToArray();
+        int[] cellAttributes = map.Field("cell_attributes").Elements().Select(x => x.GetInt32()).ToArray();
         if (width <= 0 || height <= 0 || tiles.Length != width * height || attributes.Length < 256) return;
         for (int y = 0; y < Math.Max(height, projectedHeight) * 3 + 3; y++)
             for (int x = 0; x < Math.Max(width, projectedWidth) * 3 + 3; x++)
@@ -296,7 +310,7 @@ internal static class CampaignRuntime
         ushort tileType = (ushort)ModContent.TileType<CampaignSolid>();
         for (int y = 0; y < height; y++) for (int x = 0; x < width; x++)
         {
-            int attribute = attributes[tiles[y * width + x]];
+            int attribute = cellAttributes.Length == tiles.Length ? cellAttributes[y * width + x] : attributes[tiles[y * width + x]];
             bool water = attribute is 0x02 or 0x60 or 0x61 or 0x62 || attribute >= 0x70 && attribute <= 0x77;
             for (int sy = 0; sy < 3; sy++) for (int sx = 0; sx < 3; sx++)
             {
@@ -315,6 +329,25 @@ internal static class CampaignRuntime
             }
         }
         projectedWidth = width; projectedHeight = height;
+        CampaignTerrainEdits.ProjectPlacedTiles(stage.Integer("id"));
+    }
+
+    private static void ProjectPendingMap()
+    {
+        if (pendingMap.ValueKind != JsonValueKind.Object) return;
+        ProjectMap(pendingMap);
+        pendingMap = default;
+    }
+
+    public static bool EditTerrain(int x, int y, bool solid)
+    {
+        if (!Active || !ControlsEnabled || Main.LocalPlayer.dead || Snapshot.Text("scene") != "game") return false;
+        Snapshot = Engine!.Send(new { op = "terrain_edit", epoch = Snapshot.Integer("epoch"), stage = Snapshot.Field("stage").Integer("id"), x, y, solid });
+        bool accepted = Snapshot.Boolean("terrain_edit_accepted");
+        // A synchronous mining hook must immediately update the real collision.
+        ProjectPendingMap();
+        imageDirty |= accepted;
+        return accepted;
     }
 
     private static void SynchronizeEntities()
@@ -519,6 +552,15 @@ internal static class CampaignRuntime
         Main.spriteBatch.Draw(Terraria.GameContent.TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
         Main.spriteBatch.Draw(background, CampaignView.OutputRectangle(Engine!.Width, Engine.Height), Color.White);
         Main.spriteBatch.End();
+        CampaignActorPixels.Begin();
+        Rectangle output = CampaignView.OutputRectangle(Engine.Width, Engine.Height);
+        Matrix grid = Matrix.CreateScale(CampaignView.PixelScale, CampaignView.PixelScale, 1)
+            * Matrix.CreateTranslation(output.X, output.Y, 0);
+        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+            DepthStencilState.None, RasterizerState.CullNone, null, grid);
+        var camera = Snapshot.Field("camera");
+        CampaignTerrainEdits.Draw(Main.spriteBatch, new Vector2(camera.Number("x"), camera.Number("y")));
+        Main.spriteBatch.End();
     }
     public static bool DrawForeground()
     {
@@ -573,7 +615,9 @@ internal static class CampaignRuntime
             finally
             {
                 ReleaseImages();
-                pixels = interfacePixels = null; Snapshot = default; CurrentMap = default;
+                CampaignActorPixels.DisposeTargets();
+                CampaignTerrainEdits.ClearSession();
+                pixels = interfacePixels = null; Snapshot = default; CurrentMap = pendingMap = default;
                 foreach (var pair in proxySlots)
                 {
                     var npc = Main.npc[pair.Value];

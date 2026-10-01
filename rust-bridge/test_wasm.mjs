@@ -42,6 +42,38 @@ assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
 function command(request){const text=JSON.stringify(request),p=string(text);const response=JSON.parse(read(e.cave_command(handle,p)));e.cave_free(p,encode.encode(text+'\0').length);assert.ok(response.ok,JSON.stringify(response));return response;}
 let initial=command({op:'snapshot'});
 assert.equal(95,initial.stages.length);assert.equal(60,initial.timing_hz);assert.equal(3,initial.render_layers);
+if(process.env.CAVERARRIA_TERRAIN_TEST){
+    const room=initial.stage.id,width=initial.stage.width;
+    const idx=initial.map.cell_attributes.findIndex(a=>a===0x41);
+    assert.ok(idx>=0,'fixture room has no genuine solid cell');
+    const x=idx%width,y=Math.floor(idx/width);
+    const edit=(snapshot,solid,extra={})=>command({op:'terrain_edit',epoch:snapshot.epoch,stage:room,x,y,solid,...extra});
+    let mined=edit(initial,false);
+    assert.equal(true,mined.terrain_edit_accepted);assert.equal(0,mined.map.cell_attributes[idx]);
+    let placed=edit(mined,true);
+    assert.equal(true,placed.terrain_edit_accepted);assert.equal(0x41,placed.map.cell_attributes[idx]);
+    assert.equal(false,edit(placed,false,{epoch:placed.epoch+1}).terrain_edit_accepted);
+    assert.equal(false,edit(placed,false,{stage:room+1}).terrain_edit_accepted);
+    assert.equal(false,edit(placed,false,{x:width}).terrain_edit_accepted);
+    command({op:'warp',stage:(room+1)%95});
+    let returned=command({op:'warp',stage:room});
+    assert.equal(0x41,returned.map.cell_attributes[idx]);
+    mined=edit(returned,false);command({op:'save'});
+    let retried=command({op:'retry'});
+    assert.equal(room,retried.stage.id);assert.equal(0,retried.map.cell_attributes[idx]);
+    const list=JSON.parse(read(e.cave_fs_list(1)));
+    assert.ok(list.includes('/terrain.json'));
+    e.cave_destroy(handle);
+    const empty=string('');handle=e.cave_create(empty,empty,320,240);e.cave_free(empty,1);
+    assert.ok(handle,read(e.cave_last_error()));
+    let recreated=command({op:'snapshot'});
+    assert.equal(room,recreated.stage.id);assert.equal(0,recreated.map.cell_attributes[idx]);
+    let fresh=command({op:'new'});
+    assert.equal(0,fresh.map.terrain_edits.length);
+    e.cave_destroy(handle);
+    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,placement:true,reject_stale:true,reject_bounds:true,room_transfer:true,retry:true,recreate:true,new_clears:true}));
+    process.exit(0);
+}
 if(process.env.CAVERARRIA_SILENT_AUDIO_TEST){
     assert.equal(true,initial.audio_ready);
     command({op:'warp',stage:0,x:160,y:120});

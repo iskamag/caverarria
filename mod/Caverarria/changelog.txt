@@ -1,4 +1,9 @@
-Initial playable alpha.
+0.1.1 — pixel grid, physical avatar scaling and editable terrain.
+Avatar collision, weapon origins and melee reach scale with its body. Host world actors share the campaign pixel grid.
+Pickaxe mining and ordinary solid-block placement edit live guest terrain, with per-world persistence across transfers and retries.
+Campaign reset archives checkpoint and terrain together. Furniture, platforms, falling blocks, hammer reshaping and explosives remain unsupported.
+
+0.1.0 — initial playable alpha.
 Original Cave Story campaign hosted by a real Terraria character.
 Portable WASM engine; original music and sound effects through Terraria/FNA.
 60 Hz engine mode, separate foreground and HUD layers, optimized drawing.

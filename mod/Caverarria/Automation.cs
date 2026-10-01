@@ -137,6 +137,13 @@ internal static class Automation
                 difficulty = player.difficulty, originalDifficulty = player.GetModPlayer<CampaignPlayer>().OriginalDifficulty,
                 width = player.width / CampaignRuntime.Scale, height = player.height / CampaignRuntime.Scale,
                 grounded = player.velocity.Y == 0, selectedItem = player.selectedItem,
+                itemAnimation = player.itemAnimation, itemTime = player.itemTime, toolTime = player.toolTime,
+                tileTargetX = Player.tileTargetX, tileTargetY = Player.tileTargetY, noBuilding = player.noBuilding,
+                targetCell = CampaignTerrainEdits.Cell(Player.tileTargetX, Player.tileTargetY, out int cellX, out int cellY)
+                    ? Enumerable.Range(0, 9).Select(index => {
+                        var tile = Main.tile[CampaignRuntime.OriginTileX + cellX * 3 + index % 3, CampaignRuntime.OriginTileY + cellY * 3 + index / 3];
+                        return new { tile.HasTile, tile.TileType };
+                    }).ToArray() : null,
                 heldItem = player.HeldItem.type, inventory = player.inventory.Take(10).Select(item => new { id = item.type, name = item.Name, stack = item.stack }).ToArray(),
                 projectiles = Main.projectile.Count(projectile => projectile.active && projectile.owner == player.whoAmI),
                 controls = new { left = player.controlLeft, right = player.controlRight, jump = player.controlJump, shoot = player.controlUseItem },

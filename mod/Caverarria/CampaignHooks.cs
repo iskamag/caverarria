@@ -85,6 +85,7 @@ public sealed class CampaignPlayer : ModPlayer
     private int outsideLife, outsideMaximum, savingLife, savingMaximum;
     private bool outsideDead, outsideGhost, savingDead, savingGhost;
     private int outsideRespawn, savingRespawn;
+    private int outsideWidth, outsideHeight;
     private byte outsideDifficulty, savingDifficulty;
     public bool UsingCampaignHealth => baselineCaptured && !leaving;
     internal byte OriginalDifficulty => baselineCaptured ? outsideDifficulty : Player.difficulty;
@@ -97,9 +98,11 @@ public sealed class CampaignPlayer : ModPlayer
             outsideMaximum = Player.statLifeMax2;
             outsideDead = Player.dead; outsideGhost = Player.ghost; outsideRespawn = Player.respawnTimer;
             outsideDifficulty = Player.difficulty;
+            outsideWidth = Player.width; outsideHeight = Player.height;
             baselineCaptured = true;
         }
         leaving = false;
+        CampaignBody.Apply(Player, entering: true);
         // Campaign deaths use the original checkpoint retry for every character.
         // Journey retains its mode; Mediumcore and Hardcore keep their gear/file.
         Player.difficulty = outsideDifficulty is 1 or 2 ? (byte)0 : outsideDifficulty;
@@ -120,6 +123,7 @@ public sealed class CampaignPlayer : ModPlayer
         if (!baselineCaptured) return;
         RememberCampaignHealth();
         leaving = true;
+        CampaignBody.SetSize(Player, outsideWidth, outsideHeight);
         ApplyOutsideState();
     }
     private void ApplyOutsideState()
@@ -244,6 +248,12 @@ public sealed class CampaignPlayer : ModPlayer
         Player.fallStart = Player.fallStart2 = (int)(Player.position.Y / 16);
         Player.noFallDmg = true;
     }
+    public override bool PreItemCheck()
+    {
+        if (CampaignRuntime.Active && Player.whoAmI == Main.myPlayer)
+            CampaignTerrainEdits.TrySnapPlacementTarget(Player);
+        return true;
+    }
     public override void HideDrawLayers(PlayerDrawSet drawInfo)
     {
         if (drawInfo.headOnlyRender || !CampaignView.IsCampaignAvatar(drawInfo.drawPlayer) || CampaignRuntime.Snapshot.Text("scene") == "game" && !CampaignRuntime.Snapshot.Field("player").Boolean("hidden") && CampaignRuntime.Snapshot.Field("player").Boolean("alive", true)) return;
@@ -256,8 +266,8 @@ public sealed class CampaignPlayer : ModPlayer
     public override void TransformDrawData(ref PlayerDrawSet drawInfo)
     {
         if (drawInfo.headOnlyRender || !CampaignView.IsCampaignAvatar(drawInfo.drawPlayer)) return;
-        // Use the host's own all-layer transform about the avatar's feet. This
-        // enlarges armor, hair and held items together without altering physics.
+        // Terraria draws its standard body about the actual feet even when its
+        // hitbox is larger. Enlarge all layers around those same planted feet.
         PlayerDrawLayers.DrawPlayer_ScaleDrawData(ref drawInfo, CampaignView.PlayerScale);
     }
 }

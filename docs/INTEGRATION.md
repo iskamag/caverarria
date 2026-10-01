@@ -3,8 +3,8 @@
 The target is a playable tModLoader mod putting a real Terraria player inside the
 original Cave Story campaign. Cave Story's authored maps, dialogue, inventory
 gates, enemies, boss fights, saves, scripted sequences, and endings remain live.
-Normal control, equipment, appearance, and attacks belong to Terraria. World
-editing is a later feature.
+Normal control, equipment, appearance, attacks, mining and block placement
+belong to Terraria. Terrain edits feed into the original engine.
 
 ## Runtime decision
 
@@ -24,7 +24,7 @@ user data folder.
 ## Ownership
 
 * Terraria updates the player using its real movement and item systems.
-* The mod projects original solid tiles into protected Terraria collision tiles.
+* The mod projects effective native solid cells into Terraria collision tiles.
   One Cave Story pixel corresponds to three Terraria world pixels; an authored
   16 pixel tile occupies three by three Terraria tiles.
 * doukutsu-rs owns maps, flags, story items, dialogue, NPC AI, bosses, and scripted
@@ -36,6 +36,9 @@ user data folder.
 * Enemy hitboxes are represented by Terraria combat proxies. Player attacks
   deliver damage to the native NPC or boss routine; they do not replace the
   native enemy AI. Native damage and death state must propagate to Terraria.
+* The body hitbox and avatar share the same feet-anchored scale. Host actors,
+  held items and placed block art are rasterized to the guest world pixel grid
+  before integer enlargement; physics keeps continuous world coordinates.
 * Rendering retains Cave Story's art, animation, camera, and dialogue. A world
   layer is composed before the Terraria player; a foreground and interface layer
   is composed afterward.
@@ -75,7 +78,15 @@ area remains work to do.
 
 ## Roadmap
 
-Editable maps will require persistence of terrain changes, rules for story event
-anchors after demolition, native NPC collision reconciliation, and safe handling
-of alternate entrances to authored encounters. The initial campaign protects
-its collision tiles while still honoring the original script-driven changes.
+Whole native map cells can be mined and filled using ordinary Terraria items.
+`Terrain.json` stores per-stage effective collision overrides in the engine
+user filesystem. `TerrainBlocks.json` stores placed block material and drop
+identity next to it. Overrides persist independently of checkpoint retry;
+reset archives both files with the checkpoint. Native map collision getters
+use the overrides for NPCs and bullets, and edited native art is suppressed.
+The host projects the effective attributes into collision and draws placed
+block textures. Authored TSC and map data remain live underneath these edits.
+
+Furniture, platforms, falling blocks, hammer reshaping and explosives need
+additional collision/rendering contracts. Editing can bypass gates or obstruct
+scripted encounters; full edited-campaign progression is not verified.

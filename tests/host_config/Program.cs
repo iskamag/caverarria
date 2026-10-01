@@ -20,7 +20,15 @@ try
     string? second = CampaignCheckpointBackup.Archive(current);
     Check(second != backup && File.ReadAllBytes(second!).SequenceEqual(new byte[] { 123 }), "case insensitive unique backup");
     Check(File.ReadAllBytes(backup!).SequenceEqual(checkpoint), "earlier backup preserved across resets");
-    Console.WriteLine("8 campaign checkpoint backup checks passed.");
+    File.WriteAllText(Path.Combine(current, "Terrain.json"), "guest edits");
+    File.WriteAllText(Path.Combine(current, "TerrainBlocks.json"), "host art");
+    CampaignCheckpointBackup.Archive(current);
+    Check(!File.Exists(Path.Combine(current, "Terrain.json")) && !File.Exists(Path.Combine(current, "TerrainBlocks.json")),
+        "reset retained terrain from the old campaign");
+    Check(Directory.EnumerateFiles(current, "Terrain.json*.bak").Any(path => File.ReadAllText(path) == "guest edits")
+        && Directory.EnumerateFiles(current, "TerrainBlocks.json*.bak").Any(path => File.ReadAllText(path) == "host art"),
+        "terrain reset lost the original edits");
+    Console.WriteLine("10 campaign checkpoint and terrain backup checks passed.");
 }
 finally { Directory.Delete(root, true); }
 static void Check(bool condition, string message)

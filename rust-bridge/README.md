@@ -2,8 +2,8 @@
 
 The adapter embeds pinned **doukutsu-rs**, runs its real stage scripts, NPC and boss
 simulation, save profiles, map transitions, music and endings, and lets tModLoader
-supply ordinary player kinematics and equipment. Original map editing is a future
-feature. Current campaign terrain is protected.
+supply ordinary player kinematics and equipment. Campaign mining and placement
+use persistent guest map overrides shared with Terraria collision.
 
 Portable build: `python3 scripts/build-wasm.py`. This creates
 `mod/Caverarria/Assets/Engine/caverarria_bridge.wasm`, an import-free
@@ -99,7 +99,7 @@ Native corner HP/weapon widgets are suppressed for the external player; the
 original centered AIR countdown remains visible for drowning information.
 
 Commands: `new`, `load`, `retry`, `save`, `death`, `snapshot`, `tick`, `hit`,
-`tile_hit`, `audio`, and `resize`. `resize` accepts native canvas `width`/`height`
+`tile_hit`, `terrain_edit`, `audio`, and `resize`. `resize` accepts native canvas `width`/`height`
 (160–1920 by 120–1080), preserves the current scene and cached textures, and
 returns pixels at the new size. All previously returned pixel pointers become
 invalid. The host reallocates its RGBA buffers/textures using returned `viewport`
@@ -114,6 +114,14 @@ keeps the native weapon inactive while ordinary Terraria gear is held.
 `tile_hit` `{x,y,width,height}` routes arbitrary Terraria
 projectile collisions through the original Polar Star tile-collision routine,
 including destructible snack tiles and their native effects.
+`terrain_edit` `{epoch,stage,x,y,solid}` edits one native map cell (not a host
+subtile). All fields are required. Stale epochs, wrong stages and out-of-bounds
+cells return `terrain_edit_accepted:false`; valid edits return `true`. Empty edits
+have collision attribute 0, placed blocks 0x41. They bypass original tile art;
+the host draws placed block material on the same cell. Original authored tile
+indices remain intact, and subsequent script mutations do not erase player edits.
+`Terrain.json` in the campaign user VFS stores overrides immediately, independently
+of checkpoints. Retry/load/room transfer preserve edits; `new` clears all edits.
 A hit is `{"op":"hit","id":4,"boss":false,"damage":3,"epoch":1,
 "generation":1}`. It uses native invulnerability, shared boss life, damage
 feedback, death events, drops, and flag progression. NPC slot generations prevent
@@ -123,8 +131,11 @@ Snapshots contain `viewport`, `ui_viewport`, `camera`, `stage`, `player`, `npcs`
 `weapons`, `items`, `bullets`, `flags`, `script`, `credits`, and the 95-entry
 `stages` table. `bullets` are the original weapon projectiles, including their
 damage, age and position.
-`map` contains raw tile indices and the 256-entry tile attribute table when the
-content hash changes; every script tile edit changes its `revision`. Preserve the
+`map` contains raw tile indices, the 256-entry authored tile attribute table,
+`cell_attributes` (effective per-cell collision in row-major order), and
+`terrain_edits` (`{x,y,solid}` for the current stage) when the content hash changes.
+Script tile edits and player overrides change its `revision`. Host projection
+must use `cell_attributes`, since edited cells do not reserve authored tile IDs. Preserve the
 previous map if omitted. Cave Story tile coordinates are **centers**: tile `(x,y)`
 starts at `(x*16-8,y*16-8)`. NPC bbox values `left/top/right/bottom` are extents
 from its center. `player.life_delta` describes native script healing/life changes

@@ -23,6 +23,8 @@ use serde_json::{json, Value};
 use std::any::Any;
 use std::cell::RefCell;
 use std::ffi::CString;
+use std::collections::BTreeMap;
+use std::io::{Read, Write};
 use std::path::Path;
 use std::rc::Rc;
 
@@ -38,6 +40,7 @@ pub struct Runtime {
     controller: ReplayController,
     epoch: u64,
     map_hash: u64,
+    terrain: BTreeMap<usize, BTreeMap<usize, bool>>,
     force_position: bool,
     force_velocity: bool,
     life_delta: i32,
@@ -123,7 +126,15 @@ impl Runtime {
         if let Some(game) = downcast::Downcast::<GameScene>::downcast_mut(&mut *scene).ok() {
             game.player1.external_kinematics = true;
         }
-        Ok(Self {
+        let terrain = match crate::framework::filesystem::user_open(&ctx, "/Terrain.json") {
+            Ok(mut file) => {
+                let mut bytes = Vec::new();
+                file.read_to_end(&mut bytes).map_err(err)?;
+                serde_json::from_slice(&bytes).map_err(err)?
+            }
+            Err(_) => BTreeMap::new(),
+        };
+        let mut runtime = Self {
             ctx,
             state,
             scene,
@@ -131,13 +142,27 @@ impl Runtime {
             controller: ReplayController::new(),
             epoch: 1,
             map_hash: 0,
+            terrain,
             force_position: true,
             force_velocity: true,
             life_delta: 0,
             #[cfg(feature = "pull-audio")]
             audio: Vec::new(),
             response: CString::new("{}").unwrap(),
-        })
+        };
+        runtime.apply_terrain();
+        Ok(runtime)
+    }
+    fn apply_terrain(&mut self) {
+        if let Ok(game) = downcast::Downcast::<GameScene>::downcast_mut(&mut *self.scene) {
+            game.stage.map.terrain_edits = self.terrain.get(&game.stage_id).cloned().unwrap_or_default();
+        }
+    }
+    fn persist_terrain(&mut self) -> Result<(), String> {
+        let bytes = serde_json::to_vec(&self.terrain).map_err(err)?;
+        let mut file = crate::framework::filesystem::user_create(&self.ctx, "/Terrain.json").map_err(err)?;
+        file.write_all(&bytes).map_err(err)?;
+        file.flush().map_err(err)
     }
     pub fn pixels(&self, layer: usize) -> *const u8 {
         self.raster.borrow().buffers[layer].as_ptr()
@@ -167,6 +192,7 @@ impl Runtime {
             self.map_hash = 0;
             changed = true;
         }
+        if changed { self.apply_terrain(); }
         Ok(changed)
     }
     pub fn command(&mut self, input: &str) -> Result<String, String> {
@@ -177,6 +203,7 @@ impl Runtime {
         self.force_velocity = false;
         self.life_delta = 0;
         let mut hit_accepted = false;
+        let mut terrain_accepted = false;
         match op {
             "resize" => {
                 let width = v["width"].as_i64().ok_or("Resize requires width")?;
@@ -203,6 +230,8 @@ impl Runtime {
                 }
             }
             "new" => {
+                self.terrain.clear();
+                self.persist_terrain()?;
                 self.state.start_new_game(&mut self.ctx).map_err(err)?;
                 changed = self.transitions()?;
             }
@@ -232,6 +261,22 @@ impl Runtime {
                             v["generation"].as_u64(),
                         )?;
                     }
+                }
+            }
+            "terrain_edit" => {
+                let epoch = v["epoch"].as_u64().ok_or("Terrain edit requires epoch")?;
+                let stage = usize::try_from(v["stage"].as_u64().ok_or("Terrain edit requires stage")?).map_err(|_| "Terrain stage out of bounds")?;
+                let x = usize::try_from(v["x"].as_u64().ok_or("Terrain edit requires nonnegative x")?).map_err(|_| "Terrain x out of bounds")?;
+                let y = usize::try_from(v["y"].as_u64().ok_or("Terrain edit requires nonnegative y")?).map_err(|_| "Terrain y out of bounds")?;
+                let solid = v["solid"].as_bool().ok_or("Terrain edit requires solid")?;
+                let game = downcast::Downcast::<GameScene>::downcast_ref(&*self.scene).map_err(|_| "No game scene")?;
+                if epoch == self.epoch && stage == game.stage_id
+                    && x < game.stage.map.width as usize && y < game.stage.map.height as usize {
+                    let index = y * game.stage.map.width as usize + x;
+                    self.terrain.entry(stage).or_default().insert(index, solid);
+                    self.persist_terrain()?;
+                    self.apply_terrain();
+                    terrain_accepted = true;
                 }
             }
             "tile_hit" => {
@@ -494,6 +539,7 @@ impl Runtime {
         }
         let mut result = self.snapshot(changed)?;
         result["hit_accepted"] = json!(hit_accepted);
+        result["terrain_edit_accepted"] = json!(terrain_accepted);
         Ok(result.to_string())
     }
     fn hit(
@@ -618,7 +664,7 @@ impl Runtime {
         result["scene"] = json!("game");
         result["stage"] = json!({"id":game.stage_id,"map":game.stage.data.map,"name":game.stage.data.name,"width":game.stage.map.width,"height":game.stage.map.height,"tile_size":game.stage.map.tile_size.as_int()});
         // Include current map when its contents changed, including TSC tile edits.
-        let hash = game
+        let mut hash = game
             .stage
             .map
             .tiles
@@ -626,8 +672,14 @@ impl Runtime {
             .fold(1469598103934665603u64, |h, &x| {
                 (h ^ x as u64).wrapping_mul(1099511628211)
             });
+        for (&index, &solid) in &game.stage.map.terrain_edits {
+            hash = (hash ^ index as u64).wrapping_mul(1099511628211);
+            hash = (hash ^ (if solid { 0x41 } else { 0 })).wrapping_mul(1099511628211);
+        }
         if hash != self.map_hash || changed {
             result["map"] = json!({"tiles":game.stage.map.tiles,"attributes":game.stage.map.attrib.to_vec(),"width":game.stage.map.width,"height":game.stage.map.height,"revision":hash});
+            result["map"]["cell_attributes"] = json!((0..game.stage.map.height as usize).flat_map(|y| (0..game.stage.map.width as usize).map(move |x| game.stage.map.get_attribute(x, y))).collect::<Vec<_>>());
+            result["map"]["terrain_edits"] = json!(game.stage.map.terrain_edits.iter().map(|(&index, &solid)| json!({"x":index % game.stage.map.width as usize,"y":index / game.stage.map.width as usize,"solid":solid})).collect::<Vec<_>>());
             self.map_hash = hash;
         }
         let (camera_x, camera_y) = game.frame.xy_interpolated(self.state.frame_time);

@@ -1,13 +1,15 @@
 namespace Caverarria;
 
-/// <summary>Only the selected campaign's checkpoint is moved; other saves stay intact.</summary>
+/// <summary>Archive the selected campaign's checkpoint and terrain together.</summary>
 internal static class CampaignCheckpointBackup
 {
     public static string? Archive(string directory)
     {
         if (!Directory.Exists(directory)) return null;
         var profiles = Directory.EnumerateFiles(directory)
-            .Where(path => Path.GetFileName(path).Equals("Profile.dat", StringComparison.OrdinalIgnoreCase)).ToArray();
+            .Where(path => new[] { "Profile.dat", "Terrain.json", "TerrainBlocks.json" }
+                .Contains(Path.GetFileName(path), StringComparer.OrdinalIgnoreCase))
+            .OrderBy(path => Path.GetFileName(path).Equals("Profile.dat", StringComparison.OrdinalIgnoreCase) ? 0 : 1).ToArray();
         if (profiles.Length == 0) return null;
         string suffix = ".reset-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N") + ".bak";
         var moved = new List<(string original, string backup)>();

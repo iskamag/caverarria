@@ -45,8 +45,8 @@ Mods: {
 				}
 
 				PlayerVisualScale: {
-					Label: Player appearance size
-					Tooltip: Enlarges your character's appearance while keeping movement and collision unchanged.
+					Label: Player body size
+					Tooltip: Scales your character and body collision together. Terrain can be mined to open tight passages; world pixels stay on the campaign grid.
 				}
 			}
 		}

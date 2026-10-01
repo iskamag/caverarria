@@ -12,17 +12,23 @@ character in **Single Player**, then enter the bundled **Caverarria — The Isla
 world or create one with seed **`caverarria`**. First entry downloads and verifies
 Cave Story's English freeware data; the engine is included in the mod.
 
-Use Terraria movement and item attacks.
+**For a second independent save, create another world with seed `caverarria`.**
+Characters in the same world share campaign progress; copying a world also copies
+its campaign ID and shares that progress.
 
-| Key | Action |
+Use Terraria movement and item attacks. Set the mod keys in **Settings → Controls
+→ Mod Controls → Caverarria (Alpha)**. New bindings can be **Unbound**; assign
+keys yourself or use **Reset to Default** in that section for the keys below.
+
+| Suggested key | Action |
 | --- | --- |
 | **E** | Interact / advance dialogue |
 | **R** | Retry from the campaign checkpoint |
 | **I** | Terraria inventory; right-click story items to use them |
 | **M** | Story map, once acquired |
 | **V / C** | Cycle Cave Story weapons |
+| **X** (hold) | Skip cutscenes |
 
-Cutscene skipping and other key bindings are configurable in Controls.
 Terraria's world zoom works; **Settings → Mod Configuration → Caverarria** offers
 camera/avatar sizing, campaign music/effect volumes and campaign reset.
 

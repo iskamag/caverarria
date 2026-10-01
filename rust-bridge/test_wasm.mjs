@@ -35,7 +35,7 @@ e.cave_free(executable,exe.length);
 const head=fs.readFileSync(path.join(dataRoot,'Head.tsc'));
 function cipher(data,sign){let middle=Math.floor(data.length/2),key=data[middle]||7;return Buffer.from(data.map((v,i)=>i===middle?v:(v+sign*key)&255));}
 put('/Head.tsc',cipher(Buffer.concat([cipher(head,-1),Buffer.from(
-    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<FAI0000<AM+0002:0000<END\r\n#9020\r\n<KEY<MSGSkip this dialogue through the ordinary replay controller.<NOD<FL+7999<END\r\n#9021\r\n<KEY<ML+0003<END\r\n#9022\r\n<END\r\n')]),1));
+    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<FAI0000<AM+0002:0000<END\r\n#9017\r\n<FAO0000<END\r\n#9020\r\n<KEY<MSGSkip this dialogue through the ordinary replay controller.<NOD<FL+7999<END\r\n#9021\r\n<KEY<ML+0003<END\r\n#9022\r\n<END\r\n')]),1));
 e.cave_set_time(1790800000n);
 const empty=string('');let handle=e.cave_create(empty,empty,320,240);
 assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
@@ -295,6 +295,32 @@ if(process.env.CAVERARRIA_UI_VIEWPORT_TEST){
     for(let y=120;y<240;y++)for(let x=160;x<320;x++)rightHalfAlpha+=rgba[(y*320+x)*4+3];
     assert.ok(rightHalfAlpha>0,'dialogue right half was clipped or hidden by the open inventory');
     assert.equal(0,progressAlpha(),'dialogue should remain visible without the overlapping weapon progress');
+    // One host screen/interface scale, several independently zoomed world canvases.
+    command({op:'tick',controls:32,player:{x:160,y:120,vx:0,vy:0}});
+    command({op:'event',event:9016});
+    for(let i=0;i<60;i++)command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    let fixedXp;
+    for(const world of [{width:640,height:360},{width:426,height:240},{width:320,height:180},{width:213,height:120}]){
+        command({op:'resize',...world});
+        const stable=command({op:'ui_resize',width:640,height:360});
+        assert.deepEqual(stable.viewport,world,'interface resize changed world camera');
+        assert.deepEqual(stable.ui_viewport,{width:640,height:360});
+        const pixels=new Uint8Array(e.memory.buffer,e.cave_pixels(handle,2),640*360*4);
+        const xp=Buffer.concat(Array.from({length:8},(_,y)=>Buffer.from(pixels.slice(((y+32)*640)*4,((y+32)*640+80)*4))));
+        if(fixedXp)assert.deepEqual(xp,fixedXp,'zoom moved or changed native XP bar');else fixedXp=xp;
+        assert.ok(xp.some((value,index)=>index%4===3&&value>0),'fixed-canvas XP bar absent');
+    }
+    let fixedFade;
+    for(const world of [{width:640,height:360},{width:213,height:120}]){
+        command({op:'resize',...world});
+        command({op:'ui_resize',width:640,height:360});
+        command({op:'event',event:9016});
+        for(let i=0;i<60;i++)command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+        command({op:'event',event:9017});
+        for(let i=0;i<12;i++)command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+        const fade=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_pixels(handle,2),640*360*4));
+        if(fixedFade)assert.deepEqual(fade,fixedFade,'room wipe changed with world zoom');else fixedFade=fade;
+    }
     const large=command({op:'resize',width:426,height:300});
     assert.deepEqual(large.viewport,{width:426,height:300});
     assert.deepEqual(large.ui_viewport,{width:426,height:300});

@@ -44,6 +44,28 @@ internal static class ViewChecks
             .SetValue(player, new ModPlayer[] { hooks });
         typeof(ContentInstance<CampaignViewConfig>).GetProperty("Instance")!
             .SetValue(null, new CampaignViewConfig { PlayerBodyScale = 1.5f });
+        int savedWidth = Main.screenWidth, savedHeight = Main.screenHeight;
+        float savedZoom = Main.GameZoomTarget;
+        try
+        {
+            foreach (var screen in new[] { new Point(1280, 720), new Point(1920, 1080), new Point(1365, 767) })
+            {
+                Main.screenWidth = screen.X; Main.screenHeight = screen.Y;
+                Main.GameZoomTarget = 1f;
+                int uiWidth = CampaignView.InterfaceViewportWidth, uiHeight = CampaignView.InterfaceViewportHeight;
+                var expected = CampaignView.InterfaceRectangle(uiWidth, uiHeight);
+                for (float zoom = 1f; zoom <= 2f; zoom += .25f)
+                {
+                    Main.GameZoomTarget = zoom;
+                    check(CampaignView.InterfaceViewportWidth == uiWidth && CampaignView.InterfaceViewportHeight == uiHeight,
+                        "world zoom changed native interface canvas");
+                    var output = CampaignView.InterfaceRectangle(uiWidth, uiHeight);
+                    check(output == expected && output.X < CampaignView.InterfacePixelScale && output.Y < CampaignView.InterfacePixelScale,
+                        "world zoom moved native XP/fade edge away from screen edge");
+                }
+            }
+        }
+        finally { Main.screenWidth = savedWidth; Main.screenHeight = savedHeight; Main.GameZoomTarget = savedZoom; }
         check(new CampaignViewConfig().PlayerBodyScale == 1f && CampaignRuntime.Scale == 2f,
             "default avatar no longer has ten by twenty-one logical pixels");
         try

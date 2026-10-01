@@ -23,6 +23,11 @@ public sealed class CampaignView : ModSystem
     public static float HostZoom => PixelScale / CampaignRuntime.Scale;
     public static int ViewportWidth => Math.Max(160, Main.screenWidth / PixelScale);
     public static int ViewportHeight => Math.Max(120, Main.screenHeight / PixelScale);
+    public static int InterfacePixelScale => FittedInterfaceScale(Main.screenWidth, Main.screenHeight, BasePixelScale);
+    public static int InterfaceViewportWidth => Math.Max(320, Main.screenWidth / InterfacePixelScale);
+    public static int InterfaceViewportHeight => Math.Max(240, Main.screenHeight / InterfacePixelScale);
+    internal static int FittedInterfaceScale(int screenWidth, int screenHeight, int baseScale)
+        => Math.Max(1, Math.Min(baseScale, Math.Min(screenWidth / 320, screenHeight / 240)));
     public static float PlayerScale => Math.Clamp(ModContent.GetInstance<CampaignViewConfig>().PlayerBodyScale, .75f, 1.5f);
     internal static bool IsCampaignAvatar(Player player)
         => InWorld && IsWorldPlayer(player, Main.player) && player.GetModPlayer<CampaignPlayer>().UsingCampaignHealth;
@@ -32,7 +37,7 @@ public sealed class CampaignView : ModSystem
     public static Rectangle OutputRectangle(int width, int height)
         => OutputRectangle(Main.screenWidth, Main.screenHeight, width, height, PixelScale);
     public static Rectangle InterfaceRectangle(int width, int height)
-        => InterfaceRectangle(Main.screenWidth, Main.screenHeight, width, height, PixelScale);
+        => InterfaceRectangle(Main.screenWidth, Main.screenHeight, width, height, InterfacePixelScale);
     internal static Rectangle InterfaceRectangle(int screenWidth, int screenHeight, int width, int height, int worldScale)
     {
         int scale = Math.Max(1, Math.Min(worldScale, Math.Min(screenWidth / width, screenHeight / height)));

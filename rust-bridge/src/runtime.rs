@@ -222,6 +222,17 @@ impl Runtime {
         let mut terrain_accepted = false;
         let mut tile_hit_flags = 0u32;
         match op {
+            "ui_resize" => {
+                let width = v["width"].as_i64().ok_or("UI resize requires width")?;
+                let height = v["height"].as_i64().ok_or("UI resize requires height")?;
+                if !(320..=3840).contains(&width) || !(240..=2160).contains(&height) {
+                    return Err("Invalid interface dimensions".into());
+                }
+                let mut raster = self.raster.borrow_mut();
+                raster.ui_width = width as usize;
+                raster.ui_height = height as usize;
+                raster.buffers[2].resize(width as usize * height as usize * 4, 0);
+            }
             "resize" => {
                 let width = v["width"].as_i64().ok_or("Resize requires width")?;
                 let height = v["height"].as_i64().ok_or("Resize requires height")?;
@@ -556,7 +567,7 @@ impl Runtime {
         // the same update. The next tick captures their combined result. Scene
         // changes and explicit snapshots still return a current frame.
         if changed
-            || matches!(op, "tick" | "snapshot" | "resize")
+            || matches!(op, "tick" | "snapshot" | "resize" | "ui_resize")
             || v["render"].as_bool().unwrap_or(false)
         {
             self.raster

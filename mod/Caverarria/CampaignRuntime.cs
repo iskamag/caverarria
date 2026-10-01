@@ -73,6 +73,7 @@ internal static class CampaignRuntime
             byte[] module = wasmPath != null ? File.ReadAllBytes(wasmPath)
                 : ModContent.GetInstance<CaverarriaMod>().GetFileBytes("Assets/Engine/caverarria_bridge.wasm");
             Engine = new WasmEngine(module, data, save, width, height);
+            Engine.Send(new { op = "ui_resize", width = CampaignView.InterfaceViewportWidth, height = CampaignView.InterfaceViewportHeight });
             outsideMapEnabled = Main.mapEnabled;
             Main.mapEnabled = false;
             Main.mapFullscreen = false;
@@ -486,8 +487,15 @@ internal static class CampaignRuntime
     {
         if (!Active) return;
         int width = CampaignView.ViewportWidth, height = CampaignView.ViewportHeight;
-        if (Engine!.Width == width && Engine.Height == height) return;
-        Snapshot = Engine.Resize(width, height);
+        int uiWidth = CampaignView.InterfaceViewportWidth, uiHeight = CampaignView.InterfaceViewportHeight;
+        bool worldChanged = Engine!.Width != width || Engine.Height != height;
+        bool interfaceChanged = Snapshot.Field("ui_viewport").Integer("width") != uiWidth
+            || Snapshot.Field("ui_viewport").Integer("height") != uiHeight;
+        if (!worldChanged && !interfaceChanged) return;
+        if (worldChanged) Snapshot = Engine.Resize(width, height);
+        // World resize has its own legacy UI defaults; always reapply the host's
+        // screen-sized interface canvas so zoom cannot move HUD/fade edges.
+        Snapshot = Engine.Send(new { op = "ui_resize", width = uiWidth, height = uiHeight });
         pixels = new byte[Engine.Width * Engine.Height * 4];
         ReleaseImages();
         ApplySnapshot(false); imageDirty = true;

@@ -22,13 +22,16 @@ try
     Check(File.ReadAllBytes(backup!).SequenceEqual(checkpoint), "earlier backup preserved across resets");
     File.WriteAllText(Path.Combine(current, "Terrain.json"), "guest edits");
     File.WriteAllText(Path.Combine(current, "TerrainBlocks.json"), "host art");
+    File.WriteAllText(Path.Combine(current, "TerrainFurniture.json"), "cake");
     CampaignCheckpointBackup.Archive(current);
     Check(!File.Exists(Path.Combine(current, "Terrain.json")) && !File.Exists(Path.Combine(current, "TerrainBlocks.json")),
         "reset retained terrain from the old campaign");
     Check(Directory.EnumerateFiles(current, "Terrain.json*.bak").Any(path => File.ReadAllText(path) == "guest edits")
         && Directory.EnumerateFiles(current, "TerrainBlocks.json*.bak").Any(path => File.ReadAllText(path) == "host art"),
         "terrain reset lost the original edits");
-    Console.WriteLine("10 campaign checkpoint and terrain backup checks passed.");
+    Check(!File.Exists(Path.Combine(current, "TerrainFurniture.json")) && Directory.EnumerateFiles(current, "TerrainFurniture.json*.bak")
+        .Any(path => File.ReadAllText(path) == "cake"), "furniture reset lost or retained cake");
+    Console.WriteLine("11 campaign checkpoint and terrain backup checks passed.");
 }
 finally { Directory.Delete(root, true); }
 static void Check(bool condition, string message)

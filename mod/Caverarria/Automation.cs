@@ -21,6 +21,7 @@ internal sealed class AutomationInput
     public bool NextWeapon { get; set; }
     public bool PreviousWeapon { get; set; }
     public bool Shoot { get; set; }
+    public bool UseTile { get; set; }
     public float? AimX { get; set; }
     public float? AimY { get; set; }
     public int? Item { get; set; }
@@ -105,7 +106,7 @@ internal static class Automation
         player.controlDown = hold && (Input.Down || Input.Interact);
         player.controlJump = hold && Input.Jump;
         player.controlUseItem = hold && Input.Shoot;
-        player.controlUseTile = false;
+        player.controlUseTile = hold && Input.UseTile;
         if (Input.Item.HasValue) player.selectedItem = Math.Clamp(Input.Item.Value, 0, 9);
         if (Input.AimX.HasValue && Input.AimY.HasValue)
         {
@@ -138,6 +139,14 @@ internal static class Automation
                 width = player.width / CampaignRuntime.Scale, height = player.height / CampaignRuntime.Scale,
                 grounded = player.velocity.Y == 0, selectedItem = player.selectedItem,
                 itemAnimation = player.itemAnimation, itemTime = player.itemTime, toolTime = player.toolTime,
+                skipCutsceneHeld = CaverarriaMod.SkipCutscene.Current, hasFocus = Main.hasFocus,
+                skipAssignedKeys = CaverarriaMod.SkipCutscene.GetAssignedKeys().ToArray(),
+                skipAssignedUiKeys = CaverarriaMod.SkipCutscene.GetAssignedKeys(Terraria.GameInput.InputMode.KeyboardUI).ToArray(),
+                inputProfile = Terraria.GameInput.PlayerInput.CurrentProfile.Name, inputMode = Terraria.GameInput.PlayerInput.CurrentInputMode.ToString(),
+                inputWritingText = Terraria.GameInput.PlayerInput.WritingText, inputBlockKey = Main.blockKey, inputRebinding = Terraria.GameInput.PlayerInput.CurrentlyRebinding,
+                processedKeys = Main.keyState.GetPressedKeys().Select(key => key.ToString()).ToArray(),
+                processedOldKeys = Main.oldKeyState.GetPressedKeys().Select(key => key.ToString()).ToArray(),
+                pressedKeys = Microsoft.Xna.Framework.Input.Keyboard.GetState().GetPressedKeys().Select(key => key.ToString()).ToArray(),
                 tileTargetX = Player.tileTargetX, tileTargetY = Player.tileTargetY, noBuilding = player.noBuilding,
                 targetCell = CampaignTerrainEdits.Cell(Player.tileTargetX, Player.tileTargetY, out int cellX, out int cellY)
                     ? Enumerable.Range(0, 9).Select(index => {
@@ -145,6 +154,7 @@ internal static class Automation
                         return new { tile.HasTile, tile.TileType };
                     }).ToArray() : null,
                 heldItem = player.HeldItem.type, inventory = player.inventory.Take(10).Select(item => new { id = item.type, name = item.Name, stack = item.stack }).ToArray(),
+                buffs = player.buffType.Select((type, index) => new { type, time = player.buffTime[index] }).Where(buff => buff.type != 0).ToArray(),
                 projectiles = Main.projectile.Count(projectile => projectile.active && projectile.owner == player.whoAmI),
                 controls = new { left = player.controlLeft, right = player.controlRight, jump = player.controlJump, shoot = player.controlUseItem },
                 frame = CampaignRuntime.Frame, cameraX = Main.screenPosition.X, cameraY = Main.screenPosition.Y,

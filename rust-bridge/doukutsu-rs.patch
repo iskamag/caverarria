@@ -469,7 +469,7 @@ index 5be25e5..808db14 100644
              use crate::framework::error::GameError;
              GameError::FilesystemError(format!("Failed to open directory: {}", e))
 diff --git a/src/game/map.rs b/src/game/map.rs
-index a4b067d..4c2b8fa 100644
+index a4b067d..e75cae6 100644
 --- a/src/game/map.rs
 +++ b/src/game/map.rs
 @@ -23,6 +23,8 @@ pub struct Map {
@@ -477,7 +477,7 @@ index a4b067d..4c2b8fa 100644
      pub attrib: [u8; 0x100],
      pub tile_size: TileSize,
 +    /// Host terrain edits override collision without consuming authored tile indices.
-+    pub terrain_edits: std::collections::BTreeMap<usize, bool>,
++    pub terrain_edits: std::collections::BTreeMap<usize, u16>,
  }
  
  static SOLID_TILES: [u8; 8] = [0x05, 0x41, 0x43, 0x46, 0x54, 0x55, 0x56, 0x57];
@@ -499,16 +499,47 @@ index a4b067d..4c2b8fa 100644
      }
  
      pub fn get_attribute(&self, x: usize, y: usize) -> u8 {
-@@ -287,7 +289,11 @@ impl Map {
+@@ -287,7 +289,42 @@ impl Map {
              return 0;
          }
  
 -        self.attrib[*self.tiles.get(self.width as usize * y + x).unwrap_or(&0u8) as usize]
 +        let index = self.width as usize * y + x;
-+        if let Some(&solid) = self.terrain_edits.get(&index) {
-+            return if solid { 0x41 } else { 0 };
++        if let Some(&mask) = self.terrain_edits.get(&index) {
++            return if mask == 0x1ff { 0x41 } else { 0 };
 +        }
 +        self.attrib[*self.tiles.get(index).unwrap_or(&0u8) as usize]
++    }
++
++    /// Exact fixed-point rectangles for partially occupied cells. Complete cells
++    /// retain the original authored block collision routine.
++    pub fn terrain_rectangles(&self, left: i32, top: i32, right: i32, bottom: i32) -> Vec<Rect<i32>> {
++        if self.terrain_edits.is_empty() { return Vec::new(); }
++        let size = self.tile_size.as_int() * 512;
++        let half = size / 2;
++        let x0 = (left + half).div_euclid(size).max(0);
++        let y0 = (top + half).div_euclid(size).max(0);
++        let x1 = (right + half).div_euclid(size).min(self.width as i32 - 1);
++        let y1 = (bottom + half).div_euclid(size).min(self.height as i32 - 1);
++        let mut rectangles = Vec::new();
++        for y in y0..=y1 {
++            for x in x0..=x1 {
++                let Some(&mask) = self.terrain_edits.get(&(y as usize * self.width as usize + x as usize)) else { continue; };
++                if mask == 0 || mask == 0x1ff { continue; }
++                for sy in 0..3 { for sx in 0..3 {
++                    if mask & (1 << (sy * 3 + sx)) != 0 {
++                        let rectangle = Rect {
++                            left: x * size - half + sx * size / 3,
++                            right: x * size - half + (sx + 1) * size / 3,
++                            top: y * size - half + sy * size / 3,
++                            bottom: y * size - half + (sy + 1) * size / 3,
++                        };
++                        if rectangle.left < right && rectangle.right > left && rectangle.top < bottom && rectangle.bottom > top { rectangles.push(rectangle); }
++                    }
++                }}
++            }
++        }
++        rectangles
      }
  
      pub fn find_water_regions(&self, water_params: &WaterParams) -> Vec<(WaterRegionType, Rect<u16>, u8)> {
@@ -601,6 +632,52 @@ index 06b4d3d..79a5dfc 100644
              id: 0,
              npc_type,
              x: 0,
+diff --git a/src/game/physics.rs b/src/game/physics.rs
+index 4dc2506..6e1b70b 100644
+--- a/src/game/physics.rs
++++ b/src/game/physics.rs
+@@ -261,6 +261,30 @@ pub trait PhysicalEntity {
+         }
+     }
+ 
++    /// Rectangle collision for Terraria subtiles, without changing authored
++    /// native tile metrics, slopes, hazards or map scripts.
++    fn test_terrain_rectangle(&mut self, state: &mut SharedGameState, block: Rect<i32>) {
++        let bounds = *self.hit_bounds();
++        let left = self.x() - bounds.left as i32;
++        let right = self.x() + bounds.right as i32;
++        let top = self.y() - bounds.top as i32;
++        let bottom = self.y() + bounds.bottom as i32;
++        if left >= block.right || right <= block.left || top >= block.bottom || bottom <= block.top { return; }
++        let vx = self.vel_x(); let vy = self.vel_y();
++        let overlaps = [right - block.left, block.right - left, bottom - block.top, block.bottom - top];
++        let side = if right - vx <= block.left { 0 }
++            else if left - vx >= block.right { 1 }
++            else if bottom - vy <= block.top { 2 }
++            else if top - vy >= block.bottom { 3 }
++            else { (0..4).min_by_key(|&i| overlaps[i]).unwrap() };
++        match side {
++            0 => { self.set_x(block.left - bounds.right as i32); self.flags().set_hit_right_wall(true); if self.is_player() && vx > 0 { self.set_vel_x(0); } }
++            1 => { self.set_x(block.right + bounds.left as i32); self.flags().set_hit_left_wall(true); if self.is_player() && vx < 0 { self.set_vel_x(0); } }
++            2 => { self.set_y(block.top - bounds.bottom as i32); self.flags().set_hit_bottom_wall(true); if self.is_player() && vy > 0x400 { state.sound_manager.play_sfx(23); } if vy > 0 { self.set_vel_y(0); } }
++            _ => { self.set_y(block.bottom + bounds.top as i32); self.flags().set_hit_top_wall(true); if vy < 0 { self.set_vel_y(0); } }
++        }
++    }
++
+     fn test_platform_hit(&mut self, state: &mut SharedGameState, x: i32, y: i32) {
+         let half_tile_size = state.tile_size.as_int() * 0x100;
+         let block_top = (y * 2 - 1) * half_tile_size;
+@@ -822,6 +846,10 @@ pub trait PhysicalEntity {
+         let y = (self.y() + self.offset_y()) / tile_size;
+ 
+         self.flags().0 = 0;
++        let bounds = *self.hit_bounds();
++        for rectangle in stage.map.terrain_rectangles(self.x() - bounds.left as i32, self.y() - bounds.top as i32, self.x() + bounds.right as i32, self.y() + bounds.bottom as i32) {
++            self.test_terrain_rectangle(state, rectangle);
++        }
+         for (idx, &(ox, oy)) in OFFSETS.iter().enumerate() {
+             if idx == hit_rect_size {
+                 break;
 diff --git a/src/game/player/mod.rs b/src/game/player/mod.rs
 index 8c5ccd0..58fb52e 100644
 --- a/src/game/player/mod.rs
@@ -901,6 +978,25 @@ index 3d4c6cd..396b5c4 100644
          self.teleporter_slots.clear();
          self.quake_counter = 0;
          self.carets.clear();
+diff --git a/src/game/weapon/bullet.rs b/src/game/weapon/bullet.rs
+index 80aa924..b21e777 100644
+--- a/src/game/weapon/bullet.rs
++++ b/src/game/weapon/bullet.rs
+@@ -2002,5 +2002,14 @@ impl PhysicalEntity for Bullet {
+         }
+ 
+         self.test_hit_block_destructible(x, y, &hit_attribs, state);
++        // Partial host blocks are precise rectangles, never whole native cells.
++        if !stage.map.terrain_rectangles(self.x - self.hit_bounds.left as i32, self.y - self.hit_bounds.top as i32, self.x + self.hit_bounds.right as i32, self.y + self.hit_bounds.bottom as i32).is_empty() {
++            self.flags.set_weapon_hit_block(true);
++            let vx = self.vel_x; let vy = self.vel_y;
++            if vx > 0 { self.flags.set_hit_right_wall(true); }
++            if vx < 0 { self.flags.set_hit_left_wall(true); }
++            if vy > 0 { self.flags.set_hit_bottom_wall(true); }
++            if vy < 0 { self.flags.set_hit_top_wall(true); }
++        }
+     }
+ }
 diff --git a/src/lib.rs b/src/lib.rs
 index 2d45ecf..8ad76e0 100644
 --- a/src/lib.rs

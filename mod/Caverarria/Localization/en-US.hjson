@@ -3,6 +3,7 @@ Mods: {
 		Keybinds: {
 			Interact.DisplayName: Cave Story: interact / advance dialogue
 			Retry.DisplayName: Cave Story: retry from save
+			SkipCutscene.DisplayName: Cave Story: hold to skip cutscene
 			Inventory.DisplayName: Terraria inventory / close story item
 			Map.DisplayName: Cave Story: map
 			NextWeapon.DisplayName: Cave Story: next weapon
@@ -32,6 +33,16 @@ Mods: {
 				CampaignSoundVolume: {
 					Label: Cave Story sound effect volume
 					Tooltip: Multiplies Terraria's sound volume for original Cave Story effects. Terraria weapon sounds follow Terraria's settings.
+				}
+
+				TerrariaSizedBlocks: {
+					Label: Place Terraria-sized blocks
+					Tooltip: When enabled, solid block items occupy one ordinary Terraria tile instead of a full Cave Story tile. Existing placed blocks retain their size. Small blocks share the campaign pixel grid.
+				}
+
+				PersistentTerrainEdits: {
+					Label: Save terrain edits
+					Tooltip: When enabled, mining, placed blocks and furniture survive retry and re-entry. When disabled, new edits last only until retry or leaving the world; already saved edits are preserved. Enabling this saves your current edits.
 				}
 
 				ResetCurrentCampaign: {

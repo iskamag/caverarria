@@ -40,7 +40,9 @@ pub struct Runtime {
     controller: ReplayController,
     epoch: u64,
     map_hash: u64,
-    terrain: BTreeMap<usize, BTreeMap<usize, bool>>,
+    terrain: BTreeMap<usize, BTreeMap<usize, u16>>,
+    saved_terrain: BTreeMap<usize, BTreeMap<usize, u16>>,
+    terrain_persistent: bool,
     force_position: bool,
     force_velocity: bool,
     life_delta: i32,
@@ -130,7 +132,18 @@ impl Runtime {
             Ok(mut file) => {
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes).map_err(err)?;
-                serde_json::from_slice(&bytes).map_err(err)?
+                let legacy: BTreeMap<usize, BTreeMap<usize, Value>> = serde_json::from_slice(&bytes).map_err(err)?;
+                let mut edits = BTreeMap::new();
+                for (stage, cells) in legacy {
+                    let mut masks = BTreeMap::new();
+                    for (index, value) in cells {
+                        let mask = if let Some(solid) = value.as_bool() { if solid { 511 } else { 0 } }
+                            else { value.as_u64().filter(|&m| m <= 511).ok_or("Invalid saved terrain mask")? as u16 };
+                        masks.insert(index, mask);
+                    }
+                    edits.insert(stage, masks);
+                }
+                edits
             }
             Err(_) => BTreeMap::new(),
         };
@@ -142,7 +155,9 @@ impl Runtime {
             controller: ReplayController::new(),
             epoch: 1,
             map_hash: 0,
+            saved_terrain: terrain.clone(),
             terrain,
+            terrain_persistent: true,
             force_position: true,
             force_velocity: true,
             life_delta: 0,
@@ -162,7 +177,9 @@ impl Runtime {
         let bytes = serde_json::to_vec(&self.terrain).map_err(err)?;
         let mut file = crate::framework::filesystem::user_create(&self.ctx, "/Terrain.json").map_err(err)?;
         file.write_all(&bytes).map_err(err)?;
-        file.flush().map_err(err)
+        file.flush().map_err(err)?;
+        self.saved_terrain = self.terrain.clone();
+        Ok(())
     }
     pub fn pixels(&self, layer: usize) -> *const u8 {
         self.raster.borrow().buffers[layer].as_ptr()
@@ -204,6 +221,7 @@ impl Runtime {
         self.life_delta = 0;
         let mut hit_accepted = false;
         let mut terrain_accepted = false;
+        let mut tile_hit_flags = 0u32;
         match op {
             "resize" => {
                 let width = v["width"].as_i64().ok_or("Resize requires width")?;
@@ -236,6 +254,7 @@ impl Runtime {
                 changed = self.transitions()?;
             }
             "load" | "retry" => {
+                if !self.terrain_persistent { self.terrain = self.saved_terrain.clone(); }
                 self.state.load_or_start_game(&mut self.ctx).map_err(err)?;
                 changed = self.transitions()?;
             }
@@ -263,6 +282,11 @@ impl Runtime {
                     }
                 }
             }
+            "terrain_persistence" => {
+                let enabled = v["enabled"].as_bool().ok_or("Terrain persistence requires enabled")?;
+                if enabled && !self.terrain_persistent { self.persist_terrain()?; }
+                self.terrain_persistent = enabled;
+            }
             "terrain_edit" => {
                 let epoch = v["epoch"].as_u64().ok_or("Terrain edit requires epoch")?;
                 let stage = usize::try_from(v["stage"].as_u64().ok_or("Terrain edit requires stage")?).map_err(|_| "Terrain stage out of bounds")?;
@@ -273,8 +297,24 @@ impl Runtime {
                 if epoch == self.epoch && stage == game.stage_id
                     && x < game.stage.map.width as usize && y < game.stage.map.height as usize {
                     let index = y * game.stage.map.width as usize + x;
-                    self.terrain.entry(stage).or_default().insert(index, solid);
-                    self.persist_terrain()?;
+                    let sub_x = v["sub_x"].as_u64(); let sub_y = v["sub_y"].as_u64();
+                    let mask = match (sub_x, sub_y) {
+                        (None, None) if v["sub_x"].is_null() && v["sub_y"].is_null() => if solid { 511 } else { 0 },
+                        (Some(sx), Some(sy)) if sx < 3 && sy < 3 => {
+                            let prior = self.terrain.get(&stage).and_then(|m| m.get(&index)).copied();
+                            // Partial placement never replaces an authored slope,
+                            // hazard, water or wall. Mine authored terrain first.
+                            if prior.is_none() && game.stage.map.get_attribute(x, y) != 0 {
+                                return Err("Partial edit requires an empty or player-edited cell".into());
+                            }
+                            let old = prior.unwrap_or(0);
+                            let bit = 1u16 << (sy * 3 + sx);
+                            if solid { old | bit } else { old & !bit }
+                        }
+                        _ => return Err("Terrain subcell requires sub_x and sub_y in 0..3".into()),
+                    };
+                    self.terrain.entry(stage).or_default().insert(index, mask);
+                    if self.terrain_persistent { self.persist_terrain()?; }
                     self.apply_terrain();
                     terrain_accepted = true;
                 }
@@ -300,6 +340,7 @@ impl Runtime {
                 // This is the actual upstream bullet collision, including snack tile
                 // decrement, native caret, sound, and smoke spawns.
                 bullet.tick_map_collisions(&mut self.state, &game.npc_list, &mut game.stage);
+                tile_hit_flags = bullet.flags.0;
             }
             "use_item" => {
                 let id = v["id"].as_u64().ok_or("Item use requires id")?;
@@ -456,9 +497,8 @@ impl Runtime {
                         if let Some(life) = p["life"].as_u64() {
                             game.player1.life = life.min(65535) as u16;
                         }
-                        if let Some(life) = p["max_life"].as_u64() {
-                            game.player1.max_life = life.min(65535) as u16;
-                        }
+                        // Campaign maximum belongs to native capsules/scripts. Host
+                        // effective-health recalculation must never manufacture capsules.
                         if let Some(direction) = p["direction"].as_i64() {
                             game.player1.direction = if direction < 0 {
                                 Direction::Left
@@ -540,6 +580,8 @@ impl Runtime {
         let mut result = self.snapshot(changed)?;
         result["hit_accepted"] = json!(hit_accepted);
         result["terrain_edit_accepted"] = json!(terrain_accepted);
+        result["terrain_persistent"] = json!(self.terrain_persistent);
+        if op == "tile_hit" { result["tile_hit_flags"] = json!(tile_hit_flags); }
         Ok(result.to_string())
     }
     fn hit(
@@ -672,14 +714,14 @@ impl Runtime {
             .fold(1469598103934665603u64, |h, &x| {
                 (h ^ x as u64).wrapping_mul(1099511628211)
             });
-        for (&index, &solid) in &game.stage.map.terrain_edits {
+        for (&index, &mask) in &game.stage.map.terrain_edits {
             hash = (hash ^ index as u64).wrapping_mul(1099511628211);
-            hash = (hash ^ (if solid { 0x41 } else { 0 })).wrapping_mul(1099511628211);
+            hash = (hash ^ mask as u64).wrapping_mul(1099511628211);
         }
         if hash != self.map_hash || changed {
             result["map"] = json!({"tiles":game.stage.map.tiles,"attributes":game.stage.map.attrib.to_vec(),"width":game.stage.map.width,"height":game.stage.map.height,"revision":hash});
             result["map"]["cell_attributes"] = json!((0..game.stage.map.height as usize).flat_map(|y| (0..game.stage.map.width as usize).map(move |x| game.stage.map.get_attribute(x, y))).collect::<Vec<_>>());
-            result["map"]["terrain_edits"] = json!(game.stage.map.terrain_edits.iter().map(|(&index, &solid)| json!({"x":index % game.stage.map.width as usize,"y":index / game.stage.map.width as usize,"solid":solid})).collect::<Vec<_>>());
+            result["map"]["terrain_edits"] = json!(game.stage.map.terrain_edits.iter().map(|(&index, &mask)| json!({"x":index % game.stage.map.width as usize,"y":index / game.stage.map.width as usize,"solid":mask != 0,"mask":mask})).collect::<Vec<_>>());
             self.map_hash = hash;
         }
         let (camera_x, camera_y) = game.frame.xy_interpolated(self.state.frame_time);

@@ -36,9 +36,18 @@ upgrade twice. Cave Story guns fire only inside the campaign.
 Use ordinary pickaxes to mine campaign terrain and ordinary solid block items
 to build. Each campaign block covers a 3×3 group of Terraria tiles; one placement
 uses one item, and mining returns one block (original terrain yields stone).
+Enable **Place Terraria-sized blocks** to place ordinary 16-pixel Terraria blocks
+instead. Each small block can be mined independently; existing blocks keep their
+size when the setting changes. Original solid/slope cells must be mined first
+before filling them with small blocks.
 Terrain edits affect native enemies and bullets as well as Terraria collision.
-Edits persist across room changes, checkpoint retries and re-entry. Digging can
-bypass authored gates; furniture, platforms, falling blocks, hammer reshaping
+By default, edits persist across room changes, checkpoint retries and re-entry.
+Turn off **Save terrain edits** in Caverarria configuration to keep new changes
+only until retry or leaving the world. Previously saved edits stay intact;
+enabling the setting saves your current changes. Digging can
+bypass authored gates. Ordinary non-solid furniture, including Slice of Cake,
+uses its normal placement footprint and interaction; it follows the same save
+setting. Containers, tile entities, platforms, falling blocks, hammer reshaping
 and explosives are not supported in campaign worlds yet.
 
 Campaign progress lives in
@@ -53,6 +62,10 @@ are recorded there. Campaign and character saves are separate files.
 
 Open **Settings → Mod Configuration → Caverarria** to adjust camera/avatar
 size and separate Cave Story music/effect volumes, or mute just the campaign.
+Assign **Cave Story: hold to skip cutscene** in Terraria's Controls settings,
+then hold that key to use the original engine's cutscene skip behavior. **X** is
+the suggested default; tModLoader leaves new mod keybinds unassigned until you
+configure them or use their reset-to-default button.
 While playing a Cave Story world, **Reset campaign... → Confirm reset** starts
 that world's campaign over. It moves the old checkpoint and terrain edit files to timestamped
 `.bak` files beside them before starting fresh. Story progress, terrain, story items and weapons

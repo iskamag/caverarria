@@ -7,7 +7,7 @@ internal static class CampaignCheckpointBackup
     {
         if (!Directory.Exists(directory)) return null;
         var profiles = Directory.EnumerateFiles(directory)
-            .Where(path => new[] { "Profile.dat", "Terrain.json", "TerrainBlocks.json" }
+            .Where(path => new[] { "Profile.dat", "Terrain.json", "TerrainBlocks.json", "TerrainFurniture.json" }
                 .Contains(Path.GetFileName(path), StringComparer.OrdinalIgnoreCase))
             .OrderBy(path => Path.GetFileName(path).Equals("Profile.dat", StringComparison.OrdinalIgnoreCase) ? 0 : 1).ToArray();
         if (profiles.Length == 0) return null;

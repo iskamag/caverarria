@@ -27,6 +27,23 @@ internal static class BodyChecks
             check(Vector2.Distance(Vector2.Normalize(canonicalTarget - sourceCenter), Vector2.Normalize(target - actualCenter)) < .001f,
                 "ordinary item style changed the physical aim direction");
         }
+        // Authored center y=92 with Quote's eight native pixels below it puts
+        // feet on native floor y=100. At 3x, the enlarged host embeds 7.5 pixels.
+        const float floor = 300;
+        Vector2 spawn = new(60, 92 * 3 - 63 / 2f);
+        bool FloorOverlap(Vector2 p, int w, int h) => p.Y < floor + 48 && p.Y + h > floor;
+        Vector2 cleared = CampaignBody.ClearPlacement(spawn, 30, 63, FloorOverlap);
+        check(cleared.X == spawn.X && cleared.Y + 63 <= floor && !FloorOverlap(cleared, 30, 63),
+            "authored door spawn left the enlarged body embedded in the floor");
+        check(FloorOverlap(cleared + Vector2.UnitY, 30, 63),
+            "door clearance moved farther than the nearest safe vertical placement");
+        Vector2 safeSpawn = new(60, 20);
+        check(CampaignBody.ClearPlacement(safeSpawn, 30, 63, FloorOverlap) == safeSpawn,
+            "clear authored placement was unnecessarily displaced");
+        int probes = 0;
+        check(CampaignBody.ClearPlacement(spawn, 30, 63, (p, w, h) => { probes++; return true; }) == spawn
+            && probes == 1 + 63 + 48,
+            "blocked authored placement searched beyond its bounded local clearance");
         Vector2 position = player.position, planted = player.Bottom;
         int width = player.width, height = player.height, mouseX = Main.mouseX, mouseY = Main.mouseY;
         Vector2 previousItem = player.itemLocation;

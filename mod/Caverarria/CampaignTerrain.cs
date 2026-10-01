@@ -21,17 +21,24 @@ public sealed class CampaignSolid : ModTile
 
 public sealed class CampaignTerrainProtection : GlobalTile
 {
-    public override bool CanPlace(int i, int j, int type) => !CampaignRuntime.Active || CampaignTerrainEdits.CanPlace(i, j, type);
+    public override bool CanPlace(int i, int j, int type) => !CampaignRuntime.Active
+        || (CampaignFurniture.Supports(type, Main.LocalPlayer.HeldItem.placeStyle)
+            ? CampaignFurniture.CanPlace(i, j, type) : CampaignTerrainEdits.CanPlace(i, j, type));
     public override bool CanReplace(int i, int j, int type, int tileTypeBeingPlaced) => !CampaignRuntime.Active;
     public override bool CanKillTile(int i, int j, int type, ref bool blockDamaged)
-        => !CampaignRuntime.Active || CampaignTerrainEdits.CanMine(i, j);
+        => !CampaignRuntime.Active || (CampaignFurniture.Supports(type)
+            ? CampaignFurniture.CanMine(i, j, type) : CampaignTerrainEdits.CanMine(i, j));
     public override void KillTile(int i, int j, int type, ref bool fail, ref bool effectOnly, ref bool noItem)
     {
-        if (CampaignRuntime.Active) CampaignTerrainEdits.Mine(i, j, ref fail, effectOnly, ref noItem);
+        if (!CampaignRuntime.Active) return;
+        if (CampaignFurniture.Supports(type)) CampaignFurniture.Mine(i, j, fail, effectOnly);
+        else CampaignTerrainEdits.Mine(i, j, ref fail, effectOnly, ref noItem);
     }
     public override void PlaceInWorld(int i, int j, int type, Item item)
     {
-        if (CampaignRuntime.Active) CampaignTerrainEdits.Place(i, j, type, item);
+        if (!CampaignRuntime.Active) return;
+        if (CampaignFurniture.Supports(type, item.placeStyle)) CampaignFurniture.Place(i, j, type);
+        else CampaignTerrainEdits.Place(i, j, type, item);
     }
     public override bool Slope(int i, int j, int type) => !CampaignRuntime.Active;
     public override bool CanExplode(int i, int j, int type) => !CampaignRuntime.Active;

@@ -66,6 +66,16 @@ internal static class Program
         CheckDeadInput(player, hooks);
 
         Apply(State(1, true));
+        player.statLife = 447660; player.statLifeMax2 = 447730;
+        var capacity = CampaignRuntime.CaptureCampaignHealth(player);
+        Check(capacity.maximum == 5 && capacity.life == 5, "outside capacity fed back into native capsule maximum");
+        Check(player.statLifeMax2 == 50 && player.statLife == 50, "entry did not clamp inflated outside health");
+        player.statLife = 17; player.statLifeMax2 = 447730;
+        capacity = CampaignRuntime.CaptureCampaignHealth(player);
+        Check(capacity.maximum == 5 && capacity.life == 2 && player.statLife == 17, "capacity reconciliation healed fractional campaign HP");
+        player.statLife = 0; player.dead = true;
+        Check(CampaignRuntime.CaptureCampaignHealth(player).life == 0, "capacity reconciliation resurrected dead host");
+        player.dead = false;
         player.statLife = 17; player.statLifeMax2 = 50;
         Apply(State(2, true));
         Check(player.statLife == 17, "ordinary room transfer overwrote fractional host HP");

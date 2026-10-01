@@ -87,6 +87,10 @@ use the overrides for NPCs and bullets, and edited native art is suppressed.
 The host projects the effective attributes into collision and draws placed
 block textures. Authored TSC and map data remain live underneath these edits.
 
-Furniture, platforms, falling blocks, hammer reshaping and explosives need
+Non-solid furniture uses ordinary TileObjectData footprints, tile frames and interactions;
+room-scoped TerrainFurniture.json records its pieces. Whole-cell or individual
+16-host-pixel block placement share native mask collision for enemies and bullets.
+Persistence can retain edits across retries/re-entry or restore the saved baseline.
+Containers, tile entities, platforms, falling blocks, hammer reshaping and explosives need
 additional collision/rendering contracts. Editing can bypass gates or obstruct
 scripted encounters; full edited-campaign progression is not verified.

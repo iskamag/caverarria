@@ -94,12 +94,16 @@ Terraria motion outside those tiles.
 `controls` uses upstream replay flags: left 1, right 2, up 4, down 8,
 map 16, inventory 32, jump 64, shoot 128, next weapon 256, previous weapon 512,
 pause 1024, confirm 2048, skip 4096. This retains real dialogue choices and
-inventory/teleporter interfaces.
+inventory/teleporter interfaces. Held skip (4096) uses the original 50-tick
+cutscene skip gesture; keep it separate from ordinary dialogue confirmation.
+The original Egg No. 00 computer event prints “Input Password:” then waits for
+acknowledgment and ends. It has no password text-entry interface; this bridge
+preserves that authored interaction.
 Native corner HP/weapon widgets are suppressed for the external player; the
 original centered AIR countdown remains visible for drowning information.
 
 Commands: `new`, `load`, `retry`, `save`, `death`, `snapshot`, `tick`, `hit`,
-`tile_hit`, `terrain_edit`, `audio`, and `resize`. `resize` accepts native canvas `width`/`height`
+`tile_hit`, `terrain_edit`, `terrain_persistence`, `audio`, and `resize`. `resize` accepts native canvas `width`/`height`
 (160–1920 by 120–1080), preserves the current scene and cached textures, and
 returns pixels at the new size. All previously returned pixel pointers become
 invalid. The host reallocates its RGBA buffers/textures using returned `viewport`
@@ -114,14 +118,24 @@ keeps the native weapon inactive while ordinary Terraria gear is held.
 `tile_hit` `{x,y,width,height}` routes arbitrary Terraria
 projectile collisions through the original Polar Star tile-collision routine,
 including destructible snack tiles and their native effects.
-`terrain_edit` `{epoch,stage,x,y,solid}` edits one native map cell (not a host
-subtile). All fields are required. Stale epochs, wrong stages and out-of-bounds
-cells return `terrain_edit_accepted:false`; valid edits return `true`. Empty edits
-have collision attribute 0, placed blocks 0x41. They bypass original tile art;
+`terrain_edit` `{epoch,stage,x,y,solid}` edits one native map cell. Optional
+`sub_x` and `sub_y` (both 0–2) select one of its nine Terraria subtiles. Each
+subtile is 16 host pixels, or 16/3 native pixels; native fixed-point collision
+uses its precise rectangle without changing authored tile size. Partial edits
+require an empty or previously player-edited cell; original terrain is mined as
+a whole native cell first. All five base fields are required. Stale epochs, wrong stages and out-of-bounds
+cells return `terrain_edit_accepted:false`; valid edits return `true`. Empty and partial edits
+have coarse collision attribute 0; complete nine-bit masks have attribute 0x41.
+Native player/NPC and bullet collision additionally test occupied subtile
+rectangles, so unoccupied parts remain passable. They bypass original tile art;
 the host draws placed block material on the same cell. Original authored tile
 indices remain intact, and subsequent script mutations do not erase player edits.
 `Terrain.json` in the campaign user VFS stores overrides immediately, independently
 of checkpoints. Retry/load/room transfer preserve edits; `new` clears all edits.
+`terrain_persistence` `{enabled}` defaults to true. Disabling it retains the saved
+baseline but makes subsequent edits temporary. Temporary edits survive ordinary
+room transfers and are discarded on retry/load/recreation. Enabling it writes the
+current edits immediately; a new game clears the baseline in either mode.
 A hit is `{"op":"hit","id":4,"boss":false,"damage":3,"epoch":1,
 "generation":1}`. It uses native invulnerability, shared boss life, damage
 feedback, death events, drops, and flag progression. NPC slot generations prevent
@@ -133,13 +147,18 @@ Snapshots contain `viewport`, `ui_viewport`, `camera`, `stage`, `player`, `npcs`
 damage, age and position.
 `map` contains raw tile indices, the 256-entry authored tile attribute table,
 `cell_attributes` (effective per-cell collision in row-major order), and
-`terrain_edits` (`{x,y,solid}` for the current stage) when the content hash changes.
+`terrain_edits` (`{x,y,solid,mask}` for the current stage; `mask` is row-major
+nine-bit occupancy and `solid` means any occupied subtile) when the content hash changes.
 Script tile edits and player overrides change its `revision`. Host projection
-must use `cell_attributes`, since edited cells do not reserve authored tile IDs. Preserve the
+must use `cell_attributes` plus `terrain_edits.mask`, since edited cells do not
+reserve authored tile IDs. Legacy bool terrain saves migrate to masks 0/511. Preserve the
 previous map if omitted. Cave Story tile coordinates are **centers**: tile `(x,y)`
 starts at `(x*16-8,y*16-8)`. NPC bbox values `left/top/right/bottom` are extents
 from its center. `player.life_delta` describes native script healing/life changes
 after host injection; original script max-life increases are in `player.max_life`.
+The guest ignores external `player.max_life`: only native capsules and script
+opcodes own campaign maximum health. Host effective-health resets must not
+feed their maximum back into the campaign or permanent capsule rewards.
 Native injuries retain their original effects, shock and weapon XP loss but are
 returned as `player.pending_damage_raw`. The host applies these through real
 Terraria damage handling, then calls `death` only when the Terraria player dies.

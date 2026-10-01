@@ -20,6 +20,7 @@ try
     engineProperty.SetValue(null, new InertEngine());
     snapshotProperty.SetValue(null, JsonSerializer.SerializeToElement(new { scene = "game", control_enabled = true, script_mode = "Map", stage = new { id = 3, width = 20, height = 10 } }));
     int ox = CampaignRuntime.OriginTileX, oy = CampaignRuntime.OriginTileY;
+    FurnitureChecks.Run(temporary, Check);
     Check(CampaignTerrainEdits.Cell(ox, oy, out int x, out int y) && x == 0 && y == 0, "first native cell origin");
     Check(CampaignTerrainEdits.Cell(ox + 2, oy + 2, out x, out y) && x == 0 && y == 0, "three host tiles share one native cell");
     Check(CampaignTerrainEdits.Cell(ox + 3, oy + 3, out x, out y) && x == 1 && y == 1, "next cell boundary");
@@ -59,20 +60,69 @@ try
     Check(CampaignTerrainEdits.PlacementInReach(reachPosition, 20, 42, 6, 6, 10, 26), "bottommost reachable tile matches vanilla minus-two adjustment");
     Check(!CampaignTerrainEdits.PlacementInReach(reachPosition, 20, 42, 6, 6, 10, 27), "bottom range cannot overshoot vanilla");
     Check(!CampaignTerrainEdits.PlacementInReach(reachPosition, 20, 42, 6, 6, 10, 14), "fractional top range bound matches vanilla");
+    Check(!new CampaignViewConfig().TerrariaSizedBlocks, "whole campaign cell placement remains the default");
+    var wholeBounds = CampaignTerrainEdits.PlacementBounds(ox + 4, oy + 5, false);
+    var smallBounds = CampaignTerrainEdits.PlacementBounds(ox + 4, oy + 5, true);
+    Check(wholeBounds.Width == 48 && wholeBounds.Height == 48 && wholeBounds.X == (ox + 3) * 16 && wholeBounds.Y == (oy + 3) * 16,
+        "whole placement collision covers selected native cell");
+    Check(smallBounds.Width == 16 && smallBounds.Height == 16 && smallBounds.X == (ox + 4) * 16 && smallBounds.Y == (oy + 5) * 16,
+        "small placement collision matches one ordinary host tile");
+    for (int sy = 0; sy < 3; sy++) for (int sx = 0; sx < 3; sx++)
+    {
+        int bit = 1 << (sy * 3 + sx);
+        Check(CampaignTerrainEdits.MaskHasTile(bit, sx, sy) && !CampaignTerrainEdits.MaskHasTile(511 ^ bit, sx, sy),
+            "partial guest mask selects exact host tile");
+        var visual = CampaignTerrainEdits.BlockDrawBounds(7, 9, sx, sy);
+        Check(visual.Width is 5 or 6 && visual.Height is 5 or 6,
+            "small block is rasterized on the existing native pixel grid");
+        if (sx < 2) Check(visual.Right == CampaignTerrainEdits.BlockDrawBounds(7, 9, sx + 1, sy).Left,
+            "adjacent small block visuals have no crack or overlap");
+    }
+    var wholeVisual = CampaignTerrainEdits.BlockDrawBounds(7, 9, -1, -1);
+    Check(wholeVisual.Width == 16 && CampaignTerrainEdits.BlockDrawBounds(7, 9, 0, 0).Left == wholeVisual.Left
+        && CampaignTerrainEdits.BlockDrawBounds(7, 9, 2, 2).Right == wholeVisual.Right,
+        "three ordinary blocks occupy the same native visual width as one campaign block");
+    Check(CampaignTerrainEdits.CellAllowsSmallBlock(0, false), "small blocks allowed in original empty cells");
+    Check(!CampaignTerrainEdits.CellAllowsSmallBlock(0x41, false), "original solid cell must be mined before small placement");
+    Check(CampaignTerrainEdits.CellAllowsSmallBlock(0x50, true), "mined slope cell can accept small blocks");
     // Load/save actual production metadata with two stages, then verify new-game cleanup.
     string metadata = Path.Combine(temporary, CampaignTerrainEdits.FileName);
     File.WriteAllText(metadata, "[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0},{\"Stage\":4,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]");
     CampaignTerrainEdits.ClearSession();
     typeof(CampaignTerrainEdits).GetMethod("EnsureLoaded", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, null);
-    typeof(CampaignTerrainEdits).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, null);
+    typeof(CampaignTerrainEdits).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, new object[] { false });
     using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
     {
         Check(data.RootElement.GetArrayLength() == 2, "same cell in different stages persisted independently");
         Check(data.RootElement[0].GetProperty("FrameX").GetInt32() == 18, "placed block source art retained");
     }
     Check(!File.Exists(metadata + ".tmp"), "atomic metadata write leaves no temporary file");
+    var dictionary = (System.Collections.IDictionary)typeof(CampaignTerrainEdits).GetField("blocks", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+    Check(dictionary.Values.Cast<object>().All(b => (int)b.GetType().GetProperty("SubX")!.GetValue(b)! == -1
+        && (int)b.GetType().GetProperty("SubY")!.GetValue(b)! == -1), "legacy metadata stays whole-cell after schema migration");
+    CampaignTerrainEdits.SyncPersistence(false);
+    dictionary.Clear(); // Represents mining saved placed blocks during a volatile session.
+    typeof(CampaignTerrainEdits).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, new object[] { false });
+    using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
+        Check(data.RootElement.GetArrayLength() == 2, "disabled persistence preserves saved metadata baseline");
+    CampaignTerrainEdits.ReloadSaved();
+    Check(dictionary.Count == 2, "retry restores saved metadata and discards volatile changes");
+    dictionary.Clear();
+    CampaignTerrainEdits.SyncPersistence(true);
+    Check(File.ReadAllText(metadata) == "[]", "enabling persistence saves current session changes");
+    File.WriteAllText(metadata, "[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]");
+    CampaignTerrainEdits.ReloadSaved();
+    CampaignTerrainEdits.SyncPersistence(false);
+    Check(new CampaignViewConfig().PersistentTerrainEdits, "terrain persistence defaults enabled");
     CampaignTerrainEdits.ClearNewGame();
     Check(File.ReadAllText(metadata) == "[]", "fresh campaign removes obsolete placed item metadata");
+    File.WriteAllText(metadata, "[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0,\"SubX\":0,\"SubY\":1},{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":0,\"Item\":2,\"Style\":0,\"FrameX\":0,\"FrameY\":0,\"SubX\":1,\"SubY\":1}]");
+    CampaignTerrainEdits.ReloadSaved();
+    Check(dictionary.Count == 2, "different small block item identities coexist in one native cell");
+    CampaignTerrainEdits.SyncPersistence(true);
+    using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
+        Check(data.RootElement[0].GetProperty("SubX").GetInt32() != data.RootElement[1].GetProperty("SubX").GetInt32(),
+            "small block subcell identities survive metadata round trip");
     CampaignBootstrap.ClearWorldMarker();
     Check(protection.CanPlace(ox, oy, TileID.Stone), "ordinary world placement preserved");
     bool damaged = false;

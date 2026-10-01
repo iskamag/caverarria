@@ -35,13 +35,86 @@ e.cave_free(executable,exe.length);
 const head=fs.readFileSync(path.join(dataRoot,'Head.tsc'));
 function cipher(data,sign){let middle=Math.floor(data.length/2),key=data[middle]||7;return Buffer.from(data.map((v,i)=>i===middle?v:(v+sign*key)&255));}
 put('/Head.tsc',cipher(Buffer.concat([cipher(head,-1),Buffer.from(
-    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<FAI0000<AM+0002:0000<END\r\n')]),1));
+    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<FAI0000<AM+0002:0000<END\r\n#9020\r\n<KEY<MSGSkip this dialogue through the ordinary replay controller.<NOD<FL+7999<END\r\n#9021\r\n<KEY<ML+0003<END\r\n#9022\r\n<END\r\n')]),1));
 e.cave_set_time(1790800000n);
 const empty=string('');let handle=e.cave_create(empty,empty,320,240);
 assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
 function command(request){const text=JSON.stringify(request),p=string(text);const response=JSON.parse(read(e.cave_command(handle,p)));e.cave_free(p,encode.encode(text+'\0').length);assert.ok(response.ok,JSON.stringify(response));return response;}
 let initial=command({op:'snapshot'});
 assert.equal(95,initial.stages.length);assert.equal(60,initial.timing_hz);assert.equal(3,initial.render_layers);
+if(process.env.CAVERARRIA_INPUT_TEST){
+    const egg=initial.stages.findIndex(s=>s.map==='EggX');assert.ok(egg>=0);
+    const script=cipher(fs.readFileSync(path.join(dataRoot,'Stage/EggX.tsc')),-1).toString('latin1');
+    assert.match(script,/#0300\s+<KEY<MSG<TURSky Dragon Egg No\. 00[\s\S]*?Input Password:<NOD<END/);
+    command({op:'warp',stage:egg,x:64,y:64});command({op:'event',event:300});
+    let tick;let waits=0;
+    for(let i=0;i<180;i++){
+        tick=command({op:'tick',controls:i%2?64|2048:0});
+        if(tick.script.startsWith('WaitInput'))waits++;
+        if(tick.script==='Ended')break;
+    }
+    assert.equal('Ended',tick.script);assert.equal(true,tick.control_enabled);assert.equal(egg,tick.stage.id);
+    assert.ok(waits>0,'original password prompt never waited for acknowledgment');
+    command({op:'warp',stage:0,x:64,y:64});command({op:'event',event:9020});
+    for(let i=0;i<90;i++)tick=command({op:'tick',controls:0});
+    assert.equal(false,tick.flags.includes(7999),'unacknowledged dialogue advanced');
+    let skipped=0;
+    for(;skipped<100;skipped++){
+        tick=command({op:'tick',controls:4096});
+        if(tick.script==='Ended')break;
+    }
+    assert.equal('Ended',tick.script);assert.equal(true,tick.flags.includes(7999));assert.ok(skipped>=49);
+    const nativeMax=tick.player.max_life;
+    tick=command({op:'tick',controls:0,player:{max_life:65535,life:nativeMax}});
+    assert.equal(nativeMax,tick.player.max_life,'host effective HP contaminated native capsule maximum');
+    command({op:'event',event:9021});tick=command({op:'tick',controls:0});
+    assert.equal(nativeMax+3,tick.player.max_life,'native Life Capsule opcode stopped working');
+    e.cave_destroy(handle);
+    console.log(JSON.stringify({module:modulePath,egg_password_is_acknowledgment:true,original_event_ends:true,held_skip_ticks:skipped+1,host_maximum_ignored:true,native_capsule_grants:true}));
+    process.exit(0);
+}
+if(process.env.CAVERARRIA_MICRO_TERRAIN_TEST){
+    const room=initial.stage.id,width=initial.stage.width;
+    command({op:'event',event:9022});
+    command({op:'tick',controls:0});
+    const x=Math.min(8,width-3),y=Math.min(8,initial.stage.height-3),idx=y*width+x;
+    let state=initial;
+    const edit=(cx,cy,solid,extra={})=>{
+        const result=command({op:'terrain_edit',epoch:state.epoch,stage:room,x:cx,y:cy,solid,...extra});
+        assert.equal(true,result.terrain_edit_accepted);state=result;return result;
+    };
+    // Mine a genuine native neighborhood, leaving no authored collisions near probes.
+    for(let cy=y-1;cy<=y+1;cy++)for(let cx=x-1;cx<=x+1;cx++)edit(cx,cy,false);
+    state=edit(x,y,true,{sub_x:0,sub_y:0});
+    assert.equal(0,state.map.cell_attributes[idx],'single subtile became a whole native wall');
+    assert.equal(1,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask);
+    const left=x*16-8,top=y*16-8;
+    const occupied=command({op:'tile_hit',x:left+2,y:top+2,width:1,height:1});
+    const empty=command({op:'tile_hit',x:left+8,y:top+2,width:1,height:1});
+    assert.ok(occupied.tile_hit_flags&512,'native bullet missed occupied subtile');
+    assert.equal(0,empty.tile_hit_flags&512,'native bullet hit unoccupied part of cell');
+    const floor=command({op:'tick',controls:0,player:{x:left+2,y:top-0.5,vx:0,vy:1,width:2,height:2}});
+    assert.ok(Math.abs(floor.player.y-(top-1))<1/512,'native player did not land on actual subtile top: '+JSON.stringify({player:floor.player,top}));
+    assert.ok(floor.player.flags&8,'native player did not report floor contact');
+    const clear=command({op:'tick',controls:0,player:{x:left+8,y:top-0.5,vx:0,vy:1,width:2,height:2}});
+    assert.ok(Math.abs(clear.player.y-(top-0.5))<1/512,'empty neighboring subtile displaced player');
+    command({op:'save'});e.cave_destroy(handle);
+    const name=string('');handle=e.cave_create(name,name,320,240);e.cave_free(name,1);
+    assert.ok(handle,read(e.cave_last_error()));state=command({op:'snapshot'});
+    assert.equal(1,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask);
+    edit(x,y,true,{sub_x:2,sub_y:2});
+    state=edit(x,y,false,{sub_x:0,sub_y:0});
+    assert.equal(256,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask,'subtile removal erased its neighbor');
+    // Legacy bool persistence migrates exactly, without changing authored indices.
+    command({op:'save'});e.cave_destroy(handle);
+    put('/Terrain.json',Buffer.from(JSON.stringify({[room]:{[idx]:true,[idx+1]:false}})),1);
+    const legacy=string('');handle=e.cave_create(legacy,legacy,320,240);e.cave_free(legacy,1);
+    state=command({op:'snapshot'});assert.equal(511,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask);
+    assert.equal(0x41,state.map.cell_attributes[idx]);assert.equal(0,state.map.cell_attributes[idx+1]);
+    e.cave_destroy(handle);
+    console.log(JSON.stringify({module:modulePath,micro_cell:{room,x,y},partial_collision:true,native_bullet_precise:true,native_player_precise:true,persistence:true,independent_removal:true,legacy_bool_migration:true}));
+    process.exit(0);
+}
 if(process.env.CAVERARRIA_TERRAIN_TEST){
     const room=initial.stage.id,width=initial.stage.width;
     const idx=initial.map.cell_attributes.findIndex(a=>a===0x41);
@@ -68,10 +141,26 @@ if(process.env.CAVERARRIA_TERRAIN_TEST){
     assert.ok(handle,read(e.cave_last_error()));
     let recreated=command({op:'snapshot'});
     assert.equal(room,recreated.stage.id);assert.equal(0,recreated.map.cell_attributes[idx]);
+    assert.equal(false,command({op:'terrain_persistence',enabled:false}).terrain_persistent);
+    const beforePolicy=string('/Terrain.json');
+    const persisted=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(beforePolicy,1),e.cave_fs_len(beforePolicy,1)));
+    placed=edit(recreated,true);assert.equal(0x41,placed.map.cell_attributes[idx]);
+    const volatileBytes=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(beforePolicy,1),e.cave_fs_len(beforePolicy,1)));
+    assert.deepEqual(persisted,volatileBytes,'disabled edit modified persistent terrain');
+    command({op:'warp',stage:(room+1)%95});returned=command({op:'warp',stage:room});
+    assert.equal(0x41,returned.map.cell_attributes[idx]);
+    retried=command({op:'retry'});assert.equal(0,retried.map.cell_attributes[idx]);
+    placed=edit(retried,true);
+    assert.equal(true,command({op:'terrain_persistence',enabled:true}).terrain_persistent);
+    e.cave_destroy(handle);
+    const again=string('');handle=e.cave_create(again,again,320,240);e.cave_free(again,1);
+    assert.ok(handle,read(e.cave_last_error()));
+    assert.equal(0x41,command({op:'snapshot'}).map.cell_attributes[idx],'enabling persistence failed to save current edits');
+    e.cave_free(beforePolicy,encode.encode('/Terrain.json\0').length);
     let fresh=command({op:'new'});
     assert.equal(0,fresh.map.terrain_edits.length);
     e.cave_destroy(handle);
-    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,placement:true,reject_stale:true,reject_bounds:true,room_transfer:true,retry:true,recreate:true,new_clears:true}));
+    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,placement:true,reject_stale:true,reject_bounds:true,room_transfer:true,retry:true,recreate:true,new_clears:true,volatile_room_transfer:true,volatile_retry_restores:true,reenable_saves:true}));
     process.exit(0);
 }
 if(process.env.CAVERARRIA_SILENT_AUDIO_TEST){

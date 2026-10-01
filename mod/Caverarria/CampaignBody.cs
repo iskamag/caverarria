@@ -50,6 +50,21 @@ public sealed class CampaignBody : ModSystem
         SetSize(player, size.X, size.Y);
     }
 
+    internal static Vector2 ClearPlacement(Vector2 position, int width, int height, Func<Vector2, int, int, bool> overlaps)
+    {
+        if (!overlaps(position, width, height)) return position;
+        // Authored Quote door coordinates can put the enlarged host's feet
+        // inside the projected floor. Find the nearest clearance directly above;
+        // do not move sideways into another door or search across the room.
+        int limit = height + (int)(16 * CampaignRuntime.Scale);
+        for (int rise = 1; rise <= limit; rise++)
+        {
+            Vector2 candidate = position - new Vector2(0, rise);
+            if (!overlaps(candidate, width, height)) return candidate;
+        }
+        return position;
+    }
+
     public override void Load()
     {
         if (Main.dedServ) return;

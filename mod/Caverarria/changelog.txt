@@ -1,3 +1,11 @@
+0.1.2
+- Clear enlarged avatar overlap after authored door transfers.
+- Keep Cave Story health capacity authoritative to prevent capsule feedback.
+- Configurable cutscene skip key (X by default).
+- Optional persistence for mining, blocks and furniture.
+- Optional Terraria-sized blocks with native enemy/bullet collision.
+- Ordinary non-solid furniture placement and use, including Slice of Cake.
+
 0.1.1 — pixel grid, physical avatar scaling and editable terrain.
 Avatar collision, weapon origins and melee reach scale with its body. Host world actors share the campaign pixel grid.
 Pickaxe mining and ordinary solid-block placement edit live guest terrain, with per-world persistence across transfers and retries.

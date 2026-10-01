@@ -39,12 +39,14 @@ internal static class CampaignRuntime
     private static bool SeparateInterface => Snapshot.Integer("render_layers", 2) >= 3;
     private static bool imageDirty;
     private static float musicVolume = float.NaN, soundVolume = float.NaN;
+    private static bool? terrainPersistence;
     private static CampaignAudio? audio;
     public static bool HostAudioPlaying => audio?.Playing == true;
     public static long HostAudioFrames => audio?.SubmittedFrames ?? 0;
     public static int HostAudioBuffers => audio?.PendingBuffers ?? 0;
     private static int projectedWidth, projectedHeight;
     private static int previousEpoch;
+    private static bool pendingPlacementClearance;
     private static bool nativeDeathPending;
     private static readonly Queue<(int id, int epoch, ulong generation, bool boss, int damage)> hits = new();
     private static readonly Dictionary<(int id, bool boss), int> proxySlots = new();
@@ -76,7 +78,8 @@ internal static class CampaignRuntime
             pixels = new byte[width * height * 4];
             bool fresh = !loadProfile || Environment.GetEnvironmentVariable("CAVERARRIA_LOAD") == "0";
             Snapshot = Engine.Send(new { op = fresh ? "new" : load ? "load" : "snapshot" });
-            if (fresh) CampaignTerrainEdits.ClearNewGame();
+            if (fresh) { CampaignTerrainEdits.ClearNewGame(); CampaignFurniture.ClearNewGame(); }
+            SyncTerrainPersistence();
             if (Environment.GetEnvironmentVariable("CAVERARRIA_AUDIO") == "0")
                 Snapshot = Engine.Send(new { op = "audio", enabled = false });
             var nativePlayer = Snapshot.Field("player");
@@ -107,6 +110,7 @@ internal static class CampaignRuntime
         {
             SyncViewport();
             SyncAudio();
+            SyncTerrainPersistence();
             if (pendingStoryItem > 0)
             {
                 int id = pendingStoryItem; pendingStoryItem = 0;
@@ -119,7 +123,7 @@ internal static class CampaignRuntime
                 Snapshot = Engine!.Send(new { op = "hit", id = hit.id, epoch = hit.epoch, generation = hit.generation, boss = hit.boss, damage = hit.damage });
             Player player = Main.LocalPlayer;
             Vector2 p = ToCave(player.Center), velocity = player.velocity / Scale;
-            int life = Math.Max(0, (player.statLife + 9) / 10), maxLife = Math.Max(1, player.statLifeMax2 / 10);
+            var (life, maxLife) = CaptureCampaignHealth(player);
             int controls = rawControls;
             var gun = player.HeldItem.ModItem as CaveGun;
             int nativeWeapon = Snapshot.Text("script_mode", "Map") == "Map" ? gun?.NativeType ?? 0 : 0;
@@ -128,7 +132,8 @@ internal static class CampaignRuntime
             bool interact = Automation.Holding && Automation.Input.Interact || CaverarriaMod.Interact.Current && ControlsEnabled;
             bool confirm = Automation.Holding && Automation.Input.Confirm || CaverarriaMod.Interact.Current && !ControlsEnabled;
             if (interact) controls |= 8;
-            if (confirm) controls |= 64 | 2048 | 4096;
+            if (confirm) controls |= 64 | 2048;
+            if (CaverarriaMod.SkipCutscene.Current) controls |= 4096;
             bool inventory = Automation.Holding && Automation.Input.Inventory || CaverarriaMod.Inventory.Current;
             if (Snapshot.Text("script_mode", "Map") == "Inventory")
             {
@@ -170,6 +175,16 @@ internal static class CampaignRuntime
         catch (Exception exception) { RecordFailure(exception); }
     }
 
+    internal static (int life, int maximum) CaptureCampaignHealth(Player player)
+    {
+        // Native scripts own capacity. ResetEffects and player-file saves can
+        // briefly expose outside HP; feeding that back grants fake capsules.
+        int maximum = Math.Max(1, Snapshot.Field("player").Integer("max_life", 3));
+        player.statLifeMax2 = maximum * 10;
+        player.statLife = Math.Min(player.statLife, player.statLifeMax2);
+        return (Math.Clamp((player.statLife + 9) / 10, 0, maximum), maximum);
+    }
+
     private static void ObserveNativeDeath()
     {
         // Drowning and the Core rescue hide an alive player. Only an actual native
@@ -205,6 +220,16 @@ internal static class CampaignRuntime
             Main.LocalPlayer.Center = ToWorld(p.Number("x"), p.Number("y"));
             Main.LocalPlayer.fallStart = (int)(Main.LocalPlayer.position.Y / 16);
             Main.LocalPlayer.fallStart2 = Main.LocalPlayer.fallStart;
+            pendingPlacementClearance = true;
+        }
+        if (pendingPlacementClearance && ControlsEnabled && !p.Boolean("ironhead")
+            && Snapshot.Text("scene") == "game" && p.Boolean("alive", true))
+        {
+            Player player = Main.LocalPlayer;
+            player.position = CampaignBody.ClearPlacement(player.position, player.width, player.height,
+                (position, width, height) => Collision.SolidCollision(position, width, height));
+            player.fallStart = player.fallStart2 = (int)(player.position.Y / 16);
+            pendingPlacementClearance = false;
         }
         if (initial || p.Boolean("force_velocity") || !ControlsEnabled || p.Boolean("ironhead"))
             Main.LocalPlayer.velocity = new Vector2(p.Number("vx"), p.Number("vy")) * Scale;
@@ -307,6 +332,8 @@ internal static class CampaignRuntime
         for (int y = 0; y < Math.Max(height, projectedHeight) * 3 + 3; y++)
             for (int x = 0; x < Math.Max(width, projectedWidth) * 3 + 3; x++)
                 Main.tile[OriginTileX + x, OriginTileY + y].ClearEverything();
+        var editMasks = map.Field("terrain_edits").Elements().ToDictionary(edit => (edit.Integer("x"), edit.Integer("y")),
+            edit => edit.Integer("mask", edit.Boolean("solid") ? 511 : 0));
         ushort tileType = (ushort)ModContent.TileType<CampaignSolid>();
         for (int y = 0; y < height; y++) for (int x = 0; x < width; x++)
         {
@@ -325,11 +352,13 @@ internal static class CampaignRuntime
                     float boundary = slope switch { 0x50 => 1 - cx / 2, 0x51 => .5f - cx / 2, 0x52 => cx / 2, 0x53 => .5f + cx / 2, 0x54 => cx / 2, 0x55 => .5f + cx / 2, 0x56 => 1 - cx / 2, _ => .5f - cx / 2 };
                     solid = slope < 0x54 ? cy < boundary : cy > boundary;
                 }
+                if (editMasks.TryGetValue((x, y), out int mask)) solid = CampaignTerrainEdits.MaskHasTile(mask, sx, sy);
                 if (solid) { tile.HasTile = true; tile.TileType = tileType; }
             }
         }
         projectedWidth = width; projectedHeight = height;
         CampaignTerrainEdits.ProjectPlacedTiles(stage.Integer("id"));
+        CampaignFurniture.Project(stage.Integer("id"));
     }
 
     private static void ProjectPendingMap()
@@ -339,10 +368,10 @@ internal static class CampaignRuntime
         pendingMap = default;
     }
 
-    public static bool EditTerrain(int x, int y, bool solid)
+    public static bool EditTerrain(int x, int y, bool solid, int subX = -1, int subY = -1)
     {
         if (!Active || !ControlsEnabled || Main.LocalPlayer.dead || Snapshot.Text("scene") != "game") return false;
-        Snapshot = Engine!.Send(new { op = "terrain_edit", epoch = Snapshot.Integer("epoch"), stage = Snapshot.Field("stage").Integer("id"), x, y, solid });
+        Snapshot = Engine!.Send(new { op = "terrain_edit", epoch = Snapshot.Integer("epoch"), stage = Snapshot.Field("stage").Integer("id"), x, y, solid, sub_x = subX >= 0 ? (int?)subX : null, sub_y = subY >= 0 ? (int?)subY : null });
         bool accepted = Snapshot.Boolean("terrain_edit_accepted");
         // A synchronous mining hook must immediately update the real collision.
         ProjectPendingMap();
@@ -443,6 +472,16 @@ internal static class CampaignRuntime
         ReleaseImages();
         ApplySnapshot(false); imageDirty = true;
     }
+    private static void SyncTerrainPersistence()
+    {
+        bool enabled = ModContent.GetInstance<CampaignViewConfig>().PersistentTerrainEdits;
+        if (terrainPersistence == enabled) return;
+        Snapshot = Engine!.Send(new { op = "terrain_persistence", enabled });
+        CampaignTerrainEdits.SyncPersistence(enabled);
+        CampaignFurniture.SyncPersistence(enabled);
+        terrainPersistence = enabled;
+    }
+
     private static void SyncAudio()
     {
         if (!Active) return;
@@ -514,6 +553,7 @@ internal static class CampaignRuntime
     public static void Retry()
     {
         if (!Active) return;
+        if (terrainPersistence == false) { CampaignTerrainEdits.ReloadSaved(); CampaignFurniture.ReloadSaved(); }
         Snapshot = Engine!.Send(new { op = "retry" });
         ApplySnapshot(true, checkpointReload: true); imageDirty = true;
     }
@@ -561,6 +601,10 @@ internal static class CampaignRuntime
         var camera = Snapshot.Field("camera");
         CampaignTerrainEdits.Draw(Main.spriteBatch, new Vector2(camera.Number("x"), camera.Number("y")));
         Main.spriteBatch.End();
+        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+            DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        try { CampaignFurniture.Draw(Main.spriteBatch); }
+        finally { Main.spriteBatch.End(); }
     }
     public static bool DrawForeground()
     {
@@ -616,8 +660,9 @@ internal static class CampaignRuntime
             {
                 ReleaseImages();
                 CampaignActorPixels.DisposeTargets();
-                CampaignTerrainEdits.ClearSession();
+                CampaignTerrainEdits.ClearSession(); CampaignFurniture.ClearSession();
                 pixels = interfacePixels = null; Snapshot = default; CurrentMap = pendingMap = default;
+                pendingPlacementClearance = false; terrainPersistence = null;
                 foreach (var pair in proxySlots)
                 {
                     var npc = Main.npc[pair.Value];

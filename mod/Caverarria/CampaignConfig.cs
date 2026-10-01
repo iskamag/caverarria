@@ -30,7 +30,13 @@ public sealed class CampaignViewConfig : ModConfig
     [DefaultValue(1f), Range(0f, 1f), Increment(.05f)]
     public float CampaignSoundVolume = 1f;
 
-    [Header("Save"), JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(CampaignResetElement))]
+    [DefaultValue(false)]
+    public bool TerrariaSizedBlocks;
+
+    [Header("Save"), DefaultValue(true)]
+    public bool PersistentTerrainEdits = true;
+
+    [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(CampaignResetElement))]
     public bool ResetCurrentCampaign;
 }
 

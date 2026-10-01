@@ -49,6 +49,7 @@ public sealed class CaverarriaMod : Mod
     public static ModKeybind NextWeapon { get; private set; } = null!;
     public static ModKeybind PreviousWeapon { get; private set; } = null!;
     public static ModKeybind Retry { get; private set; } = null!;
+    public static ModKeybind SkipCutscene { get; private set; } = null!;
 
     public override void Load()
     {
@@ -61,6 +62,7 @@ public sealed class CaverarriaMod : Mod
         var audioUpdate = typeof(Main).GetMethod("UpdateAudio", BindingFlags.Instance | BindingFlags.NonPublic)!;
         audioUpdateHook = new Hook(audioUpdate, UpdateAudio);
         Retry = KeybindLoader.RegisterKeybind(this, "Retry", "R");
+        SkipCutscene = KeybindLoader.RegisterKeybind(this, "SkipCutscene", "X");
         Inventory = KeybindLoader.RegisterKeybind(this, "Inventory", "I");
         Map = KeybindLoader.RegisterKeybind(this, "Map", "M");
         NextWeapon = KeybindLoader.RegisterKeybind(this, "NextWeapon", "V");
@@ -75,7 +77,7 @@ public sealed class CaverarriaMod : Mod
         menuUpdateHook = null;
         CampaignRuntime.Dispose();
         Interact = null!;
-        Retry = Inventory = Map = NextWeapon = PreviousWeapon = null!;
+        Retry = SkipCutscene = Inventory = Map = NextWeapon = PreviousWeapon = null!;
     }
 }
 

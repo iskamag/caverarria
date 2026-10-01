@@ -140,8 +140,8 @@ SHA256 manifests, with no downloaded game data or personal saves.
 ## Credits
 
 - Cave Story by Studio Pixel; English freeware translation by Aeon Genesis.
-- Icon artwork: original Cave Story sprites by Studio Pixel and Terraria's Guide
-  by Re-Logic, composed on a shared pixel grid.
+- Icon artwork: Cave Story's Quote, cave and Polar Star by Studio Pixel;
+  Terraria's Guide and Terra Blade by Re-Logic, composed on a shared pixel grid.
 - [doukutsu-rs](https://github.com/doukutsu-rs/doukutsu-rs): campaign runtime.
 - [tModLoader](https://github.com/tModLoader/tModLoader): Terraria mod host.
 - [WebAssembly for .NET](https://github.com/RyanLamansky/dotnet-webassembly): managed

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,18 +7,8 @@ using Terraria.DataStructures;
 using Terraria.Graphics;
 using Terraria.Graphics.Renderers;
 using Terraria.ModLoader;
-using Terraria.ModLoader.Config;
 
 namespace Caverarria;
-
-public sealed class CampaignViewConfig : ModConfig
-{
-    public override ConfigScope Mode => ConfigScope.ClientSide;
-    [DefaultValue(4), Range(2, 6)]
-    public int CameraPixelScale = 4;
-    [DefaultValue(1.5f), Range(1f, 2f), Increment(.25f)]
-    public float PlayerVisualScale = 1.5f;
-}
 
 public sealed class CampaignView : ModSystem
 {

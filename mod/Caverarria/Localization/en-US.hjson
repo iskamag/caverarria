@@ -11,7 +11,33 @@ Mods: {
 
 		Configs: {
 			CampaignViewConfig: {
-				DisplayName: Campaign camera and appearance
+				DisplayName: Caverarria
+
+				Headers: {
+					View: Camera and appearance
+					Audio: Campaign audio
+					Save: Campaign save
+				}
+
+				MuteCampaignAudio: {
+					Label: Mute Cave Story audio
+					Tooltip: Mutes only Cave Story music and sound effects. Terraria's volume settings remain unchanged.
+				}
+
+				CampaignMusicVolume: {
+					Label: Cave Story music volume
+					Tooltip: Multiplies Terraria's music volume while in a Cave Story world.
+				}
+
+				CampaignSoundVolume: {
+					Label: Cave Story sound effect volume
+					Tooltip: Multiplies Terraria's sound volume for original Cave Story effects. Terraria weapon sounds follow Terraria's settings.
+				}
+
+				ResetCurrentCampaign: {
+					Label: Reset this world's Cave Story save
+					Tooltip: Restarts this world's campaign and backs up its checkpoint. Requires confirmation in a running Cave Story world.
+				}
 
 				CameraPixelScale: {
 					Label: Camera base pixel scale
@@ -23,6 +49,22 @@ Mods: {
 					Tooltip: Enlarges your character's appearance while keeping movement and collision unchanged.
 				}
 			}
+		}
+
+		ConfigReset: {
+			Title: Reset this world's Cave Story save
+			Description: Start this world's campaign over. The old checkpoint is backed up; permanent Life Capsule upgrades stay with your character.
+			Confirmation: Reset this world's story, weapons and items? Other worlds and your Terraria character's permanent health are preserved.
+			Unavailable: Enter a Cave Story world to reset its campaign. This action affects only the world you are playing.
+			Reset: Reset campaign...
+			Confirm: Confirm reset
+			Cancel: Cancel
+			Resetting: Resetting campaign...
+			Complete: Campaign restarted. The old checkpoint was backed up beside Profile.dat.
+			FreshComplete: Campaign restarted. There was no saved checkpoint to back up.
+			StartFailed: Checkpoint backed up. Campaign startup failed; leave and re-enter the world to try again.
+			Cancelled: Reset cancelled because the current world changed.
+			Failed: Reset failed. Your checkpoint or its backup was preserved; see the mod log for details.
 		}
 
 		Items: {

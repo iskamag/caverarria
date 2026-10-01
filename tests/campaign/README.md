@@ -224,3 +224,22 @@ gap between valid center positions is about 118.7 Cave Story pixels. Prove it
 through held jump and directional input in the live client. Geometric clearance
 alone does not establish the necessary airtime; the original engine reduces
 gravity while jump is held.
+
+## Silent audio verification
+
+Every `scripts/run.py --headless` client routes SDL audio to its dummy device,
+including tests without `--audio`. With `--audio`, the guest mixer and actual
+FNA/FAudio output still run, while the desktop speakers receive no test audio.
+This is a child-process environment setting; it does not mute applications or
+change the system audio device. Ordinary interactive launches retain their audio
+route.
+
+For a private recording of the client's mixed FAudio output, use a new output
+file with `--headless --audio --audio-output artifacts/audio-check/mixed.raw`.
+The launcher selects SDL's disk driver and `SDL_DISKAUDIOFILE`; both are present
+in the installed Linux SDL library. Capture includes host music/effects and the
+campaign stream. SDL writes headerless PCM in the negotiated output format, so
+record the actual device format before interpreting samples. The file can grow
+quickly; stop the isolated client after the bounded check. The launcher rejects
+an existing output path to preserve earlier evidence. These flags affect only
+the isolated test process and do not change ordinary Steam play.

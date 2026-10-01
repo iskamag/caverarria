@@ -67,26 +67,29 @@ index a634459..536ca38 100644
 
  /// A RGBA color in the `sRGB` color space represented as `f32`'s in the range `[0.0-1.0]`
 diff --git a/src/components/hud.rs b/src/components/hud.rs
-index e167bc3..cd0edec 100644
+index e167bc3..6cec8ff 100644
 --- a/src/components/hud.rs
 +++ b/src/components/hud.rs
-@@ -15,6 +15,7 @@ pub struct HUD {
+@@ -15,6 +15,9 @@ pub struct HUD {
      pub weapon_x_pos: usize,
      pub visible: bool,
      pub has_player2: bool,
++    /// Host inventory temporarily covers the native weapon progress display.
++    pub hide_weapon_progress: bool,
 +    external_player: bool,
      ammo: u16,
      max_ammo: u16,
      xp: u16,
-@@ -41,6 +42,7 @@ impl HUD {
+@@ -41,6 +44,8 @@ impl HUD {
              weapon_x_pos: 16,
              visible: false,
              has_player2: false,
++            hide_weapon_progress: false,
 +            external_player: false,
              ammo: 0,
              max_ammo: 0,
              xp: 0,
-@@ -64,6 +66,7 @@ impl HUD {
+@@ -64,6 +69,7 @@ impl HUD {
 
  impl GameEntity<(&Player, &mut Inventory)> for HUD {
      fn tick(&mut self, state: &mut SharedGameState, (player, inventory): (&Player, &mut Inventory)) -> GameResult {
@@ -94,7 +97,7 @@ index e167bc3..cd0edec 100644
          let (ammo, max_ammo) = inventory.get_current_ammo();
          let (xp, max_xp, max_level) = inventory.get_current_max_exp(&state.constants);
 
-@@ -203,14 +206,17 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -203,14 +209,17 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
              0.0
          };
 
@@ -107,7 +110,7 @@ index e167bc3..cd0edec 100644
 -        if !self.shock {
 -            // per
 -            batch.add_rect(bar_offset + weap_x + 32.0, 24.0 + top, &Rect::new_size(72, 48, 8, 8));
-+        if !self.shock && (!self.external_player || self.weapon_count != 0) {
++        if !self.shock && (!self.external_player || (self.weapon_count != 0 && !self.hide_weapon_progress)) {
 +            // Terraria owns health/ammo presentation, but native weapon level
 +            // and experience still belong to the original campaign.
 +            if !self.external_player {
@@ -116,7 +119,7 @@ index e167bc3..cd0edec 100644
              // lv
              batch.add_rect(num_offset + weap_x, 32.0 + top, &Rect::new_size(80, 80, 16, 8));
              // xp box
-@@ -229,7 +235,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -229,7 +238,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
                  batch.add_rect(bar_offset + weap_x + 24.0, 32.0 + top, &Rect::new_size(40, 80, 40, 8));
              }
 
@@ -125,7 +128,7 @@ index e167bc3..cd0edec 100644
                  let yellow_bar_width = (self.life_bar as f32 / self.max_life as f32 * 39.0) as u16;
                  let bar_width = (self.life as f32 / self.max_life as f32 * 39.0) as u16;
 
-@@ -257,7 +263,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -257,7 +266,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
          batch.draw(ctx)?;
          let batch = state.texture_set.get_or_load_batch(ctx, &state.constants, "ArmsImage")?;
 
@@ -134,7 +137,7 @@ index e167bc3..cd0edec 100644
              let mut rect = Rect::new(0, 0, 0, 16);
 
              // First frame of animation is off by one weapon
-@@ -311,13 +317,15 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -311,13 +320,15 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
              )?;
          }
 
@@ -144,7 +147,7 @@ index e167bc3..cd0edec 100644
              draw_number(bar_offset + weap_x + 64.0, 24.0 + top, self.max_ammo as usize, Alignment::Right, state, ctx)?;
          }
 -        if !self.shock {
-+        if !self.shock && (!self.external_player || self.weapon_count != 0) {
++        if !self.shock && (!self.external_player || (self.weapon_count != 0 && !self.hide_weapon_progress)) {
              draw_number(num_offset + weap_x + 24.0, 32.0 + top, self.current_level, Alignment::Right, state, ctx)?;
 -            draw_number(num_offset + 40.0, 40.0 + top, self.life_bar as usize, Alignment::Right, state, ctx)?;
 +            if !self.external_player {

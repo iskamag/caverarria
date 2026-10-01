@@ -42,6 +42,15 @@ that checkpoint, or starts a new game if none exists. Your Terraria character
 continues to use its ordinary `.plr`/`.tplr` files; permanent capsule upgrades
 are recorded there. Campaign and character saves are separate files.
 
+Open **Settings → Mod Configuration → Caverarria** to adjust camera/avatar
+size and separate Cave Story music/effect volumes, or mute just the campaign.
+While playing a Cave Story world, **Reset campaign... → Confirm reset** starts
+that world's campaign over. It moves the old `Profile.dat` to a timestamped
+`.bak` beside it before starting fresh. Story progress, story items and weapons
+restart; permanent Life Capsule health stays on your character. Other worlds'
+checkpoints are untouched. Reset is unavailable from the main menu or a normal
+Terraria world.
+
 ## Alpha scope
 
 Linux checks cover normal world entry with a selected character, preservation

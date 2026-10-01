@@ -44,7 +44,7 @@ internal static class CampaignRuntime
     private static readonly Queue<object> terrainHits = new();
     private static readonly HashSet<int> weaponIds = new();
 
-    public static void Start()
+    public static void Start(bool loadProfile = true)
     {
         if (Engine != null || !CampaignBootstrap.IsCampaignWorld || Main.dedServ) return;
         if (!CampaignDataInstaller.EnsureReady()) return;
@@ -52,7 +52,7 @@ internal static class CampaignRuntime
         {
             string data = Environment.GetEnvironmentVariable("CAVERARRIA_DATA") ?? Path.Combine(CampaignBootstrap.AssetsPath, "data");
             string save = CampaignBootstrap.SavePath;
-            bool load = CampaignBootstrap.WantsLoad;
+            bool load = loadProfile && CampaignBootstrap.WantsLoad;
             int width = CampaignView.ViewportWidth, height = CampaignView.ViewportHeight;
             string? wasmPath = Environment.GetEnvironmentVariable("CAVERARRIA_WASM");
             byte[] module = wasmPath != null ? File.ReadAllBytes(wasmPath)
@@ -62,7 +62,7 @@ internal static class CampaignRuntime
             Main.mapEnabled = false;
             Main.mapFullscreen = false;
             pixels = new byte[width * height * 4];
-            Snapshot = Engine.Send(new { op = Environment.GetEnvironmentVariable("CAVERARRIA_LOAD") == "0" ? "new" : load ? "load" : "snapshot" });
+            Snapshot = Engine.Send(new { op = !loadProfile || Environment.GetEnvironmentVariable("CAVERARRIA_LOAD") == "0" ? "new" : load ? "load" : "snapshot" });
             if (Environment.GetEnvironmentVariable("CAVERARRIA_AUDIO") == "0")
                 Snapshot = Engine.Send(new { op = "audio", enabled = false });
             var nativePlayer = Snapshot.Field("player");
@@ -136,7 +136,7 @@ internal static class CampaignRuntime
             long tickStarted = FramePerformance.Begin();
             Snapshot = Engine!.Send(new
             {
-                op = "tick", controls, weapon = nativeWeapon, external = true,
+                op = "tick", controls, weapon = nativeWeapon, external = true, host_inventory_open = Main.playerInventory,
                 player = new { x = p.X, y = p.Y, vx = velocity.X, vy = velocity.Y, width = player.width / Scale, height = player.height / Scale, direction = player.direction, life, max_life = maxLife, grounded = player.velocity.Y == 0, jump_started = player.justJumped, wet = player.wet }
             });
             FramePerformance.End("engine", tickStarted);
@@ -412,8 +412,12 @@ internal static class CampaignRuntime
     }
     private static void SyncAudio()
     {
-        if (!Active || musicVolume == Main.musicVolume && soundVolume == Main.soundVolume) return;
-        musicVolume = Main.musicVolume; soundVolume = Main.soundVolume;
+        if (!Active) return;
+        var config = ModContent.GetInstance<CampaignViewConfig>();
+        float music = config.MuteCampaignAudio ? 0 : Main.musicVolume * Math.Clamp(config.CampaignMusicVolume, 0f, 1f);
+        float sound = config.MuteCampaignAudio ? 0 : Main.soundVolume * Math.Clamp(config.CampaignSoundVolume, 0f, 1f);
+        if (musicVolume == music && soundVolume == sound) return;
+        musicVolume = music; soundVolume = sound;
         Snapshot = Engine!.Send(new { op = "audio", music_volume = musicVolume, sfx_volume = soundVolume });
         ApplySnapshot(false);
     }

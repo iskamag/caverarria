@@ -35,18 +35,43 @@ def find_tml() -> Path:
     raise SystemExit("tModLoader not found; set TMODLOADER_PATH to its installation directory.")
 
 
+
+def audio_test_environment(env: dict[str, str], headless: bool, output: Path | None = None) -> dict[str, str]:
+    """Route isolated graphical tests to a private SDL output, never the desktop."""
+    if output is not None and not headless:
+        raise ValueError("--audio-output requires --headless")
+    result = env.copy()
+    if headless:
+        result["SDL_AUDIODRIVER"] = "disk" if output is not None else "dummy"
+        # Do not inherit a previous capture's filename or a desktop ALSA device.
+        result.pop("SDL_DISKAUDIOFILE", None)
+        result.pop("SDL_DISKAUDIOFILEIN", None)
+        result.pop("CAVERARRIA_AUDIO_DEVICE", None)
+        if output is not None:
+            result["SDL_DISKAUDIOFILE"] = str(output.resolve())
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", type=Path, default=ROOT / "runtime/profile")
     parser.add_argument("--test-dir", type=Path, help="Enable file-based real-player input automation")
     parser.add_argument("--headless", action="store_true", help="Run the actual graphical client under Xvfb")
-    parser.add_argument("--audio", action="store_true", help="Enable Cave Story audio during a headless test")
+    parser.add_argument("--audio", action="store_true", help="Exercise Cave Story audio in a silent headless test")
+    parser.add_argument("--audio-output", type=Path, help="With --headless --audio, capture SDL mixed audio as raw PCM")
     parser.add_argument("--no-autostart", action="store_true", help="Show the normal tModLoader menu")
     campaign = parser.add_mutually_exclusive_group()
     campaign.add_argument("--load", action="store_true", help="Resume the saved campaign and Terraria character")
     campaign.add_argument("--new-game", action="store_true", help="Start a new campaign instead of resuming")
     parser.add_argument("--log", type=Path, help="Capture launcher stdout/stderr")
     args, extra = parser.parse_known_args()
+    if args.audio_output is not None and (not args.headless or not args.audio):
+        parser.error("--audio-output requires --headless --audio")
+    if args.audio_output is not None:
+        args.audio_output = args.audio_output.resolve()
+        if args.audio_output.exists():
+            parser.error("--audio-output must name a new file")
+        args.audio_output.parent.mkdir(parents=True, exist_ok=True)
     tml = find_tml()
     profile = args.profile.resolve()
     profile.mkdir(parents=True, exist_ok=True)
@@ -88,8 +113,9 @@ def main() -> None:
     # Select the working ALSA Pulse plugin where the desktop provides it. The
     # machine's default ALSA card may otherwise point at a missing device.
     pulse_socket = Path(env.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "pulse/native"
-    if pulse_socket.exists():
+    if not args.headless and pulse_socket.exists():
         env.setdefault("CAVERARRIA_AUDIO_DEVICE", "pulse")
+    env = audio_test_environment(env, args.headless, args.audio_output)
     if args.test_dir:
         test_dir = args.test_dir.resolve()
         test_dir.mkdir(parents=True, exist_ok=True)

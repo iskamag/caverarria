@@ -35,7 +35,7 @@ e.cave_free(executable,exe.length);
 const head=fs.readFileSync(path.join(dataRoot,'Head.tsc'));
 function cipher(data,sign){let middle=Math.floor(data.length/2),key=data[middle]||7;return Buffer.from(data.map((v,i)=>i===middle?v:(v+sign*key)&255));}
 put('/Head.tsc',cipher(Buffer.concat([cipher(head,-1),Buffer.from(
-    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<AM+0002:0000<END\r\n')]),1));
+    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<FAI0000<AM+0002:0000<END\r\n')]),1));
 e.cave_set_time(1790800000n);
 const empty=string('');let handle=e.cave_create(empty,empty,320,240);
 assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
@@ -114,20 +114,31 @@ if(process.env.CAVERARRIA_UI_VIEWPORT_TEST){
     const xpPointer=e.cave_pixels(handle,2),xpRgba=new Uint8Array(e.memory.buffer,xpPointer,320*240*4);
     for(let y=32;y<40;y++)for(let x=0;x<80;x++)xpAlpha+=xpRgba[(y*320+x)*4+3];
     assert.ok(xpAlpha>0,'host-controlled avatar lost original native weapon LV/XP bar');
+    const progressAlpha=()=>{
+        const pixels=new Uint8Array(e.memory.buffer,e.cave_pixels(handle,2),320*240*4);
+        let sum=0;
+        for(let y=32;y<40;y++)for(let x=0;x<80;x++)sum+=pixels[(y*320+x)*4+3];
+        return sum;
+    };
+    command({op:'tick',controls:0,host_inventory_open:true,player:{x:160,y:120,vx:0,vy:0}});
+    assert.equal(0,progressAlpha(),'weapon progress overlaps the open Terraria inventory');
+    command({op:'tick',controls:0,host_inventory_open:false,player:{x:160,y:120,vx:0,vy:0}});
+    assert.ok(progressAlpha()>0,'weapon progress did not return after closing inventory');
     command({op:'event',event:9015});
     let displayed;
-    for(let i=0;i<180;i++)displayed=command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    for(let i=0;i<180;i++)displayed=command({op:'tick',controls:0,host_inventory_open:true,player:{x:160,y:120,vx:0,vy:0}});
     assert.deepEqual(displayed.viewport,{width:160,height:120},'UI draw leaked its dimensions into world simulation');
     assert.deepEqual(displayed.ui_viewport,{width:320,height:240});
     const pointer=e.cave_pixels(handle,2),rgba=new Uint8Array(e.memory.buffer,pointer,320*240*4);
     let rightHalfAlpha=0;
     for(let y=120;y<240;y++)for(let x=160;x<320;x++)rightHalfAlpha+=rgba[(y*320+x)*4+3];
-    assert.ok(rightHalfAlpha>0,'dialogue right half was clipped to the zoomed world viewport');
+    assert.ok(rightHalfAlpha>0,'dialogue right half was clipped or hidden by the open inventory');
+    assert.equal(0,progressAlpha(),'dialogue should remain visible without the overlapping weapon progress');
     const large=command({op:'resize',width:426,height:300});
     assert.deepEqual(large.viewport,{width:426,height:300});
     assert.deepEqual(large.ui_viewport,{width:426,height:300});
     console.log(JSON.stringify({module:modulePath,world_viewport:displayed.viewport,ui_viewport:displayed.ui_viewport,
-        dialogue_right_half_alpha:rightHalfAlpha,weapon_xp_bar_alpha:xpAlpha,world_canvas_restored:true}));
+        dialogue_right_half_alpha:rightHalfAlpha,weapon_xp_bar_alpha:xpAlpha,inventory_hides_progress_only:true,world_canvas_restored:true}));
     e.cave_destroy(handle);process.exit(0);
 }
 for(let i=0;i<180;i++)command({op:'tick',controls:0,player:{x:160,y:128,vx:0,vy:0}});

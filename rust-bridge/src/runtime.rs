@@ -350,6 +350,7 @@ impl Runtime {
                 self.controller.state = KeyState(v["controls"].as_u64().unwrap_or(0) as u16);
                 let mut before = None;
                 if let Ok(game) = downcast::Downcast::<GameScene>::downcast_mut(&mut *self.scene) {
+                    game.hud_player1.hide_weapon_progress = v["host_inventory_open"].as_bool().unwrap_or(false);
                     game.player1.external_damage_pending = 0;
                     game.player1.external_jump_started = false;
                     game.player1.controller = Box::new(self.controller);

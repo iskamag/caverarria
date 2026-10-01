@@ -127,7 +127,7 @@ def collect(args) -> dict[str, bytes]:
     lock_path = ROOT / 'rust-bridge/Cargo.lock'
     lock = tomllib.loads(lock_path.read_text())
     checksums = {(p['name'], p['version'], p.get('source')): p.get('checksum') for p in lock['package']}
-    output: dict[str, bytes] = {}
+    output: dict[str, bytes] = {'LICENSE.txt': (ROOT / 'LICENSE').read_bytes()}
     inventory = []
     for package in selected:
         name, version = package['name'], package['version']
@@ -138,7 +138,8 @@ def collect(args) -> dict[str, bytes]:
                'repository': package.get('repository'), 'features': sorted(nodes[package['id']]['features']),
                'cargoPackageChecksum': checksums.get((name, version, package.get('source'))), 'licenseFiles': []}
         if name == 'caverarria-bridge':
-            row['exception'] = 'Project-owned integration code; no license grant selected. This inventory does not license that code.'
+            row['exception'] = 'Project-owned integration code; MIT license at LICENSE.txt.'
+            row['licenseFiles'] = [{'path': 'LICENSE.txt', 'bytes': len(output['LICENSE.txt']), 'sha256': sha(output['LICENSE.txt'])}]
             inventory.append(row)
             continue
         candidates = license_files(directory)
@@ -206,7 +207,7 @@ def collect(args) -> dict[str, bytes]:
              'Target: wasm32-unknown-unknown; no default features; portable feature.',
              'The complete original license texts are packaged at the paths below.',
              'Build-time dependencies are retained in the inventory for completeness.',
-             'This notice does not select a license for Caverarria-owned integration code.', '',
+             'Caverarria-owned integration code is MIT licensed; see LICENSE.txt.', '',
              'Cave Story: Studio Pixel. English freeware translation: Aeon Genesis.',
              'Original game data is downloaded separately on first use and is not in this mod.', '',
              'WebAssembly for .NET 2.1.0: Ryan Lamansky; Apache-2.0.',
@@ -263,8 +264,8 @@ def main():
         raise SystemExit('License package is missing or stale:\n' + '\n'.join(stale))
     inventory = json.loads(files['ThirdPartyInventory.json'])
     print(f"{'Verified' if args.check else 'Packaged'} {inventory['thirdPartyPackageCount']} third-party Cargo packages, "
-          f"{sum(len(p['licenseFiles']) for p in inventory['packages'])} exact license/notice files, plus Rust target notices. "
-          'Own integration license remains unselected.')
+          f"{sum(len(p['licenseFiles']) for p in inventory['packages'] if 'exception' not in p)} exact license/notice files, plus Rust target notices. "
+          'Own integration code is MIT licensed.')
 
 
 if __name__ == '__main__':

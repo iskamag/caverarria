@@ -98,11 +98,13 @@ def tmod_members(data: bytes) -> tuple[dict[str, bytes], dict]:
 def verify_portable_mod(data: bytes) -> dict:
     members, information = tmod_members(data)
     required = {'Caverarria.dll', 'Assets/Engine/caverarria_bridge.wasm', 'lib/WebAssembly.dll',
-                'lib/WebAssembly.LICENSE', 'ThirdPartyInventory.json', 'ThirdPartyNotices.txt'}
+                'lib/WebAssembly.LICENSE', 'ThirdPartyInventory.json', 'ThirdPartyNotices.txt', 'LICENSE.txt'}
     if not required <= members.keys():
         raise ValueError(f'Mod missing portable engine or license files: {sorted(required - members.keys())}')
     if sha(members['lib/WebAssembly.dll']) != '7904c9db84ed069bc735ae33b86add27e4680dd3e3cc2d74f8bbbc4a6d936fb1':
         raise ValueError('Packaged runner differs from pinned WebAssembly2.1.0')
+    if members['LICENSE.txt'] != (ROOT / 'LICENSE').read_bytes():
+        raise ValueError('Packaged integration license differs from root LICENSE')
     if sha(members['lib/WebAssembly.LICENSE']) != 'b9fd7c9a677750c930f827b8ff6e3fad93bac91f04ca54df2e3cca68971dcef2':
         raise ValueError('Packaged managed runner license differs from upstream')
     wasm = members['Assets/Engine/caverarria_bridge.wasm']
@@ -164,7 +166,7 @@ def package(args) -> tuple[Path, dict]:
     install += '## Alpha feedback\n\nRead `KNOWN_ALPHA_LIMITATIONS.md` before playing.\n\n' + section(alpha, 'Report a problem')
     install = install.replace('# Caverarria playable alpha\n', f'# Caverarria playable alpha {args.version}\n', 1)
     files = {'Caverarria.tmod': mod, 'Worlds/Caverarria.wld': world, 'Worlds/Caverarria.twld': world_data,
-             'INSTALL.md': install.encode(),
+             'INSTALL.md': install.encode(), 'LICENSE': (ROOT / 'LICENSE').read_bytes(),
              'KNOWN_ALPHA_LIMITATIONS.md': (f'# Known alpha limitations — {args.version}\n\n' + section(alpha, 'Known alpha limitations')).encode(),
              'CREDITS.md': ('# Credits\n\n' + section(alpha, 'Credits')).encode()}
     manifest = {'schemaVersion': 1, 'releaseVersion': args.version, 'mod': information,

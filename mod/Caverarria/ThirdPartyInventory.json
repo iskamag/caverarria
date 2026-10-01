@@ -282,15 +282,21 @@
     {
       "name": "caverarria-bridge",
       "version": "0.1.0",
-      "licenseExpression": null,
+      "licenseExpression": "MIT",
       "source": "workspace/rust-bridge",
       "repository": null,
       "features": [
         "portable"
       ],
       "cargoPackageChecksum": null,
-      "licenseFiles": [],
-      "exception": "Project-owned integration code; no license grant selected. This inventory does not license that code."
+      "licenseFiles": [
+        {
+          "path": "LICENSE.txt",
+          "bytes": 1080,
+          "sha256": "ae6ce70c134a4351fc0b5782464ecf3b629e905598661c70218a10fd330cc702"
+        }
+      ],
+      "exception": "Project-owned integration code; MIT license at LICENSE.txt."
     },
     {
       "name": "cfg-if",

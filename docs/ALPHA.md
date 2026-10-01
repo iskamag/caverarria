@@ -85,6 +85,8 @@ Cave Story: **Studio Pixel**. English freeware translation: **Aeon Genesis**.
 [WebAssembly for .NET](https://github.com/RyanLamansky/dotnet-webassembly) runs the
 portable core. NXEngine-evo was used as a file-format reference.
 
+Caverarria integration code is MIT licensed (`LICENSE.txt` inside the mod).
+Third-party code and original game assets retain their own licenses and ownership.
 The mod contains `ThirdPartyNotices.txt`, `ThirdPartyInventory.json`, the original
 upstream license texts and the managed runner's Apache-2.0 license. Original
 freeware data is downloaded separately rather than redistributed in this ZIP.

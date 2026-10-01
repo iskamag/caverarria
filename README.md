@@ -75,3 +75,6 @@ Host: [tModLoader](https://github.com/tModLoader/tModLoader).
 Managed runner: [WebAssembly for .NET](https://github.com/RyanLamansky/dotnet-webassembly).
 File-format reference: [NXEngine-evo](https://github.com/nxengine/nxengine-evo).
 Dependency notices and licenses are included in the mod.
+
+Caverarria integration code is licensed under [MIT](LICENSE). Third-party code
+and Cave Story assets retain their respective licenses and ownership.

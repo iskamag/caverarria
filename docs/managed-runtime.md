@@ -138,5 +138,6 @@ The erasable, rc-box and pelite-macros registry packages omit their workspace
 license files. The script retrieves their exact recorded upstream revisions,
 checks pinned SHA256 values and caches the texts for offline regeneration. A
 missing license for any other third-party package fails packaging. The existing
-`lib/WebAssembly.LICENSE` remains intact. These notices grant no new license for
-Caverarria-owned integration code and contain no freeware game assets.
+`lib/WebAssembly.LICENSE` remains intact. Caverarria-owned integration code is
+MIT licensed; the packager copies the root `LICENSE` into the mod as
+`LICENSE.txt`. Third-party notices contain no freeware game assets.

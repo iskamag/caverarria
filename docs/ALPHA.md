@@ -4,13 +4,6 @@ Bring a Terraria character into Cave Story's original world, with its maps,
 dialogue, enemies, story items, music and saves. This alpha is ready for early
 play and feedback. A full playthrough and every ending have not been verified.
 
-## Install from Steam Workshop
-
-Subscribe to [**Caverarria (Alpha)** on Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3811267098). Start tModLoader, open
-**Workshop → Manage Mods**, enable Caverarria and return to reload the mods.
-Choose **Single Player**, select a character, create a world with the seed
-**`caverarria`**, and enter it from the ordinary world list.
-
 ## Install the GitHub ZIP
 
 You need Terraria and tModLoader. The download includes the mod and a fresh

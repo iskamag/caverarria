@@ -5,10 +5,10 @@ Cave Story's maps, dialogue, enemies, bosses, story items, music and saves run i
 **doukutsu-rs**. Terraria supplies your character's appearance, movement,
 equipment and attacks.
 
-Get the alpha from [GitHub Releases](https://github.com/iskamag/caverarria/releases)
-or subscribe to [**Caverarria (Alpha)** on Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3811267098). The GitHub ZIP includes
+Get the alpha from [GitHub Releases](https://github.com/iskamag/caverarria/releases).
+The GitHub ZIP includes
 `Caverarria.tmod` and a fresh campaign world. [Installation and player notes](docs/ALPHA.md)
-cover both options and the known alpha limitations.
+cover installation and the known alpha limitations.
 
 Enable the mod, select a character in **Single Player**, and create a world with
 seed **`caverarria`**, or enter the bundled **Caverarria — The Island** world.

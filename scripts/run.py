@@ -53,7 +53,8 @@ def main() -> None:
     mod = ROOT / "runtime/build/Caverarria.tmod"
     if not mod.exists():
         raise SystemExit("Build the mod first: scripts/build-mod.sh")
-    # Terraria's -savedirectory argument is the base; tML uses its own child.
+    # Select both the Terraria base and its tML child explicitly so the global
+    # launch config cannot redirect this isolated profile.
     mods = profile / "tModLoader/Mods"
     mods.mkdir(parents=True, exist_ok=True)
     shutil.copy2(mod, mods / mod.name)
@@ -95,7 +96,8 @@ def main() -> None:
         env["CAVERARRIA_TEST_DIR"] = str(test_dir)
     dotnet = tml / "dotnet/dotnet"
     command = [str(dotnet if dotnet.exists() else "dotnet"), str(tml / "tModLoader.dll"),
-               "-nosteam", "-savedirectory", str(profile), *extra]
+               "-nosteam", "-savedirectory", str(profile),
+               "-tmlsavedirectory", str(profile / "tModLoader"), *extra]
     if args.headless:
         command = ["xvfb-run", "-a", "-s", "-screen 0 1280x720x24", *command]
     if args.log:

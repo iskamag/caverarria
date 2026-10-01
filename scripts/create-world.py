@@ -29,7 +29,8 @@ def main() -> None:
     env = {key: value for key, value in os.environ.items() if not key.startswith("CAVERARRIA_")}
     with log_path.open("w") as log:
         process = subprocess.Popen([str(tml / "dotnet/dotnet"), str(tml / "tModLoader.dll"),
-            "-server", "-nosteam", "-savedirectory", str(profile), "-config", str(configuration)],
+            "-server", "-nosteam", "-savedirectory", str(profile),
+            "-tmlsavedirectory", str(profile / "tModLoader"), "-config", str(configuration)],
             cwd=tml, env=env, stdin=subprocess.PIPE, stdout=log, stderr=subprocess.STDOUT, text=True)
         try:
             deadline = time.monotonic() + 180

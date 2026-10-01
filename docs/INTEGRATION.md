@@ -50,7 +50,11 @@ user data folder.
   selected Terraria character. Each world owns an independent native campaign
   save under `tModLoader/Caverarria/Campaigns/<campaignId>`. Campaign health
   changes the character's effective health inside that world; player-file saves
-  retain outside health and permanent maximum health. Normal worlds and existing
+  retain outside health and permanent maximum health. Life Capsules immediately
+  add permanent character health through `ModifyMaxStats`; per-character,
+  per-campaign maximum milestones prevent checkpoint replays from granting the
+  upgrade again. Existing alpha profiles receive their earned upgrades on entry.
+  Normal worlds and existing
   Cave Story saves remain separate. The convenience launcher uses an isolated
   profile.
 

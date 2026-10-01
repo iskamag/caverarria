@@ -99,6 +99,7 @@ internal static class Automation
         if (Input.AimX.HasValue && Input.AimY.HasValue)
         {
             Vector2 aim = CampaignRuntime.ToWorld(Input.AimX.Value, Input.AimY.Value) - Main.screenPosition;
+            aim = Vector2.Transform(aim, Main.GameViewMatrix.TransformationMatrix);
             Main.mouseX = (int)aim.X; Main.mouseY = (int)aim.Y;
             if (player.controlUseItem) player.direction = Input.AimX.Value < CampaignRuntime.ToCave(player.Center).X ? -1 : 1;
         }

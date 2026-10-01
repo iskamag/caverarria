@@ -49,6 +49,8 @@ public sealed class CaverarriaMod : Mod
     public static ModKeybind NextWeapon { get; private set; } = null!;
     public static ModKeybind PreviousWeapon { get; private set; } = null!;
     public static ModKeybind Retry { get; private set; } = null!;
+    public static ModKeybind ZoomIn { get; private set; } = null!;
+    public static ModKeybind ZoomOut { get; private set; } = null!;
 
     public override void Load()
     {
@@ -61,6 +63,8 @@ public sealed class CaverarriaMod : Mod
         var audioUpdate = typeof(Main).GetMethod("UpdateAudio", BindingFlags.Instance | BindingFlags.NonPublic)!;
         audioUpdateHook = new Hook(audioUpdate, UpdateAudio);
         Retry = KeybindLoader.RegisterKeybind(this, "Retry", "R");
+        ZoomIn = KeybindLoader.RegisterKeybind(this, "ZoomIn", "OemPlus");
+        ZoomOut = KeybindLoader.RegisterKeybind(this, "ZoomOut", "OemMinus");
         Inventory = KeybindLoader.RegisterKeybind(this, "Inventory", "I");
         Map = KeybindLoader.RegisterKeybind(this, "Map", "M");
         NextWeapon = KeybindLoader.RegisterKeybind(this, "NextWeapon", "V");
@@ -76,6 +80,7 @@ public sealed class CaverarriaMod : Mod
         CampaignRuntime.Dispose();
         Interact = null!;
         Retry = Inventory = Map = NextWeapon = PreviousWeapon = null!;
+        ZoomIn = ZoomOut = null!;
     }
 }
 

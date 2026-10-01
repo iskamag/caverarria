@@ -827,7 +827,7 @@ index 2d45ecf..8ad76e0 100644
 +#[path = "../../../rust-bridge/src/runtime.rs"]
 +pub mod cavebridge;
 diff --git a/src/scene/game_scene.rs b/src/scene/game_scene.rs
-index 8a2de3c..c766c9e 100644
+index 8a2de3c..3b27e40 100644
 --- a/src/scene/game_scene.rs
 +++ b/src/scene/game_scene.rs
 @@ -28,6 +28,7 @@ use crate::framework::context::Context;
@@ -838,7 +838,24 @@ index 8a2de3c..c766c9e 100644
  use crate::framework::ui::Components;
  use crate::framework::{filesystem, gamepad, graphics};
  use crate::game::caret::CaretType;
-@@ -1455,12 +1456,14 @@ impl GameScene {
+@@ -65,6 +66,8 @@ pub struct GameScene {
+     pub credits: Credits,
+     pub falling_island: FallingIsland,
+     pub inventory_ui: InventoryUI,
++    /// Host inventory supplies items; only the original item-action dialogue is shown.
++    pub external_inventory: bool,
+     pub map_system: MapSystem,
+     pub hud_player1: HUD,
+     pub hud_player2: HUD,
+@@ -164,6 +167,7 @@ impl GameScene {
+             credits: Credits::new(),
+             falling_island: FallingIsland::new(),
+             inventory_ui: InventoryUI::new(),
++            external_inventory: false,
+             map_system: MapSystem::new(),
+             hud_player1: HUD::new(Alignment::Left),
+             hud_player2: HUD::new(Alignment::Right),
+@@ -1455,12 +1459,14 @@ impl GameScene {
          self.tick_npc_bullet_collissions(state);
  
          if state.control_flags.control_enabled() {
@@ -853,7 +870,37 @@ index 8a2de3c..c766c9e 100644
              self.inventory_player2.tick_weapons(
                  state,
                  &mut self.player2,
-@@ -2017,7 +2020,11 @@ impl Scene for GameScene {
+@@ -1889,10 +1895,25 @@ impl Scene for GameScene {
+                 TextScriptVM::run(state, self, ctx)?;
+             }
+             ScriptMode::Inventory => {
+-                self.inventory_ui
+-                    .tick(state, (ctx, &mut self.player1, &mut self.inventory_player1, &mut self.hud_player1))?;
+-
+-                TextScriptVM::run(state, self, ctx)?;
++                if self.external_inventory {
++                    if self.player1.controller.trigger_inventory() {
++                        state.textscript_vm.reset();
++                        state.control_flags.set_control_enabled(true);
++                        state.control_flags.set_tick_world(true);
++                        state.textscript_vm.set_mode(ScriptMode::Map);
++                        self.external_inventory = false;
++                    } else {
++                        TextScriptVM::run(state, self, ctx)?;
++                        if state.textscript_vm.state == TextScriptExecutionState::Ended {
++                            state.textscript_vm.set_mode(ScriptMode::Map);
++                            self.external_inventory = false;
++                        }
++                    }
++                } else {
++                    self.inventory_ui
++                        .tick(state, (ctx, &mut self.player1, &mut self.inventory_player1, &mut self.hud_player1))?;
++                    TextScriptVM::run(state, self, ctx)?;
++                }
+             }
+         }
+
+@@ -2017,7 +2038,11 @@ impl Scene for GameScene {
          self.draw_npc_layer(state, ctx, NPCLayer::Middleground)?;
          self.draw_bullets(state, ctx)?;
          self.player2.draw(state, ctx, &self.frame)?;
@@ -866,7 +913,7 @@ index 8a2de3c..c766c9e 100644
  
          if !self.player1.cond.hidden() {
              self.whimsical_star.draw(state, ctx, &self.frame)?;
-@@ -2050,6 +2057,9 @@ impl Scene for GameScene {
+@@ -2050,6 +2075,9 @@ impl Scene for GameScene {
              graphics::set_clip_rect(ctx, None)?;
          }
  
@@ -876,7 +923,17 @@ index 8a2de3c..c766c9e 100644
          if self.inventory_dim > 0.0 {
              let rect = Rect::new(0, 0, state.screen_size.0 as isize + 1, state.screen_size.1 as isize + 1);
              let mut dim_color = state.constants.inventory_dim_color;
-@@ -2313,6 +2323,7 @@ impl Scene for GameScene {
+@@ -2158,7 +2186,8 @@ impl Scene for GameScene {
+                 }
+             }
+             ScriptMode::StageSelect => self.stage_select.draw(state, ctx, &self.frame)?,
+-            ScriptMode::Inventory => self.inventory_ui.draw(state, ctx, &self.frame)?,
++            ScriptMode::Inventory if !self.external_inventory => self.inventory_ui.draw(state, ctx, &self.frame)?,
++            ScriptMode::Inventory => (),
+             _ => {}
+         }
+
+@@ -2313,6 +2342,7 @@ impl Scene for GameScene {
          Ok(())
      }
  

@@ -1,0 +1,3 @@
+Run `node tests/story_inventory/run.mjs mod/Caverarria/Assets/Engine/caverarria_bridge.wasm` from the checkout after a WASM rebuild. Original data must be installed in `runtime/data`.
+
+This runs the actual shipped portable engine. A private TSC fixture acquires Arthur's Key and a Life Pot; unmodified original `ArmsItem.tsc` handles their item actions. Assertions cover description UI cancellation, a Life Pot's normal Yes confirmation, actual native healing and item consumption, and rejection of an absent item. This is a bounded adapter regression, not a hosted UI playthrough or campaign progression evidence.

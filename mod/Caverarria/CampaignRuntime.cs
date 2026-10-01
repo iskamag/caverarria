@@ -36,7 +36,8 @@ internal static class CampaignRuntime
     private static readonly Queue<(int id, int epoch, ulong generation, bool boss, int damage)> hits = new();
     private static readonly Dictionary<(int id, bool boss), int> proxySlots = new();
     private static int rawControls;
-    private static bool nextWeaponHeld, previousWeaponHeld;
+    private static bool nextWeaponHeld, previousWeaponHeld, inventoryHeld;
+    private static int pendingStoryItem;
     private static bool outsideMapEnabled;
     private static int shotFrames;
     private static readonly Queue<object> terrainHits = new();
@@ -51,7 +52,7 @@ internal static class CampaignRuntime
             string data = Environment.GetEnvironmentVariable("CAVERARRIA_DATA") ?? Path.Combine(CampaignBootstrap.AssetsPath, "data");
             string save = CampaignBootstrap.SavePath;
             bool load = CampaignBootstrap.WantsLoad;
-            int width = Math.Max(160, Main.screenWidth / 3), height = Math.Max(120, Main.screenHeight / 3);
+            int width = CampaignView.ViewportWidth, height = CampaignView.ViewportHeight;
             string? wasmPath = Environment.GetEnvironmentVariable("CAVERARRIA_WASM");
             byte[] module = wasmPath != null ? File.ReadAllBytes(wasmPath)
                 : ModContent.GetInstance<CaverarriaMod>().GetFileBytes("Assets/Engine/caverarria_bridge.wasm");
@@ -89,8 +90,17 @@ internal static class CampaignRuntime
         // Use doukutsu-rs' built-in 60 Hz mode alongside Terraria's update loop.
         try
         {
+            if (CaverarriaMod.ZoomIn.JustPressed) CampaignView.ChangeZoom(1);
+            if (CaverarriaMod.ZoomOut.JustPressed) CampaignView.ChangeZoom(-1);
             SyncViewport();
             SyncAudio();
+            if (pendingStoryItem > 0)
+            {
+                int id = pendingStoryItem; pendingStoryItem = 0;
+                Main.playerInventory = false;
+                Snapshot = Engine!.Send(new { op = "use_item", id });
+                ApplySnapshot(false);
+            }
             while (terrainHits.TryDequeue(out var terrainHit)) { Snapshot = Engine!.Send(terrainHit); ApplySnapshot(false); }
             while (hits.TryDequeue(out var hit))
                 Snapshot = Engine!.Send(new { op = "hit", id = hit.id, epoch = hit.epoch, generation = hit.generation, boss = hit.boss, damage = hit.damage });
@@ -106,7 +116,13 @@ internal static class CampaignRuntime
             bool confirm = Automation.Holding && Automation.Input.Confirm || CaverarriaMod.Interact.Current && !ControlsEnabled;
             if (interact) controls |= 8;
             if (confirm) controls |= 64 | 2048 | 4096;
-            if (Automation.Holding && Automation.Input.Inventory || CaverarriaMod.Inventory.Current) controls |= 32;
+            bool inventory = Automation.Holding && Automation.Input.Inventory || CaverarriaMod.Inventory.Current;
+            if (Snapshot.Text("script_mode", "Map") == "Inventory")
+            {
+                if (inventory || Microsoft.Xna.Framework.Input.Keyboard.GetState().IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape)) controls |= 32;
+            }
+            else if (inventory && !inventoryHeld && ControlsEnabled) Main.playerInventory = !Main.playerInventory;
+            inventoryHeld = inventory;
             if (Automation.Holding && Automation.Input.Map || CaverarriaMod.Map.Current) controls |= 16;
             // Gameplay selection follows the real held item; native cycling here
             // would advance again after the bridge selected that same weapon.
@@ -157,6 +173,12 @@ internal static class CampaignRuntime
         if (map.ValueKind == JsonValueKind.Object) ProjectMap(map);
         int epoch = Snapshot.Integer("epoch");
         var p = Snapshot.Field("player");
+        if (Snapshot.Text("scene") == "game" && p.ValueKind == JsonValueKind.Object)
+        {
+            int upgrade = Main.LocalPlayer.GetModPlayer<LifeCapsulePlayer>()
+                .ObserveMaximum(CampaignBootstrap.HealthKey, p.Integer("max_life", 3));
+            if (upgrade > 0) Main.LocalPlayer.GetModPlayer<CampaignPlayer>().AddOutsideHealth(upgrade);
+        }
         ObserveNativeDeath();
         if (Snapshot.Text("scene") == "game" && p.Boolean("alive")
             && (checkpointReload || nativeDeathPending || epoch != previousEpoch && Main.LocalPlayer.dead))
@@ -177,6 +199,7 @@ internal static class CampaignRuntime
         previousEpoch = epoch;
         SynchronizeEntities();
         SynchronizeWeapons();
+        SynchronizeInventory();
     }
 
     public static void PlacePlayerAtCampaignPosition()
@@ -201,6 +224,63 @@ internal static class CampaignRuntime
                 var item = Main.LocalPlayer.QuickSpawnItemDirect(Main.LocalPlayer.GetSource_Misc("CaveStoryWeapon"), type);
             }
         }
+    }
+
+    public static void UseStoryItem(int id)
+    {
+        if (Active && ControlsEnabled && !Main.LocalPlayer.dead) pendingStoryItem = id;
+    }
+
+    private static void SynchronizeInventory()
+    {
+        var desired = Snapshot.Field("items").Elements()
+            .Where(item => item.Integer("id") > 0 && item.Integer("id") < 0x8000)
+            .ToDictionary(item => item.Integer("id"), item => item.Integer("amount"));
+        // Reconcile only representations issued by this campaign. Other campaigns'
+        // belongings remain intact; the original runtime owns progression and use.
+        var slots = StoryItemSlots().ToList();
+        foreach (var item in slots)
+        {
+            if (item.ModItem is not CampaignItem story || story.CampaignId != CampaignBootstrap.CampaignId) continue;
+            int remaining = desired.GetValueOrDefault(story.NativeType);
+            if (remaining <= 0) item.TurnToAir();
+            else
+            {
+                item.stack = Math.Min(remaining, item.maxStack);
+                desired[story.NativeType] = remaining - item.stack;
+            }
+        }
+        foreach (var pair in desired)
+        {
+            int remaining = pair.Value, type = CampaignItem.ItemFor(pair.Key);
+            if (type == 0) continue;
+            while (remaining > 0)
+            {
+                // Leave the authoritative item in the campaign when inventory is
+                // full instead of spawning repeated world drops every update.
+                var empty = Main.LocalPlayer.inventory.Take(50).FirstOrDefault(item => item.IsAir);
+                if (empty == null) break;
+                empty.SetDefaults(type);
+                ((CampaignItem)empty.ModItem).CampaignId = CampaignBootstrap.CampaignId;
+                empty.stack = Math.Min(remaining, empty.maxStack);
+                remaining -= empty.stack;
+            }
+        }
+    }
+
+    private static IEnumerable<Item> StoryItemSlots()
+    {
+        var player = Main.LocalPlayer;
+        foreach (var item in player.inventory.Take(58)) yield return item;
+        yield return Main.mouseItem;
+        yield return player.trashItem;
+        foreach (var bank in new[] { player.bank, player.bank2, player.bank3, player.bank4 })
+            foreach (var item in bank.item) yield return item;
+        foreach (var chest in Main.chest)
+            if (chest != null)
+                foreach (var item in chest.item) yield return item;
+        foreach (var item in Main.item)
+            if (item.active) yield return item;
     }
 
     private static void ProjectMap(JsonElement map)
@@ -243,7 +323,7 @@ internal static class CampaignRuntime
         var present = new HashSet<(int, bool)>();
         foreach (var entity in Snapshot.Field("npcs").Elements().Concat(Snapshot.Field("bosses").Elements()))
         {
-            if (!entity.Boolean("shootable") || entity.Integer("life") <= 0) continue;
+            if (!CaveEntity.IsCombatTarget(entity)) continue;
             var key = (entity.Integer("id"), entity.Boolean("boss"));
             present.Add(key);
             if (!proxySlots.TryGetValue(key, out int index) || !Main.npc[index].active || Main.npc[index].ModNPC is not CaveEntity)
@@ -256,9 +336,9 @@ internal static class CampaignRuntime
             var proxy = (CaveEntity)npc.ModNPC;
             proxy.Generation = entity.Field("generation").ValueKind == JsonValueKind.Number ? entity.Field("generation").GetUInt64() : 0;
             proxy.NativeId = key.Item1; proxy.NativeBoss = key.Item2; proxy.Epoch = Snapshot.Integer("epoch");
-            npc.width = Math.Max(4, (int)((entity.Number("left") + entity.Number("right")) * Scale));
-            npc.height = Math.Max(4, (int)((entity.Number("top") + entity.Number("bottom")) * Scale));
-            npc.position = ToWorld(entity.Number("x") - entity.Number("left"), entity.Number("y") - entity.Number("top"));
+            Rectangle bounds = CaveEntity.CombatBounds(entity);
+            npc.width = bounds.Width; npc.height = bounds.Height;
+            npc.position = new Vector2(bounds.X, bounds.Y);
             npc.life = Math.Max(1, entity.Integer("life") * 10);
             npc.lifeMax = Math.Max(npc.lifeMax, npc.life);
             npc.velocity = Vector2.Zero;
@@ -313,7 +393,7 @@ internal static class CampaignRuntime
     private static void SyncViewport()
     {
         if (!Active) return;
-        int width = Math.Max(160, Main.screenWidth / 3), height = Math.Max(120, Main.screenHeight / 3);
+        int width = CampaignView.ViewportWidth, height = CampaignView.ViewportHeight;
         if (Engine!.Width == width && Engine.Height == height) return;
         Snapshot = Engine.Resize(width, height);
         pixels = new byte[Engine.Width * Engine.Height * 4];
@@ -413,7 +493,7 @@ internal static class CampaignRuntime
         if (background == null) return;
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
         Main.spriteBatch.Draw(Terraria.GameContent.TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
-        Main.spriteBatch.Draw(background, new Rectangle(0, 0, Engine!.Width * 3, Engine.Height * 3), Color.White);
+        Main.spriteBatch.Draw(background, CampaignView.OutputRectangle(Engine!.Width, Engine.Height), Color.White);
         Main.spriteBatch.End();
     }
     public static bool DrawForeground()
@@ -431,7 +511,7 @@ internal static class CampaignRuntime
         if (image == null) return;
         Main.spriteBatch.End();
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
-        Main.spriteBatch.Draw(image, new Rectangle(0, 0, Engine!.Width * 3, Engine.Height * 3), Color.White);
+        Main.spriteBatch.Draw(image, CampaignView.OutputRectangle(Engine!.Width, Engine.Height), Color.White);
         Main.spriteBatch.End();
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
     }
@@ -459,7 +539,7 @@ internal static class CampaignRuntime
             Engine = null;
             ReleaseImages();
             pixels = null; Snapshot = default; CurrentMap = default;
-            proxySlots.Clear(); hits.Clear(); terrainHits.Clear(); weaponIds.Clear(); rawControls = shotFrames = 0; nextWeaponHeld = previousWeaponHeld = false;
+            proxySlots.Clear(); hits.Clear(); terrainHits.Clear(); weaponIds.Clear(); rawControls = shotFrames = pendingStoryItem = 0; nextWeaponHeld = previousWeaponHeld = inventoryHeld = false;
             musicVolume = soundVolume = float.NaN;
             Frame = 0; projectedWidth = projectedHeight = previousEpoch = 0;
             nativeDeathPending = false;

@@ -256,6 +256,24 @@ impl Runtime {
                 // decrement, native caret, sound, and smoke spawns.
                 bullet.tick_map_collisions(&mut self.state, &game.npc_list, &mut game.stage);
             }
+            "use_item" => {
+                let id = v["id"].as_u64().ok_or("Item use requires id")?;
+                if id > u16::MAX as u64 - 6000 {
+                    return Err("Invalid item id".into());
+                }
+                let game = downcast::Downcast::<GameScene>::downcast_mut(&mut *self.scene)
+                    .map_err(|_| "No game scene")?;
+                if game.player1.cond.alive()
+                    && game.inventory_player1.has_item(id as u16)
+                    && self.state.control_flags.control_enabled()
+                    && self.state.textscript_vm.mode == crate::game::scripting::tsc::text_script::ScriptMode::Map
+                    && self.state.textscript_vm.state == crate::game::scripting::tsc::text_script::TextScriptExecutionState::Ended
+                {
+                    game.external_inventory = true;
+                    self.state.textscript_vm.set_mode(crate::game::scripting::tsc::text_script::ScriptMode::Inventory);
+                    self.state.textscript_vm.start_script(6000 + id as u16);
+                }
+            }
             "event" => {
                 self.state
                     .textscript_vm

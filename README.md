@@ -18,8 +18,25 @@ The mod embeds its portable engine and managed runner, so players need no
 separate engine installation.
 
 Use Terraria movement and item attacks. **E** interacts or advances dialogue,
-**R** retries the campaign save, **I** opens story inventory, **M** opens the
+**R** retries the campaign save, **I** opens Terraria's inventory, **M** opens the
 story map once acquired, and **V/C** cycle story weapons. Original save points remain active.
+**+ / -** zoom the camera in/out in sharp pixel steps. Camera zoom and player
+appearance size are also adjustable in Mod Configuration; the default draws
+your character 50% larger while keeping the movement/collision box unchanged.
+Story items occupy Terraria inventory slots and use their original campaign
+actions. Life Capsules immediately grant permanent character health, at ten
+Terraria HP per original HP; retrying a checkpoint does not grant the same
+upgrade twice. Cave Story guns fire only inside the campaign.
+
+Campaign progress lives in
+`<tModLoader save folder>/Caverarria/Campaigns/<campaignId>/Profile.dat`.
+The ID is stored in the world's `.twld` file: characters entering the same world
+share its campaign, and copying a world with its ID also shares that progress.
+Original save points, `/caverarria save`, and Save & Exit while alive write the
+campaign state. Exiting while dead keeps the previous checkpoint. Retry loads
+that checkpoint, or starts a new game if none exists. Your Terraria character
+continues to use its ordinary `.plr`/`.tplr` files; permanent capsule upgrades
+are recorded there. Campaign and character saves are separate files.
 
 ## Alpha scope
 

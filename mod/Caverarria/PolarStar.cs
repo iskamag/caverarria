@@ -36,6 +36,7 @@ public abstract class CaveGun : ModItem
     public override Vector2? HoldoutOffset() => new Vector2(-3, 0);
     public override void ModifyTooltips(List<TooltipLine> tooltips)
     {
+        tooltips.Add(new TooltipLine(Mod, "CampaignWeapon", "Fires only in a Cave Story campaign"));
         var weapon = CampaignRuntime.Snapshot.Field("weapons").Elements().FirstOrDefault(value => value.Integer("id") == NativeType);
         if (weapon.ValueKind == System.Text.Json.JsonValueKind.Object)
         {

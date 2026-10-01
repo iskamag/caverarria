@@ -3,13 +3,226 @@ Mods: {
 		Keybinds: {
 			Interact.DisplayName: Cave Story: interact / advance dialogue
 			Retry.DisplayName: Cave Story: retry from save
-			Inventory.DisplayName: Cave Story: inventory / quest items
+			ZoomIn.DisplayName: Cave Story: zoom in
+			ZoomOut.DisplayName: Cave Story: zoom out
+			Inventory.DisplayName: Terraria inventory / close story item
 			Map.DisplayName: Cave Story: map
 			NextWeapon.DisplayName: Cave Story: next weapon
 			PreviousWeapon.DisplayName: Cave Story: previous weapon
 		}
 
+		Configs: {
+			CampaignViewConfig: {
+				DisplayName: Campaign camera and appearance
+
+				CameraPixelScale: {
+					Label: Camera zoom
+					Tooltip: Larger values bring the camera closer. Use + / - during play.
+				}
+
+				PlayerVisualScale: {
+					Label: Player appearance size
+					Tooltip: Enlarges your character's appearance while keeping movement and collision unchanged.
+				}
+			}
+		}
+
 		Items: {
+			StoryArthursKey: {
+				DisplayName: Arthur's Key
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryMapSystem: {
+				DisplayName: Map System
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StorySantasKey: {
+				DisplayName: Santa's Key
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StorySilverLocket: {
+				DisplayName: Silver Locket
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryBeastFang: {
+				DisplayName: Beast Fang
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryLifeCapsule: {
+				DisplayName: Life Capsule
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryIDCard: {
+				DisplayName: ID Card
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryJellyfishJuice: {
+				DisplayName: Jellyfish Juice
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryRustyKey: {
+				DisplayName: Rusty Key
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryGumKey: {
+				DisplayName: Gum Key
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryGumBase: {
+				DisplayName: Gum Base
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryCharcoal: {
+				DisplayName: Charcoal
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryExplosive: {
+				DisplayName: Explosive
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryPuppy: {
+				DisplayName: Puppy
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryLifePot: {
+				DisplayName: Life Pot
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryCureAll: {
+				DisplayName: Cure-All
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryClinicKey: {
+				DisplayName: Clinic Key
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryBoosterv08: {
+				DisplayName: Booster v0.8
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryArmsBarrier: {
+				DisplayName: Arms Barrier
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryTurbocharge: {
+				DisplayName: Turbocharge
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryCurlysAirTank: {
+				DisplayName: Curly's Air Tank
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryNikumaruCounter: {
+				DisplayName: Nikumaru Counter
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryBoosterv20: {
+				DisplayName: Booster v2.0
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryMimigaMask: {
+				DisplayName: Mimiga Mask
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryTeleporterRoomKey: {
+				DisplayName: Teleporter Room Key
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StorySuesLetter: {
+				DisplayName: Sue's Letter
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryController: {
+				DisplayName: Controller
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryBrokenSprinkler: {
+				DisplayName: Broken Sprinkler
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StorySprinkler: {
+				DisplayName: Sprinkler
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryTowRope: {
+				DisplayName: Tow Rope
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryClayFigureMedal: {
+				DisplayName: Clay Figure Medal
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryLittleMan: {
+				DisplayName: Little Man
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryMushroomBadge: {
+				DisplayName: Mushroom Badge
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryMaPignon: {
+				DisplayName: Ma Pignon
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryCurlysUnderwear: {
+				DisplayName: Curly's Underwear
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryAlienMedal: {
+				DisplayName: Alien Medal
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryChacosLipstick: {
+				DisplayName: Chaco's Lipstick
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryWhimsicalStar: {
+				DisplayName: Whimsical Star
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
+			StoryIronBond: {
+				DisplayName: Iron Bond
+				Tooltip: Right-click to inspect or use in its Cave Story campaign
+			}
+
 			Snake: {
 				DisplayName: Snake
 				Tooltip:

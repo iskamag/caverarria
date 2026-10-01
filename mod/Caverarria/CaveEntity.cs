@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Text.Json;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -12,6 +13,20 @@ public sealed class CaveEntity : ModNPC
     public int Epoch;
     public ulong Generation;
     public bool NativeBoss;
+    // Local HP is not a targeting predicate: vulnerable boss parts can have
+    // zero HP and forward their damage to the boss core in the guest engine.
+    internal static bool IsCombatTarget(JsonElement entity) => entity.Boolean("shootable");
+
+    internal static Rectangle CombatBounds(JsonElement entity)
+    {
+        // Original bullet collision uses hit_bounds.right on BOTH sides. The
+        // left extent belongs to terrain/player collision and may be zero.
+        float radius = entity.Number("right");
+        Vector2 position = CampaignRuntime.ToWorld(entity.Number("x") - radius, entity.Number("y") - entity.Number("top"));
+        return new Rectangle((int)position.X, (int)position.Y,
+            Math.Max(4, (int)(radius * 2 * CampaignRuntime.Scale)),
+            Math.Max(4, (int)((entity.Number("top") + entity.Number("bottom")) * CampaignRuntime.Scale)));
+    }
     public override string Texture => "Terraria/Images/NPC_0";
     public override void SetDefaults()
     {

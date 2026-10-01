@@ -36,13 +36,14 @@ public sealed class CampaignSystem : ModSystem
     public override void PostDrawTiles() => CampaignRuntime.DrawWorld();
     public override void ModifyTransformMatrix(ref Terraria.Graphics.SpriteViewMatrix transform)
     {
-        if (CampaignRuntime.Active) transform.Zoom = Vector2.One;
+        if (CampaignRuntime.Active) transform.Zoom = new Vector2(CampaignView.HostZoom);
     }
     public override void ModifyScreenPosition()
     {
         if (!CampaignRuntime.Active) return;
         var camera = CampaignRuntime.Snapshot.Field("camera");
-        Main.screenPosition = CampaignRuntime.Origin + new Vector2(camera.Number("x"), camera.Number("y")) * CampaignRuntime.Scale;
+        Main.screenPosition = CampaignView.WorldScreenPosition(new Vector2(camera.Number("x"), camera.Number("y")),
+            CampaignRuntime.Engine!.Width, CampaignRuntime.Engine.Height);
     }
     public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
     {
@@ -128,6 +129,12 @@ public sealed class CampaignPlayer : ModPlayer
         Player.dead = outsideDead; Player.ghost = outsideGhost; Player.respawnTimer = outsideRespawn;
         Player.difficulty = outsideDifficulty;
     }
+    internal void AddOutsideHealth(int amount)
+    {
+        if (!baselineCaptured || amount <= 0) return;
+        outsideMaximum += amount;
+        outsideLife += amount;
+    }
     internal void FinishCampaign()
     {
         RestoreOutsideHealth();
@@ -186,6 +193,16 @@ public sealed class CampaignPlayer : ModPlayer
             Player.velocity = Vector2.Zero;
         }
     }
+    public override void ProcessTriggers(TriggersSet triggersSet)
+    {
+        // Terraria's UpdateDead copies fresh triggers but skips SetControls.
+        // The native Restart menu must still receive direction/jump edges while
+        // the host respawn timer is running, rather than the last living input.
+        if (!CampaignRuntime.Active || Player.whoAmI != Main.myPlayer || !Player.dead) return;
+        Automation.ReadInput();
+        Automation.Apply(Player);
+        CampaignRuntime.CaptureControls(Player);
+    }
     public override void OnEnterWorld()
     {
         if (!CampaignRuntime.Active) return;
@@ -235,6 +252,13 @@ public sealed class CampaignPlayer : ModPlayer
     public override void DrawEffects(PlayerDrawSet drawInfo, ref float r, ref float g, ref float b, ref float a, ref bool fullBright)
     {
         if (CampaignRuntime.Active) fullBright = true;
+    }
+    public override void TransformDrawData(ref PlayerDrawSet drawInfo)
+    {
+        if (!CampaignRuntime.Active || drawInfo.headOnlyRender) return;
+        // Use the host's own all-layer transform about the avatar's feet. This
+        // enlarges armor, hair and held items together without altering physics.
+        PlayerDrawLayers.DrawPlayer_ScaleDrawData(ref drawInfo, CampaignView.PlayerScale);
     }
 }
 

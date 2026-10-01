@@ -13,7 +13,7 @@ It also exercises the real `CampaignPlayer.ProcessTriggers` hook with a dead
 player and a running respawn timer: fresh restart-menu selection/confirmation,
 button release, and rejection of remote/living players on that capture path.
 Capsule checks cover automatic permanent upgrades, replay protection, independent
-campaigns, old alpha migration, and player save/load persistence.
+campaigns and player save/load persistence.
 It creates a temporary save path and removes it afterward; it does not open a
 client, inject controls, or access real player/world/campaign saves.
 

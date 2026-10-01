@@ -41,42 +41,24 @@ internal static class CampaignTerrainEdits
     {
         loadedPath = null; blocks.Clear(); activeSolid.Clear(); EnsureLoaded();
     }
-    /// <summary>Discard this campaign's incompatible 0.1 checkpoint and terrain, as requested for 0.2.</summary>
-    public static void PrepareSaveLayout(string? directory = null)
-    {
-        directory ??= CampaignBootstrap.SavePath;
-        if (!Directory.Exists(directory)) return;
-        string[] files = Directory.EnumerateFiles(directory).Where(path =>
-            Path.GetFileName(path).Equals(FileName, StringComparison.OrdinalIgnoreCase)
-            || Path.GetFileName(path).Equals("Terrain.json", StringComparison.OrdinalIgnoreCase)
-            || Path.GetFileName(path).Equals(CampaignFurniture.FileName, StringComparison.OrdinalIgnoreCase)).ToArray();
-        bool incompatible = false;
-        foreach (string path in files)
-        {
-            bool guest = Path.GetFileName(path).Equals("Terrain.json", StringComparison.OrdinalIgnoreCase);
-            using var json = JsonDocument.Parse(File.ReadAllText(path));
-            incompatible |= json.RootElement.ValueKind != JsonValueKind.Object
-                || json.RootElement.Integer(guest ? "version" : "Version") != LayoutVersion
-                || json.RootElement.Integer(guest ? "subdivisions" : "Subdivisions") != Subdivisions;
-        }
-        if (!incompatible) return;
-        foreach (string path in files) File.Delete(path);
-        foreach (string path in Directory.EnumerateFiles(directory).Where(path =>
-            Path.GetFileName(path).Equals("Profile.dat", StringComparison.OrdinalIgnoreCase))) File.Delete(path);
-    }
     private static void EnsureLoaded()
     {
         string path = MetadataPath;
         if (loadedPath == path) return;
         blocks.Clear();
-        PrepareSaveLayout();
         if (File.Exists(path))
-            foreach (var b in JsonSerializer.Deserialize<TerrainFile>(File.ReadAllText(path))?.Blocks ?? [])
+        {
+            var file = JsonSerializer.Deserialize<TerrainFile>(File.ReadAllText(path))
+                ?? throw new InvalidDataException("Invalid terrain block file.");
+            if (file.Version != LayoutVersion || file.Subdivisions != Subdivisions)
+                throw new InvalidDataException("Unsupported terrain block layout.");
+            foreach (var b in file.Blocks)
             {
                 if (b.SubX >= Subdivisions || b.SubY >= Subdivisions || b.SubX < -1 || b.SubY < -1 || (b.SubX < 0) != (b.SubY < 0))
                     throw new InvalidDataException("Invalid version 2 terrain block coordinates.");
                 blocks[(b.Stage, b.X, b.Y, b.SubX, b.SubY)] = b;
             }
+        }
         loadedPath = path;
     }
     private static void Save(bool force = false)
@@ -248,7 +230,7 @@ internal static class CampaignTerrainEdits
         activeSolid.Clear();
         currentCellAttributes = CampaignRuntime.CurrentMap.Field("cell_attributes").Elements().Select(value => value.GetInt32()).ToArray();
         foreach (var edit in CampaignRuntime.CurrentMap.Field("terrain_edits").Elements())
-            activeSolid[(edit.Integer("x"), edit.Integer("y"))] = edit.Integer("mask", edit.Boolean("solid") ? FullMask : 0);
+            activeSolid[(edit.Integer("x"), edit.Integer("y"))] = edit.GetProperty("mask").GetInt32();
         foreach (var b in blocks.Values.Where(b => b.Stage == stage && GuestHasBlock(b)))
         {
             // Guest script mutations can remove a placed cell; never resurrect it.

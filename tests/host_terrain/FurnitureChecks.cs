@@ -88,9 +88,10 @@ internal static class FurnitureChecks
             check(JsonDocument.Parse(File.ReadAllText(path)).RootElement.GetProperty("Objects").GetArrayLength() == 0, "fresh campaign retained furniture from an old run");
             CampaignFurniture.ClearSession();
             File.WriteAllText(path, "[]");
-            typeof(CampaignFurniture).GetMethod("EnsureLoaded", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, null);
-            check(!File.Exists(path) && Directory.GetFiles(directory, CampaignFurniture.FileName + ".legacy-layout-*.bak").Length == 0,
-                "legacy furniture host coordinates were projected into the incompatible smaller world grid");
+            bool rejected = false;
+            try { typeof(CampaignFurniture).GetMethod("EnsureLoaded", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, null); }
+            catch (TargetInvocationException error) when (error.InnerException is InvalidDataException) { rejected = true; }
+            check(rejected && File.ReadAllText(path) == "[]", "unsupported furniture must fail without deleting its file");
         }
         finally { Main.tileFrameImportant[TileID.SliceOfCake] = oldFrame; CampaignFurniture.ClearSession(); }
     }

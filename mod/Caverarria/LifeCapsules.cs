@@ -18,9 +18,8 @@ public sealed class LifeCapsulePlayer : ModPlayer
     internal int ObserveMaximum(string campaign, int maximum)
     {
         if (string.IsNullOrEmpty(campaign)) return 0;
-        // Original Cave Story starts at 3 HP. Restoring an older checkpoint must
-        // not award an already collected capsule again. Old alpha saves migrate
-        // their earned capacity on first entry with this version.
+        // Original Cave Story starts at 3 HP. Replaying a checkpoint must
+        // not award an already collected capsule again.
         int previous = rewardedMaximums.GetValueOrDefault(campaign, 3);
         if (maximum <= previous) return 0;
         int upgrade = checked((maximum - previous) * 10);

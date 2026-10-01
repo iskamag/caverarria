@@ -143,26 +143,26 @@ if(process.env.CAVERARRIA_MICRO_TERRAIN_TEST){
     const terrainDocument=JSON.parse(decode.decode(new Uint8Array(e.memory.buffer,e.cave_fs_get(terrainFile,1),e.cave_fs_len(terrainFile,1))));
     assert.equal(2,terrainDocument.version);assert.equal(2,terrainDocument.subdivisions);assert.equal(8,terrainDocument.stages[room][idx]);
     e.cave_free(terrainFile,encode.encode('/Terrain.json\0').length);
-    // Old 3x3 layouts must never be mistaken for new 2x2 masks.
+    // Unsupported layouts fail without changing checkpoint or terrain bytes.
     command({op:'save'});e.cave_destroy(handle);
     const savedName=string('/Profile.dat');
     const profileBefore=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(savedName,1),e.cave_fs_len(savedName,1)));
     for(const incompatible of [{[room]:{[idx]:true,[idx+1]:511}}, {version:1,subdivisions:3,stages:{[room]:{[idx]:15}}}]) {
-        const legacyBytes=Buffer.from(JSON.stringify(incompatible));
-        put('/Terrain.json',legacyBytes,1);
-        const legacy=string('');handle=e.cave_create(legacy,legacy,320,240);e.cave_free(legacy,1);
-        state=command({op:'snapshot'});assert.equal(2,state.terrain_layout_version);
-        assert.deepEqual([],state.map.terrain_edits,'incompatible 3x3 edits were interpreted as 2x2');
+        const unsupportedBytes=Buffer.from(JSON.stringify(incompatible));
+        put('/Terrain.json',unsupportedBytes,1);
+        const empty=string('');handle=e.cave_create(empty,empty,320,240);e.cave_free(empty,1);
+        assert.equal(0,handle,'unsupported terrain must fail to load');
+        assert.match(read(e.cave_last_error()),/Unsupported saved terrain layout/);
         const profileAfter=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(savedName,1),e.cave_fs_len(savedName,1)));
         assert.deepEqual(profileBefore,profileAfter,'layout reset changed campaign checkpoint');
         const terrainName=string('/Terrain.json');
         const untouched=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(terrainName,1),e.cave_fs_len(terrainName,1)));
-        assert.deepEqual(legacyBytes,untouched,'ignored legacy terrain was overwritten');
+        assert.deepEqual(unsupportedBytes,untouched,'rejected terrain was overwritten');
         e.cave_free(terrainName,encode.encode('/Terrain.json\0').length);
         e.cave_destroy(handle);
     }
     e.cave_free(savedName,encode.encode('/Profile.dat\0').length);
-    console.log(JSON.stringify({module:modulePath,micro_cell:{room,x,y},partial_collision:true,native_bullet_precise:true,native_player_precise:true,persistence:true,independent_removal:true,incompatible_layout_ignored:true,checkpoint_unchanged:true}));
+    console.log(JSON.stringify({module:modulePath,micro_cell:{room,x,y},partial_collision:true,native_bullet_precise:true,native_player_precise:true,persistence:true,independent_removal:true,unsupported_layout_rejected:true,checkpoint_unchanged:true}));
     process.exit(0);
 }
 if(process.env.CAVERARRIA_TERRAIN_TEST){

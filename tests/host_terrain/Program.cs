@@ -93,27 +93,6 @@ try
     Check(wholePieces.Sum(piece => piece.Width * piece.Height) == 256, "normalized samples cover full native cell area");
     Check(smallPieces.Length == 1 && smallPieces[0] == CampaignTerrainEdits.BlockDrawBounds(7, 9, 1, 0),
         "small block uses the same normalized eight-pixel texture scale");
-    string legacy = Path.Combine(temporary, "legacy");
-    Directory.CreateDirectory(legacy);
-    File.WriteAllText(Path.Combine(legacy, "Profile.dat"), "checkpoint-preserved");
-    File.WriteAllText(Path.Combine(legacy, "terrain.json"), "{\"13\":{\"11:9\":511}}");
-    File.WriteAllText(Path.Combine(legacy, "TerrainBlocks.json"), "[{\"Stage\":13,\"X\":11,\"Y\":9}]");
-    File.WriteAllText(Path.Combine(legacy, "TerrainFurniture.json"), "[{\"Stage\":13,\"X\":11,\"Y\":9}]");
-    string otherProfile = Path.Combine(temporary, "other-campaign", "Profile.dat");
-    Directory.CreateDirectory(Path.GetDirectoryName(otherProfile)!); File.WriteAllText(otherProfile, "other campaign");
-    CampaignTerrainEdits.PrepareSaveLayout(legacy);
-    Check(File.ReadAllText(otherProfile) == "other campaign", "layout reset affects only selected campaign directory");
-    Check(!File.Exists(Path.Combine(legacy, "terrain.json")) && !File.Exists(Path.Combine(legacy, "TerrainBlocks.json")) && !File.Exists(Path.Combine(legacy, "TerrainFurniture.json")),
-        "legacy 3x3 terrain pair is removed from active version 2 save paths");
-    Check(Directory.GetFiles(legacy, "*.bak").Length == 0, "incompatible terrain is discarded without archival by user request");
-    Check(!File.Exists(Path.Combine(legacy, "Profile.dat")), "layout upgrade resets incompatible campaign checkpoint");
-    CampaignTerrainEdits.PrepareSaveLayout(legacy);
-    Check(Directory.GetFiles(legacy, "*.bak").Length == 0, "legacy layout reset is idempotent");
-    File.WriteAllText(Path.Combine(legacy, "Terrain.json"), "{\"version\":2,\"subdivisions\":2,\"stages\":{}}");
-    File.WriteAllText(Path.Combine(legacy, "TerrainBlocks.json"), Metadata("[]"));
-    CampaignTerrainEdits.PrepareSaveLayout(legacy);
-    Check(File.Exists(Path.Combine(legacy, "Terrain.json")) && File.Exists(Path.Combine(legacy, "TerrainBlocks.json")),
-        "version 2 terrain files are retained unchanged");
     // Load/save actual production metadata with two stages, then verify new-game cleanup.
     string metadata = Path.Combine(temporary, CampaignTerrainEdits.FileName);
     File.WriteAllText(metadata, Metadata("[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0},{\"Stage\":4,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]"));
@@ -152,6 +131,16 @@ try
     using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
         Check(data.RootElement.GetProperty("Blocks")[0].GetProperty("SubX").GetInt32() != data.RootElement.GetProperty("Blocks")[1].GetProperty("SubX").GetInt32(),
             "small block subcell identities survive metadata round trip");
+    CampaignTerrainEdits.ClearSession();
+    string unsupported = Metadata("[]").Replace("\"Version\":2", "\"Version\":1");
+    File.WriteAllText(metadata, unsupported);
+    string checkpoint = Path.Combine(temporary, "Profile.dat");
+    File.WriteAllText(checkpoint, "checkpoint-preserved");
+    bool rejected = false;
+    try { CampaignTerrainEdits.ReloadSaved(); }
+    catch (InvalidDataException) { rejected = true; }
+    Check(rejected && File.ReadAllText(metadata) == unsupported && File.ReadAllText(checkpoint) == "checkpoint-preserved",
+        "unsupported blocks must fail without rewriting terrain or resetting checkpoint");
     CampaignBootstrap.ClearWorldMarker();
     Check(protection.CanPlace(ox, oy, TileID.Stone), "ordinary world placement preserved");
     bool damaged = false;

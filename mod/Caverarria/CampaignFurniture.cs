@@ -31,8 +31,8 @@ internal static class CampaignFurniture
             using var json = JsonDocument.Parse(File.ReadAllText(path));
             if (json.RootElement.ValueKind != JsonValueKind.Object || json.RootElement.Integer("Version") != 2
                 || json.RootElement.Integer("Subdivisions") != 2)
-                File.Delete(path);
-            else foreach (var item in JsonSerializer.Deserialize<FurnitureFile>(json.RootElement.GetRawText())?.Objects ?? [])
+                throw new InvalidDataException("Unsupported furniture layout.");
+            foreach (var item in JsonSerializer.Deserialize<FurnitureFile>(json.RootElement.GetRawText())?.Objects ?? [])
                 furniture[(item.Stage, item.X, item.Y)] = item;
         }
         loadedPath = path;

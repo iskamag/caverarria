@@ -66,7 +66,6 @@ internal static class CampaignRuntime
         {
             string data = Environment.GetEnvironmentVariable("CAVERARRIA_DATA") ?? Path.Combine(CampaignBootstrap.AssetsPath, "data");
             string save = CampaignBootstrap.SavePath;
-            CampaignTerrainEdits.PrepareSaveLayout(save);
             bool load = loadProfile && CampaignBootstrap.WantsLoad;
             int width = CampaignView.ViewportWidth, height = CampaignView.ViewportHeight;
             string? wasmPath = Environment.GetEnvironmentVariable("CAVERARRIA_WASM");
@@ -330,8 +329,10 @@ internal static class CampaignRuntime
             if (item.active) yield return item;
     }
 
-    private static Point LegacyProjectionFootprint(int width, int height)
+    private static Point SavedProjectionFootprint(int width, int height)
     {
+        // A saved host world can contain projected tiles from a larger room.
+        // Clear the current 2x2 campaign footprint on first entry.
         string data = Environment.GetEnvironmentVariable("CAVERARRIA_DATA") ?? Path.Combine(CampaignBootstrap.AssetsPath, "data");
         string stageDirectory = Path.Combine(data, "Stage");
         if (Directory.Exists(stageDirectory))
@@ -342,8 +343,8 @@ internal static class CampaignRuntime
                 reader.ReadByte();
                 width = Math.Max(width, reader.ReadUInt16()); height = Math.Max(height, reader.ReadUInt16());
             }
-        return new Point(Math.Min(Main.maxTilesX - OriginTileX, width * 3 + 3),
-            Math.Min(Main.maxTilesY - OriginTileY, height * 3 + 3));
+        return new Point(Math.Min(Main.maxTilesX - OriginTileX, width * 2 + 2),
+            Math.Min(Main.maxTilesY - OriginTileY, height * 2 + 2));
     }
 
     private static void ProjectMap(JsonElement map)
@@ -355,14 +356,14 @@ internal static class CampaignRuntime
         int[] attributes = map.Field("attributes").Elements().Select(x => x.GetInt32()).ToArray();
         int[] cellAttributes = map.Field("cell_attributes").Elements().Select(x => x.GetInt32()).ToArray();
         if (width <= 0 || height <= 0 || tiles.Length != width * height || attributes.Length < 256) return;
-        Point clear = projectedWidth == 0 && projectedHeight == 0 ? LegacyProjectionFootprint(width, height)
+        Point clear = projectedWidth == 0 && projectedHeight == 0 ? SavedProjectionFootprint(width, height)
             : new Point(Math.Min(Main.maxTilesX - OriginTileX, Math.Max(width, projectedWidth) * 2 + 2),
                 Math.Min(Main.maxTilesY - OriginTileY, Math.Max(height, projectedHeight) * 2 + 2));
         for (int y = 0; y < clear.Y; y++)
             for (int x = 0; x < clear.X; x++)
                 Main.tile[OriginTileX + x, OriginTileY + y].ClearEverything();
         var editMasks = map.Field("terrain_edits").Elements().ToDictionary(edit => (edit.Integer("x"), edit.Integer("y")),
-            edit => edit.Integer("mask", edit.Boolean("solid") ? 15 : 0));
+            edit => edit.GetProperty("mask").GetInt32());
         ushort tileType = (ushort)ModContent.TileType<CampaignSolid>();
         for (int y = 0; y < height; y++) for (int x = 0; x < width; x++)
         {

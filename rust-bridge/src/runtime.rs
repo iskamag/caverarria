@@ -133,16 +133,14 @@ impl Runtime {
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes).map_err(err)?;
                 let document: Value = serde_json::from_slice(&bytes).map_err(err)?;
-                // 0.2.0 changes the physical grid from 3x3 to exact 2x2.
-                // Old masks have incompatible meaning; retain the original file
-                // until host archival/new edits, and leave campaign Profile.dat alone.
-                if document["version"].as_u64() == Some(2) && document["subdivisions"].as_u64() == Some(2) {
-                    let edits: BTreeMap<usize, BTreeMap<usize, u16>> = serde_json::from_value(document["stages"].clone()).map_err(err)?;
-                    if edits.values().any(|cells| cells.values().any(|&mask| mask > 15)) {
-                        return Err("Invalid saved terrain mask for 2x2 layout".into());
-                    }
-                    edits
-                } else { BTreeMap::new() }
+                if document["version"].as_u64() != Some(2) || document["subdivisions"].as_u64() != Some(2) {
+                    return Err("Unsupported saved terrain layout".into());
+                }
+                let edits: BTreeMap<usize, BTreeMap<usize, u16>> = serde_json::from_value(document["stages"].clone()).map_err(err)?;
+                if edits.values().any(|cells| cells.values().any(|&mask| mask > 15)) {
+                    return Err("Invalid saved terrain mask for 2x2 layout".into());
+                }
+                edits
             }
             Err(_) => BTreeMap::new(),
         };

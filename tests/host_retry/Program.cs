@@ -170,8 +170,6 @@ internal static class Program
         Check(health.Base == 70, "permanent capsule health did not survive player save/load");
         Check(reloaded.ObserveMaximum("island", 10) == 0, "player reload lost rewarded capsule milestones");
         Check(reloaded.ObserveMaximum("other-island", 6) == 30, "independent campaign's capsules were suppressed");
-        var migrated = new LifeCapsulePlayer();
-        Check(migrated.ObserveMaximum("old-alpha", 10) == 70, "old alpha campaign capacity did not migrate");
     }
 
     private static void RegisterPlayer<T>(Player player, T hooks, ushort index) where T : ModPlayer

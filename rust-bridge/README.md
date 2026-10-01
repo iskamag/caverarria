@@ -152,9 +152,8 @@ four-bit occupancy and `solid` means any occupied subtile) when the content hash
 Script tile edits and player overrides change its `revision`. Host projection
 must use `cell_attributes` plus `terrain_edits.mask`, since edited cells do not
 reserve authored tile IDs. The 0.2.0 terrain schema is `{version:2,subdivisions:2,stages:{stage:{cell:mask}}}`.
-Unversioned and 3x3 layouts are ignored without altering their bytes or
-`Profile.dat` in standalone engine use; the host discards incompatible terrain
-and resets that campaign checkpoint for 0.2.0, as requested. Preserve the
+Unsupported terrain layouts fail to load; no save migration or automatic
+checkpoint reset is performed. Preserve the
 previous map if omitted. Cave Story tile coordinates are **centers**: tile `(x,y)`
 starts at `(x*16-8,y*16-8)`. NPC bbox values `left/top/right/bottom` are extents
 from its center. `player.life_delta` describes native script healing/life changes

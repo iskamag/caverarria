@@ -15,6 +15,7 @@ internal static class CampaignFurniture
     internal const string FileName = "TerrainFurniture.json";
     private sealed record Piece(int X, int Y, short FrameX, short FrameY);
     private sealed record Furniture(int Stage, int X, int Y, int Tile, string? TileName, int Style, int Alternate, Piece[] Pieces);
+    private sealed record FurnitureFile(int Version, int Subdivisions, Furniture[] Objects);
     private static readonly Dictionary<(int stage, int x, int y), Furniture> furniture = new();
     private static string? loadedPath;
     private static bool persistenceEnabled = true;
@@ -26,8 +27,14 @@ internal static class CampaignFurniture
         if (loadedPath == path) return;
         furniture.Clear();
         if (File.Exists(path))
-            foreach (var item in JsonSerializer.Deserialize<Furniture[]>(File.ReadAllText(path)) ?? [])
+        {
+            using var json = JsonDocument.Parse(File.ReadAllText(path));
+            if (json.RootElement.ValueKind != JsonValueKind.Object || json.RootElement.Integer("Version") != 2
+                || json.RootElement.Integer("Subdivisions") != 2)
+                File.Delete(path);
+            else foreach (var item in JsonSerializer.Deserialize<FurnitureFile>(json.RootElement.GetRawText())?.Objects ?? [])
                 furniture[(item.Stage, item.X, item.Y)] = item;
+        }
         loadedPath = path;
     }
     private static void Save(bool force = false)
@@ -35,10 +42,10 @@ internal static class CampaignFurniture
         if (!force && !persistenceEnabled) return;
         Directory.CreateDirectory(CampaignBootstrap.SavePath);
         string temporary = MetadataPath + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(furniture.Values.ToArray()));
+        File.WriteAllText(temporary, JsonSerializer.Serialize(new FurnitureFile(2, 2, furniture.Values.ToArray())));
         File.Move(temporary, MetadataPath, true);
     }
-    public static void ClearSession() { furniture.Clear(); loadedPath = null; persistenceEnabled = true; }
+    public static void ClearSession() { furniture.Clear(); drawPieces.Clear(); loadedPath = null; persistenceEnabled = true; CampaignTilePixels.DisposeFrames(); }
     public static void ClearNewGame() { EnsureLoaded(); furniture.Clear(); Save(force: true); }
     public static void ReloadSaved() { furniture.Clear(); loadedPath = null; EnsureLoaded(); }
     public static void SyncPersistence(bool enabled)
@@ -152,8 +159,11 @@ internal static class CampaignFurniture
             }
         }
     }
-    public static void Draw(SpriteBatch batch)
+    private sealed record DrawPiece(Texture2D Texture, Vector2 Position, Color Color, SpriteEffects Effects);
+    private static readonly List<DrawPiece> drawPieces = new();
+    public static void Prepare(Vector2 nativeCamera)
     {
+        drawPieces.Clear();
         if (!CampaignRuntime.Active) return;
         EnsureLoaded(); Refresh();
         foreach (Furniture item in furniture.Values.Where(item => item.Stage == Stage))
@@ -176,10 +186,18 @@ internal static class CampaignFurniture
                     out SpriteEffects effects, out Texture2D glow, out Rectangle glowSource, out Color glowColor);
                 Rectangle source = new(fx + addX, fy + addY, width, height - half);
                 if (source.Left < 0 || source.Top < 0 || source.Right > texture.Width || source.Bottom > texture.Height) continue;
-                Vector2 position = new Vector2(i * 16 - (width - 16) / 2f, j * 16 + top + half) - Main.screenPosition;
-                batch.Draw(texture, position, source, Color.White, 0, Vector2.Zero, 1, effects, 0);
-                if (glow != null) batch.Draw(glow, position, glowSource, glowColor, 0, Vector2.Zero, 1, effects, 0);
+                Vector2 position = CampaignTilePixels.Position(
+                    new Vector2(i * 16 - (width - 16) / 2f, j * 16 + top + half), nativeCamera);
+                drawPieces.Add(new DrawPiece(CampaignTilePixels.Prepare(texture, source), position, Color.White, effects));
+                if (glow != null && glowSource.Width > 0 && glowSource.Height > 0)
+                    drawPieces.Add(new DrawPiece(CampaignTilePixels.Prepare(glow, glowSource), position, glowColor, effects));
             }
         }
+    }
+    // Caller supplies the guest-grid transform, shared with projected terrain.
+    public static void Draw(SpriteBatch batch)
+    {
+        foreach (var piece in drawPieces)
+            batch.Draw(piece.Texture, piece.Position, null, piece.Color, 0, Vector2.Zero, 1, piece.Effects, 0);
     }
 }

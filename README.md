@@ -22,9 +22,11 @@ Use Terraria movement and item attacks. **E** interacts or advances dialogue,
 story map once acquired, and **V/C** cycle story weapons. Original save points remain active.
 Terraria's **+ / -** and world zoom slider zoom the campaign in sharp pixel
 steps. Camera base scale and player
-body size are also adjustable in Mod Configuration; the default scales your
-character and body collision together by 1.5. Terraria world actors and held
-items are rasterized onto the same pixel grid as the original campaign.
+body size are also adjustable in Mod Configuration. One logical Terraria pixel
+is one Cave Story pixel: doubled Terraria texture pixels are normalized 2:1,
+and the camera magnifies the shared grid by whole numbers. The default body
+uses ordinary Terraria collision dimensions and keeps the previous apparent
+size. Furniture and block frames are normalized once before camera movement.
 Player scaling applies only to the actual campaign avatar; menus and normal
 worlds keep their ordinary appearance. Enemies retain their original shields
 and vulnerability windows, including the Graveyard keeper's attack phase.
@@ -33,12 +35,16 @@ actions. Life Capsules immediately grant permanent character health, at ten
 Terraria HP per original HP; retrying a checkpoint does not grant the same
 upgrade twice. Cave Story guns fire only inside the campaign.
 
+Version 0.2.0 changes the world grid. The 0.1 campaign save and
+placed terrain are reset for the new layout. Terraria characters stay intact.
+
 Use ordinary pickaxes to mine campaign terrain and ordinary solid block items
-to build. Each campaign block covers a 3×3 group of Terraria tiles; one placement
+to build. Each campaign block covers a 2×2 group of Terraria tiles; one placement
 uses one item, and mining returns one block (original terrain yields stone).
 Enable **Place Terraria-sized blocks** to place ordinary 16-pixel Terraria blocks
 instead. Each small block can be mined independently; existing blocks keep their
-size when the setting changes. Original solid/slope cells must be mined first
+size when the setting changes. Terraria tiles use two texture pixels per logical
+campaign pixel at either placement size. Original solid/slope cells must be mined first
 before filling them with small blocks.
 Terrain edits affect native enemies and bullets as well as Terraria collision.
 By default, edits persist across room changes, checkpoint retries and re-entry.

@@ -132,18 +132,17 @@ impl Runtime {
             Ok(mut file) => {
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes).map_err(err)?;
-                let legacy: BTreeMap<usize, BTreeMap<usize, Value>> = serde_json::from_slice(&bytes).map_err(err)?;
-                let mut edits = BTreeMap::new();
-                for (stage, cells) in legacy {
-                    let mut masks = BTreeMap::new();
-                    for (index, value) in cells {
-                        let mask = if let Some(solid) = value.as_bool() { if solid { 511 } else { 0 } }
-                            else { value.as_u64().filter(|&m| m <= 511).ok_or("Invalid saved terrain mask")? as u16 };
-                        masks.insert(index, mask);
+                let document: Value = serde_json::from_slice(&bytes).map_err(err)?;
+                // 0.2.0 changes the physical grid from 3x3 to exact 2x2.
+                // Old masks have incompatible meaning; retain the original file
+                // until host archival/new edits, and leave campaign Profile.dat alone.
+                if document["version"].as_u64() == Some(2) && document["subdivisions"].as_u64() == Some(2) {
+                    let edits: BTreeMap<usize, BTreeMap<usize, u16>> = serde_json::from_value(document["stages"].clone()).map_err(err)?;
+                    if edits.values().any(|cells| cells.values().any(|&mask| mask > 15)) {
+                        return Err("Invalid saved terrain mask for 2x2 layout".into());
                     }
-                    edits.insert(stage, masks);
-                }
-                edits
+                    edits
+                } else { BTreeMap::new() }
             }
             Err(_) => BTreeMap::new(),
         };
@@ -174,7 +173,7 @@ impl Runtime {
         }
     }
     fn persist_terrain(&mut self) -> Result<(), String> {
-        let bytes = serde_json::to_vec(&self.terrain).map_err(err)?;
+        let bytes = serde_json::to_vec(&json!({"version":2,"subdivisions":2,"stages":self.terrain})).map_err(err)?;
         let mut file = crate::framework::filesystem::user_create(&self.ctx, "/Terrain.json").map_err(err)?;
         file.write_all(&bytes).map_err(err)?;
         file.flush().map_err(err)?;
@@ -299,8 +298,8 @@ impl Runtime {
                     let index = y * game.stage.map.width as usize + x;
                     let sub_x = v["sub_x"].as_u64(); let sub_y = v["sub_y"].as_u64();
                     let mask = match (sub_x, sub_y) {
-                        (None, None) if v["sub_x"].is_null() && v["sub_y"].is_null() => if solid { 511 } else { 0 },
-                        (Some(sx), Some(sy)) if sx < 3 && sy < 3 => {
+                        (None, None) if v["sub_x"].is_null() && v["sub_y"].is_null() => if solid { 15 } else { 0 },
+                        (Some(sx), Some(sy)) if sx < 2 && sy < 2 => {
                             let prior = self.terrain.get(&stage).and_then(|m| m.get(&index)).copied();
                             // Partial placement never replaces an authored slope,
                             // hazard, water or wall. Mine authored terrain first.
@@ -308,10 +307,10 @@ impl Runtime {
                                 return Err("Partial edit requires an empty or player-edited cell".into());
                             }
                             let old = prior.unwrap_or(0);
-                            let bit = 1u16 << (sy * 3 + sx);
+                            let bit = 1u16 << (sy * 2 + sx);
                             if solid { old | bit } else { old & !bit }
                         }
-                        _ => return Err("Terrain subcell requires sub_x and sub_y in 0..3".into()),
+                        _ => return Err("Terrain subcell requires sub_x and sub_y in 0..2".into()),
                     };
                     self.terrain.entry(stage).or_default().insert(index, mask);
                     if self.terrain_persistent { self.persist_terrain()?; }
@@ -581,6 +580,7 @@ impl Runtime {
         result["hit_accepted"] = json!(hit_accepted);
         result["terrain_edit_accepted"] = json!(terrain_accepted);
         result["terrain_persistent"] = json!(self.terrain_persistent);
+        result["terrain_layout_version"] = json!(2);
         if op == "tile_hit" { result["tile_hit_flags"] = json!(tile_hit_flags); }
         Ok(result.to_string())
     }

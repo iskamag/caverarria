@@ -13,6 +13,8 @@ namespace Caverarria;
 internal static class CampaignTerrainEdits
 {
     internal const string FileName = "TerrainBlocks.json";
+    internal const int LayoutVersion = 2, Subdivisions = 2, FullMask = 15;
+    private sealed record TerrainFile(int Version, int Subdivisions, Block[] Blocks);
     private sealed record Block(int Stage, int X, int Y, int Tile, string? TileName, int Item, string? ItemName, int Style, int FrameX, int FrameY, int SubX = -1, int SubY = -1);
     private static readonly Dictionary<(int stage, int x, int y, int subX, int subY), Block> blocks = new();
     private static readonly Dictionary<(int x, int y), int> activeSolid = new();
@@ -39,14 +41,42 @@ internal static class CampaignTerrainEdits
     {
         loadedPath = null; blocks.Clear(); activeSolid.Clear(); EnsureLoaded();
     }
+    /// <summary>Discard this campaign's incompatible 0.1 checkpoint and terrain, as requested for 0.2.</summary>
+    public static void PrepareSaveLayout(string? directory = null)
+    {
+        directory ??= CampaignBootstrap.SavePath;
+        if (!Directory.Exists(directory)) return;
+        string[] files = Directory.EnumerateFiles(directory).Where(path =>
+            Path.GetFileName(path).Equals(FileName, StringComparison.OrdinalIgnoreCase)
+            || Path.GetFileName(path).Equals("Terrain.json", StringComparison.OrdinalIgnoreCase)
+            || Path.GetFileName(path).Equals(CampaignFurniture.FileName, StringComparison.OrdinalIgnoreCase)).ToArray();
+        bool incompatible = false;
+        foreach (string path in files)
+        {
+            bool guest = Path.GetFileName(path).Equals("Terrain.json", StringComparison.OrdinalIgnoreCase);
+            using var json = JsonDocument.Parse(File.ReadAllText(path));
+            incompatible |= json.RootElement.ValueKind != JsonValueKind.Object
+                || json.RootElement.Integer(guest ? "version" : "Version") != LayoutVersion
+                || json.RootElement.Integer(guest ? "subdivisions" : "Subdivisions") != Subdivisions;
+        }
+        if (!incompatible) return;
+        foreach (string path in files) File.Delete(path);
+        foreach (string path in Directory.EnumerateFiles(directory).Where(path =>
+            Path.GetFileName(path).Equals("Profile.dat", StringComparison.OrdinalIgnoreCase))) File.Delete(path);
+    }
     private static void EnsureLoaded()
     {
         string path = MetadataPath;
         if (loadedPath == path) return;
         blocks.Clear();
+        PrepareSaveLayout();
         if (File.Exists(path))
-            foreach (var b in JsonSerializer.Deserialize<Block[]>(File.ReadAllText(path)) ?? [])
+            foreach (var b in JsonSerializer.Deserialize<TerrainFile>(File.ReadAllText(path))?.Blocks ?? [])
+            {
+                if (b.SubX >= Subdivisions || b.SubY >= Subdivisions || b.SubX < -1 || b.SubY < -1 || (b.SubX < 0) != (b.SubY < 0))
+                    throw new InvalidDataException("Invalid version 2 terrain block coordinates.");
                 blocks[(b.Stage, b.X, b.Y, b.SubX, b.SubY)] = b;
+            }
         loadedPath = path;
     }
     private static void Save(bool force = false)
@@ -54,7 +84,7 @@ internal static class CampaignTerrainEdits
         if (!force && !persistenceEnabled) return;
         Directory.CreateDirectory(CampaignBootstrap.SavePath);
         string temporary = MetadataPath + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(blocks.Values.ToArray()));
+        File.WriteAllText(temporary, JsonSerializer.Serialize(new TerrainFile(LayoutVersion, Subdivisions, blocks.Values.ToArray())));
         File.Move(temporary, MetadataPath, true);
     }
     private static int TileType(Block b) => b.TileName == null ? b.Tile
@@ -64,8 +94,8 @@ internal static class CampaignTerrainEdits
 
     internal static bool Cell(int i, int j, out int x, out int y)
     {
-        x = (i - CampaignRuntime.OriginTileX) / 3;
-        y = (j - CampaignRuntime.OriginTileY) / 3;
+        x = (i - CampaignRuntime.OriginTileX) / 2;
+        y = (j - CampaignRuntime.OriginTileY) / 2;
         var stage = CampaignRuntime.Snapshot.Field("stage");
         return CampaignRuntime.Active && i >= CampaignRuntime.OriginTileX && j >= CampaignRuntime.OriginTileY
             && x < stage.Integer("width") && y < stage.Integer("height");
@@ -86,8 +116,8 @@ internal static class CampaignTerrainEdits
                 && CellAllowsSmallBlock(currentCellAttributes[index], activeSolid.ContainsKey((x, y)));
             return allowed && !Main.tile[i, j].HasTile;
         }
-        for (int sy = 0; sy < 3; sy++) for (int sx = 0; sx < 3; sx++)
-            if (Main.tile[CampaignRuntime.OriginTileX + x * 3 + sx, CampaignRuntime.OriginTileY + y * 3 + sy].HasTile) return false;
+        for (int sy = 0; sy < 2; sy++) for (int sx = 0; sx < 2; sx++)
+            if (Main.tile[CampaignRuntime.OriginTileX + x * 2 + sx, CampaignRuntime.OriginTileY + y * 2 + sy].HasTile) return false;
         return true;
     }
     // Preserve authored solid/slope art and physics until it is mined as a whole
@@ -96,8 +126,8 @@ internal static class CampaignTerrainEdits
     internal static Rectangle PlacementBounds(int i, int j, bool small)
     {
         if (small) return new Rectangle(i * 16, j * 16, 16, 16);
-        int x = (i - CampaignRuntime.OriginTileX) / 3, y = (j - CampaignRuntime.OriginTileY) / 3;
-        return new Rectangle((CampaignRuntime.OriginTileX + x * 3) * 16, (CampaignRuntime.OriginTileY + y * 3) * 16, 48, 48);
+        int x = (i - CampaignRuntime.OriginTileX) / 2, y = (j - CampaignRuntime.OriginTileY) / 2;
+        return new Rectangle((CampaignRuntime.OriginTileX + x * 2) * 16, (CampaignRuntime.OriginTileY + y * 2) * 16, 32, 32);
     }
     /// <summary>Keep the mouse's native cell, but let vanilla attach its first host tile at that cell's edge.</summary>
     public static void TrySnapPlacementTarget(Player player)
@@ -107,7 +137,7 @@ internal static class CampaignTerrainEdits
         int desiredX = Player.tileTargetX, desiredY = Player.tileTargetY;
         if (type < 0 || !CanPlace(desiredX, desiredY, type)
             || !Cell(desiredX, desiredY, out int x, out int y)) return;
-        int left = CampaignRuntime.OriginTileX + x * 3, top = CampaignRuntime.OriginTileY + y * 3;
+        int left = CampaignRuntime.OriginTileX + x * 2, top = CampaignRuntime.OriginTileY + y * 2;
         int reachX = Player.tileRangeX + player.blockRange + player.HeldItem.tileBoost;
         int reachY = Player.tileRangeY + player.blockRange + player.HeldItem.tileBoost;
         bool InReach(int i, int j) => PlacementInReach(player.position, player.width, player.height, reachX, reachY, i, j);
@@ -127,7 +157,7 @@ internal static class CampaignTerrainEdits
     {
         targetX = desiredX; targetY = desiredY;
         int closest = int.MaxValue;
-        for (int y = top; y < top + 3; y++) for (int x = left; x < left + 3; x++)
+        for (int y = top; y < top + 2; y++) for (int x = left; x < left + 2; x++)
         {
             if (!inReach(x, y) || !(solid(x - 1, y) || solid(x + 1, y) || solid(x, y - 1) || solid(x, y + 1))) continue;
             int distance = (x - desiredX) * (x - desiredX) + (y - desiredY) * (y - desiredY);
@@ -142,7 +172,7 @@ internal static class CampaignTerrainEdits
         if (fail || effectOnly || !CanMine(i, j) || !Cell(i, j, out int x, out int y)) return;
         EnsureLoaded();
         int stage = Stage;
-        int subX = (i - CampaignRuntime.OriginTileX) % 3, subY = (j - CampaignRuntime.OriginTileY) % 3;
+        int subX = (i - CampaignRuntime.OriginTileX) % 2, subY = (j - CampaignRuntime.OriginTileY) % 2;
         blocks.TryGetValue((stage, x, y, subX, subY), out var placed);
         bool small = placed != null;
         if (!small) blocks.TryGetValue((stage, x, y, -1, -1), out placed);
@@ -170,7 +200,7 @@ internal static class CampaignTerrainEdits
         int stage = Stage;
         var tile = Main.tile[i, j];
         bool small = SmallBlocks;
-        int subX = small ? (i - CampaignRuntime.OriginTileX) % 3 : -1, subY = small ? (j - CampaignRuntime.OriginTileY) % 3 : -1;
+        int subX = small ? (i - CampaignRuntime.OriginTileX) % 2 : -1, subY = small ? (j - CampaignRuntime.OriginTileY) % 2 : -1;
         var block = new Block(stage, x, y, type, TileLoader.GetTile(type)?.FullName,
             item.type, item.ModItem?.FullName, item.placeStyle, tile.TileFrameX, tile.TileFrameY, subX, subY);
         editing = true;
@@ -190,21 +220,26 @@ internal static class CampaignTerrainEdits
     }
     private static void ClearCell(int x, int y)
     {
-        for (int sy = 0; sy < 3; sy++) for (int sx = 0; sx < 3; sx++)
-            Main.tile[CampaignRuntime.OriginTileX + x * 3 + sx, CampaignRuntime.OriginTileY + y * 3 + sy].ClearTile();
+        for (int sy = 0; sy < 2; sy++) for (int sx = 0; sx < 2; sx++)
+            Main.tile[CampaignRuntime.OriginTileX + x * 2 + sx, CampaignRuntime.OriginTileY + y * 2 + sy].ClearTile();
     }
-    internal static bool MaskHasTile(int mask, int subX, int subY) => (mask & (1 << (subY * 3 + subX))) != 0;
+    internal static bool MaskHasTile(int mask, int subX, int subY) => (mask & (1 << (subY * 2 + subX))) != 0;
     private static bool GuestHasBlock(Block block) => activeSolid.TryGetValue((block.X, block.Y), out int mask)
-        && (block.SubX < 0 ? mask == 511 : MaskHasTile(mask, block.SubX, block.SubY));
+        && (block.SubX < 0 ? mask == FullMask : MaskHasTile(mask, block.SubX, block.SubY));
 
     internal static Rectangle BlockDrawBounds(int cellX, int cellY, int subX, int subY)
     {
         if (subX < 0) return new Rectangle(cellX * 16 - 8, cellY * 16 - 8, 16, 16);
-        int left = (int)MathF.Round(cellX * 16 - 8 + subX * (16f / 3f));
-        int top = (int)MathF.Round(cellY * 16 - 8 + subY * (16f / 3f));
-        int right = (int)MathF.Round(cellX * 16 - 8 + (subX + 1) * (16f / 3f));
-        int bottom = (int)MathF.Round(cellY * 16 - 8 + (subY + 1) * (16f / 3f));
-        return new Rectangle(left, top, right - left, bottom - top);
+        return new Rectangle(cellX * 16 - 8 + subX * 8, cellY * 16 - 8 + subY * 8, 8, 8);
+    }
+
+    internal static IEnumerable<Rectangle> BlockDrawPieces(int cellX, int cellY, int subX, int subY)
+    {
+        if (subX >= 0) { yield return BlockDrawBounds(cellX, cellY, subX, subY); yield break; }
+        // A full Cave Story cell contains four ordinary Terraria tiles. Each tile
+        // uses the same fixed two texture pixels per native pixel sampling rate.
+        for (int y = 0; y < Subdivisions; y++) for (int x = 0; x < Subdivisions; x++)
+            yield return BlockDrawBounds(cellX, cellY, x, y);
     }
 
     public static void ProjectPlacedTiles(int stage)
@@ -213,14 +248,14 @@ internal static class CampaignTerrainEdits
         activeSolid.Clear();
         currentCellAttributes = CampaignRuntime.CurrentMap.Field("cell_attributes").Elements().Select(value => value.GetInt32()).ToArray();
         foreach (var edit in CampaignRuntime.CurrentMap.Field("terrain_edits").Elements())
-            activeSolid[(edit.Integer("x"), edit.Integer("y"))] = edit.Integer("mask", edit.Boolean("solid") ? 511 : 0);
+            activeSolid[(edit.Integer("x"), edit.Integer("y"))] = edit.Integer("mask", edit.Boolean("solid") ? FullMask : 0);
         foreach (var b in blocks.Values.Where(b => b.Stage == stage && GuestHasBlock(b)))
         {
             // Guest script mutations can remove a placed cell; never resurrect it.
-            int i = CampaignRuntime.OriginTileX + b.X * 3, j = CampaignRuntime.OriginTileY + b.Y * 3;
-            if (i < 0 || j < 0 || i + 2 >= Main.maxTilesX || j + 2 >= Main.maxTilesY) continue;
+            int i = CampaignRuntime.OriginTileX + b.X * 2, j = CampaignRuntime.OriginTileY + b.Y * 2;
+            if (i < 0 || j < 0 || i + 1 >= Main.maxTilesX || j + 1 >= Main.maxTilesY) continue;
             int firstX = b.SubX < 0 ? 0 : b.SubX, firstY = b.SubY < 0 ? 0 : b.SubY;
-            int count = b.SubX < 0 ? 3 : 1;
+            int count = b.SubX < 0 ? 2 : 1;
             for (int sy = firstY; sy < firstY + count; sy++) for (int sx = firstX; sx < firstX + count; sx++)
             {
                 var tile = Main.tile[i + sx, j + sy];
@@ -230,21 +265,35 @@ internal static class CampaignTerrainEdits
             }
         }
     }
+    public static void Prepare()
+    {
+        if (!CampaignRuntime.Active) return;
+        EnsureLoaded();
+        foreach (var b in blocks.Values.Where(b => b.Stage == Stage && GuestHasBlock(b)))
+        {
+            int type = TileType(b); Main.instance.LoadTiles(type);
+            var texture = TextureAssets.Tile[type].Value;
+            var source = TileSource(texture, b);
+            CampaignTilePixels.Prepare(texture, source);
+        }
+    }
+    private static Rectangle TileSource(Texture2D texture, Block block)
+        => new(Math.Clamp(block.FrameX, 0, Math.Max(0, texture.Width - 16)),
+            Math.Clamp(block.FrameY, 0, Math.Max(0, texture.Height - 16)), 16, 16);
     public static void Draw(SpriteBatch batch, Vector2 nativeCamera)
     {
         if (!CampaignRuntime.Active) return;
         EnsureLoaded();
         foreach (var b in blocks.Values.Where(b => b.Stage == Stage && GuestHasBlock(b)))
         {
-            int i = CampaignRuntime.OriginTileX + b.X * 3, j = CampaignRuntime.OriginTileY + b.Y * 3;
+            int i = CampaignRuntime.OriginTileX + b.X * 2, j = CampaignRuntime.OriginTileY + b.Y * 2;
             int testI = i + Math.Max(0, b.SubX), testJ = j + Math.Max(0, b.SubY);
             if (testI < 0 || testJ < 0 || testI >= Main.maxTilesX || testJ >= Main.maxTilesY || !Main.tile[testI, testJ].HasTile) continue;
             int type = TileType(b); Main.instance.LoadTiles(type);
             var texture = TextureAssets.Tile[type].Value;
-            int fx = Math.Clamp(b.FrameX, 0, Math.Max(0, texture.Width - 16)), fy = Math.Clamp(b.FrameY, 0, Math.Max(0, texture.Height - 16));
-            var bounds = BlockDrawBounds(b.X, b.Y, b.SubX, b.SubY);
-            batch.Draw(texture, new Rectangle(bounds.X - (int)nativeCamera.X, bounds.Y - (int)nativeCamera.Y, bounds.Width, bounds.Height),
-                new Rectangle(fx, fy, 16, 16), Color.White);
+            var normalized = CampaignTilePixels.Get(texture, TileSource(texture, b));
+            foreach (var bounds in BlockDrawPieces(b.X, b.Y, b.SubX, b.SubY))
+                batch.Draw(normalized, new Vector2(bounds.X - MathF.Floor(nativeCamera.X), bounds.Y - MathF.Floor(nativeCamera.Y)), Color.White);
         }
     }
 }

@@ -90,29 +90,48 @@ if(process.env.CAVERARRIA_MICRO_TERRAIN_TEST){
     assert.equal(1,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask);
     const left=x*16-8,top=y*16-8;
     const occupied=command({op:'tile_hit',x:left+2,y:top+2,width:1,height:1});
-    const empty=command({op:'tile_hit',x:left+8,y:top+2,width:1,height:1});
+    const empty=command({op:'tile_hit',x:left+12,y:top+2,width:1,height:1});
     assert.ok(occupied.tile_hit_flags&512,'native bullet missed occupied subtile');
     assert.equal(0,empty.tile_hit_flags&512,'native bullet hit unoccupied part of cell');
     const floor=command({op:'tick',controls:0,player:{x:left+2,y:top-0.5,vx:0,vy:1,width:2,height:2}});
     assert.ok(Math.abs(floor.player.y-(top-1))<1/512,'native player did not land on actual subtile top: '+JSON.stringify({player:floor.player,top}));
     assert.ok(floor.player.flags&8,'native player did not report floor contact');
-    const clear=command({op:'tick',controls:0,player:{x:left+8,y:top-0.5,vx:0,vy:1,width:2,height:2}});
+    const clear=command({op:'tick',controls:0,player:{x:left+12,y:top-0.5,vx:0,vy:1,width:2,height:2}});
     assert.ok(Math.abs(clear.player.y-(top-0.5))<1/512,'empty neighboring subtile displaced player');
     command({op:'save'});e.cave_destroy(handle);
     const name=string('');handle=e.cave_create(name,name,320,240);e.cave_free(name,1);
     assert.ok(handle,read(e.cave_last_error()));state=command({op:'snapshot'});
     assert.equal(1,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask);
-    edit(x,y,true,{sub_x:2,sub_y:2});
+    edit(x,y,true,{sub_x:1,sub_y:1});
     state=edit(x,y,false,{sub_x:0,sub_y:0});
-    assert.equal(256,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask,'subtile removal erased its neighbor');
-    // Legacy bool persistence migrates exactly, without changing authored indices.
+    assert.equal(8,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask,'subtile removal erased its neighbor');
+    assert.ok(command({op:'tile_hit',x:left+12,y:top+12,width:1,height:1}).tile_hit_flags&512,'bottom-right 2x2 subtile missed');
+    assert.equal(0,command({op:'tile_hit',x:left+2,y:top+2,width:1,height:1}).tile_hit_flags&512,'removed subtile remained solid');
+    assert.throws(()=>edit(x,y,true,{sub_x:2,sub_y:0}),/Terrain subcell/);
+    const terrainFile=string('/Terrain.json');
+    const terrainDocument=JSON.parse(decode.decode(new Uint8Array(e.memory.buffer,e.cave_fs_get(terrainFile,1),e.cave_fs_len(terrainFile,1))));
+    assert.equal(2,terrainDocument.version);assert.equal(2,terrainDocument.subdivisions);assert.equal(8,terrainDocument.stages[room][idx]);
+    e.cave_free(terrainFile,encode.encode('/Terrain.json\0').length);
+    // Old 3x3 layouts must never be mistaken for new 2x2 masks.
     command({op:'save'});e.cave_destroy(handle);
-    put('/Terrain.json',Buffer.from(JSON.stringify({[room]:{[idx]:true,[idx+1]:false}})),1);
-    const legacy=string('');handle=e.cave_create(legacy,legacy,320,240);e.cave_free(legacy,1);
-    state=command({op:'snapshot'});assert.equal(511,state.map.terrain_edits.find(t=>t.x===x&&t.y===y).mask);
-    assert.equal(0x41,state.map.cell_attributes[idx]);assert.equal(0,state.map.cell_attributes[idx+1]);
-    e.cave_destroy(handle);
-    console.log(JSON.stringify({module:modulePath,micro_cell:{room,x,y},partial_collision:true,native_bullet_precise:true,native_player_precise:true,persistence:true,independent_removal:true,legacy_bool_migration:true}));
+    const savedName=string('/Profile.dat');
+    const profileBefore=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(savedName,1),e.cave_fs_len(savedName,1)));
+    for(const incompatible of [{[room]:{[idx]:true,[idx+1]:511}}, {version:1,subdivisions:3,stages:{[room]:{[idx]:15}}}]) {
+        const legacyBytes=Buffer.from(JSON.stringify(incompatible));
+        put('/Terrain.json',legacyBytes,1);
+        const legacy=string('');handle=e.cave_create(legacy,legacy,320,240);e.cave_free(legacy,1);
+        state=command({op:'snapshot'});assert.equal(2,state.terrain_layout_version);
+        assert.deepEqual([],state.map.terrain_edits,'incompatible 3x3 edits were interpreted as 2x2');
+        const profileAfter=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(savedName,1),e.cave_fs_len(savedName,1)));
+        assert.deepEqual(profileBefore,profileAfter,'layout reset changed campaign checkpoint');
+        const terrainName=string('/Terrain.json');
+        const untouched=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(terrainName,1),e.cave_fs_len(terrainName,1)));
+        assert.deepEqual(legacyBytes,untouched,'ignored legacy terrain was overwritten');
+        e.cave_free(terrainName,encode.encode('/Terrain.json\0').length);
+        e.cave_destroy(handle);
+    }
+    e.cave_free(savedName,encode.encode('/Profile.dat\0').length);
+    console.log(JSON.stringify({module:modulePath,micro_cell:{room,x,y},partial_collision:true,native_bullet_precise:true,native_player_precise:true,persistence:true,independent_removal:true,incompatible_layout_ignored:true,checkpoint_unchanged:true}));
     process.exit(0);
 }
 if(process.env.CAVERARRIA_TERRAIN_TEST){

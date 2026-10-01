@@ -220,17 +220,18 @@ public sealed class CampaignPlayer : ModPlayer
         Player.statLifeMax2 = Math.Max(1, CampaignRuntime.Snapshot.Field("player").Integer("max_life", 3) * 10);
         Player.statLife = Math.Min(Player.statLife, Player.statLifeMax2);
         Player.noFallDmg = true;
-        Player.jumpSpeedBoost += 2.5f;
-        Player.gravity = CampaignRuntime.IronheadMovement || CampaignRuntime.Snapshot.Field("player").Boolean("booster_active") ? 0 : .325f;
+        Player.jumpSpeedBoost = (Player.jumpSpeed + Player.jumpSpeedBoost + 2.5f) * (2f / 3f) - Player.jumpSpeed;
+        Player.gravity = CampaignRuntime.IronheadMovement || CampaignRuntime.Snapshot.Field("player").Boolean("booster_active") ? 0 : .325f * (2f / 3f);
         Player.breath = Player.breathMax; Player.breathCD = 0;
     }
     public override void PostUpdateRunSpeeds()
     {
         if (!CampaignRuntime.Active) return;
-        // Compensate for 3x authored pixels while retaining Terraria acceleration/jump integration.
-        Player.maxRunSpeed = Math.Max(Player.maxRunSpeed, 4f);
-        Player.accRunSpeed = Math.Max(Player.accRunSpeed, 4f);
-        Player.runAcceleration *= 1.25f;
+        // Preserve native-pixel movement speeds after changing host units from 3 to 2.
+        Player.maxRunSpeed = Math.Max(Player.maxRunSpeed, 4f) * (2f / 3f);
+        Player.accRunSpeed = Math.Max(Player.accRunSpeed, 4f) * (2f / 3f);
+        Player.runAcceleration *= 1.25f * (2f / 3f);
+        Player.runSlowdown *= 2f / 3f;
     }
     public override void PreUpdateMovement()
     {
@@ -239,7 +240,7 @@ public sealed class CampaignPlayer : ModPlayer
         Player.breath = Player.breathMax;
         Player.breathCD = 0;
         if ((CampaignRuntime.Snapshot.Field("player").Integer("flags") & 256) != 0) Player.wet = true;
-        Player.maxFallSpeed = Math.Max(Player.maxFallSpeed, 7.5f);
+        Player.maxFallSpeed = Math.Max(Player.maxFallSpeed, 7.5f) * (2f / 3f);
         Player.noFallDmg = true;
     }
     public override void PostUpdate()

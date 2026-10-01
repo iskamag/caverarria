@@ -23,7 +23,7 @@ public sealed class CampaignView : ModSystem
     public static float HostZoom => PixelScale / CampaignRuntime.Scale;
     public static int ViewportWidth => Math.Max(160, Main.screenWidth / PixelScale);
     public static int ViewportHeight => Math.Max(120, Main.screenHeight / PixelScale);
-    public static float PlayerScale => Math.Clamp(ModContent.GetInstance<CampaignViewConfig>().PlayerVisualScale, 1f, 2f);
+    public static float PlayerScale => Math.Clamp(ModContent.GetInstance<CampaignViewConfig>().PlayerBodyScale, .75f, 1.5f);
     internal static bool IsCampaignAvatar(Player player)
         => InWorld && IsWorldPlayer(player, Main.player) && player.GetModPlayer<CampaignPlayer>().UsingCampaignHealth;
     internal static bool IsWorldPlayer(Player player, Player[] players)

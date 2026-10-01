@@ -18,8 +18,8 @@ public sealed class CampaignViewConfig : ModConfig
     [Header("View"), DefaultValue(4), Range(2, 6)]
     public int CameraPixelScale = 4;
 
-    [DefaultValue(1.5f), Range(1f, 2f), Increment(.25f)]
-    public float PlayerVisualScale = 1.5f;
+    [DefaultValue(1f), Range(.75f, 1.5f), Increment(.25f)]
+    public float PlayerBodyScale = 1f;
 
     [Header("Audio"), DefaultValue(false)]
     public bool MuteCampaignAudio;

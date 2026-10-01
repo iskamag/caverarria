@@ -43,7 +43,9 @@ internal static class ViewChecks
         typeof(Player).GetField("modPlayers", BindingFlags.Instance | BindingFlags.NonPublic)!
             .SetValue(player, new ModPlayer[] { hooks });
         typeof(ContentInstance<CampaignViewConfig>).GetProperty("Instance")!
-            .SetValue(null, new CampaignViewConfig { PlayerVisualScale = 1.5f });
+            .SetValue(null, new CampaignViewConfig { PlayerBodyScale = 1.5f });
+        check(new CampaignViewConfig().PlayerBodyScale == 1f && CampaignRuntime.Scale == 2f,
+            "default avatar no longer has ten by twenty-one logical pixels");
         try
         {
             Main.myPlayer = 0;

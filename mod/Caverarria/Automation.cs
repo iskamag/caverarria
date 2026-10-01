@@ -22,6 +22,7 @@ internal sealed class AutomationInput
     public bool PreviousWeapon { get; set; }
     public bool Shoot { get; set; }
     public bool UseTile { get; set; }
+    public bool CapturePixels { get; set; }
     public float? AimX { get; set; }
     public float? AimY { get; set; }
     public int? Item { get; set; }
@@ -86,6 +87,7 @@ internal static class Automation
                 Main.LocalPlayer.selectedItem = 0;
                 debugCommands++;
             }
+            if (next.CapturePixels) { CampaignTilePixels.Capture(directory); debugCommands++; }
             if (next.Retry) CampaignRuntime.Retry();
             if (next.Engine.ValueKind == JsonValueKind.Object)
             {
@@ -111,7 +113,8 @@ internal static class Automation
         if (Input.AimX.HasValue && Input.AimY.HasValue)
         {
             Vector2 aim = CampaignRuntime.ToWorld(Input.AimX.Value, Input.AimY.Value) - Main.screenPosition;
-            aim = Vector2.Transform(aim, Main.GameViewMatrix.TransformationMatrix);
+            // SetControls runs after PlayerInput.SetZoom_World: vanilla tile
+            // targeting expects unzoomed host-local mouse coordinates here.
             Main.mouseX = (int)aim.X; Main.mouseY = (int)aim.Y;
             if (player.controlUseItem) player.direction = Input.AimX.Value < CampaignRuntime.ToCave(player.Center).X ? -1 : 1;
         }
@@ -149,8 +152,8 @@ internal static class Automation
                 pressedKeys = Microsoft.Xna.Framework.Input.Keyboard.GetState().GetPressedKeys().Select(key => key.ToString()).ToArray(),
                 tileTargetX = Player.tileTargetX, tileTargetY = Player.tileTargetY, noBuilding = player.noBuilding,
                 targetCell = CampaignTerrainEdits.Cell(Player.tileTargetX, Player.tileTargetY, out int cellX, out int cellY)
-                    ? Enumerable.Range(0, 9).Select(index => {
-                        var tile = Main.tile[CampaignRuntime.OriginTileX + cellX * 3 + index % 3, CampaignRuntime.OriginTileY + cellY * 3 + index / 3];
+                    ? Enumerable.Range(0, 4).Select(index => {
+                        var tile = Main.tile[CampaignRuntime.OriginTileX + cellX * 2 + index % 2, CampaignRuntime.OriginTileY + cellY * 2 + index / 2];
                         return new { tile.HasTile, tile.TileType };
                     }).ToArray() : null,
                 heldItem = player.HeldItem.type, inventory = player.inventory.Take(10).Select(item => new { id = item.type, name = item.Name, stack = item.stack }).ToArray(),

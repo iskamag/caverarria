@@ -22,12 +22,12 @@ try
     int ox = CampaignRuntime.OriginTileX, oy = CampaignRuntime.OriginTileY;
     FurnitureChecks.Run(temporary, Check);
     Check(CampaignTerrainEdits.Cell(ox, oy, out int x, out int y) && x == 0 && y == 0, "first native cell origin");
-    Check(CampaignTerrainEdits.Cell(ox + 2, oy + 2, out x, out y) && x == 0 && y == 0, "three host tiles share one native cell");
-    Check(CampaignTerrainEdits.Cell(ox + 3, oy + 3, out x, out y) && x == 1 && y == 1, "next cell boundary");
+    Check(CampaignTerrainEdits.Cell(ox + 1, oy + 1, out x, out y) && x == 0 && y == 0, "two host tiles share one native cell");
+    Check(CampaignTerrainEdits.Cell(ox + 2, oy + 2, out x, out y) && x == 1 && y == 1, "next cell boundary");
     Check(!CampaignTerrainEdits.Cell(ox - 1, oy, out _, out _), "left boundary protected");
     Check(!CampaignTerrainEdits.Cell(ox, oy - 1, out _, out _), "top boundary protected");
-    Check(!CampaignTerrainEdits.Cell(ox + 60, oy, out _, out _), "right boundary protected");
-    Check(!CampaignTerrainEdits.Cell(ox, oy + 30, out _, out _), "bottom boundary protected");
+    Check(!CampaignTerrainEdits.Cell(ox + 40, oy, out _, out _), "right boundary protected");
+    Check(!CampaignTerrainEdits.Cell(ox, oy + 20, out _, out _), "bottom boundary protected");
     Check(CampaignTerrainEdits.CanMine(ox, oy), "ordinary campaign mining permitted");
     var protection = new CampaignTerrainProtection();
     Check(!protection.CanExplode(ox, oy, TileID.Stone), "explosives cannot desynchronize guest collision");
@@ -37,19 +37,19 @@ try
     Check(!CampaignTerrainEdits.CanMine(ox, oy), "script control lock blocks mining");
     Check(!CampaignTerrainEdits.CanPlace(ox, oy, TileID.Stone), "script control lock blocks placement");
     bool AnyReach(int i, int j) => true;
-    bool LeftWall(int i, int j) => i == 9 && j >= 20 && j <= 22;
+    bool LeftWall(int i, int j) => i == 9 && j >= 20 && j <= 21;
     Check(CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, LeftWall, AnyReach, out int snappedX, out int snappedY)
-        && snappedX == 10 && snappedY == 21, "center cursor attaches at nearest cell edge against left native wall");
-    Check(CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, (i, j) => j == 23, AnyReach, out snappedX, out snappedY)
-        && snappedX == 11 && snappedY == 22, "center cursor attaches against native floor");
+        && snappedX == 10 && snappedY == 21, "native-cell cursor attaches at nearest cell edge against left native wall");
+    Check(CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, (i, j) => j == 22, AnyReach, out snappedX, out snappedY)
+        && snappedX == 11 && snappedY == 21, "native-cell cursor attaches against native floor");
     Check(!CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, (i, j) => false, AnyReach, out snappedX, out snappedY)
         && snappedX == 11 && snappedY == 21, "floating cell without native neighbors cannot attach");
     Check(!CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, (i, j) => i == 9 && j == 19, AnyReach, out _, out _),
         "diagonal native neighbor cannot attach");
     Check(!CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, LeftWall, (i, j) => i >= 11, out _, out _),
         "snapping does not extend ordinary placement reach");
-    Check(CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, LeftWall, (i, j) => j == 22, out snappedX, out snappedY)
-        && snappedX == 10 && snappedY == 22, "nearest eligible edge selected when preferred tile is out of reach");
+    Check(CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 11, 21, LeftWall, (i, j) => j == 20, out snappedX, out snappedY)
+        && snappedX == 10 && snappedY == 20, "nearest eligible edge selected when preferred tile is out of reach");
     Check(CampaignTerrainEdits.TryFindPlacementTarget(10, 20, 10, 20, LeftWall, AnyReach, out snappedX, out snappedY)
         && snappedX == 10 && snappedY == 20, "already valid edge target remains under mouse");
     var reachPosition = new Microsoft.Xna.Framework.Vector2(160.5f, 320.5f);
@@ -63,65 +63,93 @@ try
     Check(!new CampaignViewConfig().TerrariaSizedBlocks, "whole campaign cell placement remains the default");
     var wholeBounds = CampaignTerrainEdits.PlacementBounds(ox + 4, oy + 5, false);
     var smallBounds = CampaignTerrainEdits.PlacementBounds(ox + 4, oy + 5, true);
-    Check(wholeBounds.Width == 48 && wholeBounds.Height == 48 && wholeBounds.X == (ox + 3) * 16 && wholeBounds.Y == (oy + 3) * 16,
+    Check(wholeBounds.Width == 32 && wholeBounds.Height == 32 && wholeBounds.X == (ox + 4) * 16 && wholeBounds.Y == (oy + 4) * 16,
         "whole placement collision covers selected native cell");
     Check(smallBounds.Width == 16 && smallBounds.Height == 16 && smallBounds.X == (ox + 4) * 16 && smallBounds.Y == (oy + 5) * 16,
         "small placement collision matches one ordinary host tile");
-    for (int sy = 0; sy < 3; sy++) for (int sx = 0; sx < 3; sx++)
+    for (int sy = 0; sy < 2; sy++) for (int sx = 0; sx < 2; sx++)
     {
-        int bit = 1 << (sy * 3 + sx);
-        Check(CampaignTerrainEdits.MaskHasTile(bit, sx, sy) && !CampaignTerrainEdits.MaskHasTile(511 ^ bit, sx, sy),
+        int bit = 1 << (sy * 2 + sx);
+        Check(CampaignTerrainEdits.MaskHasTile(bit, sx, sy) && !CampaignTerrainEdits.MaskHasTile(15 ^ bit, sx, sy),
             "partial guest mask selects exact host tile");
         var visual = CampaignTerrainEdits.BlockDrawBounds(7, 9, sx, sy);
-        Check(visual.Width is 5 or 6 && visual.Height is 5 or 6,
+        Check(visual.Width == 8 && visual.Height == 8,
             "small block is rasterized on the existing native pixel grid");
-        if (sx < 2) Check(visual.Right == CampaignTerrainEdits.BlockDrawBounds(7, 9, sx + 1, sy).Left,
+        if (sx < 1) Check(visual.Right == CampaignTerrainEdits.BlockDrawBounds(7, 9, sx + 1, sy).Left,
             "adjacent small block visuals have no crack or overlap");
     }
     var wholeVisual = CampaignTerrainEdits.BlockDrawBounds(7, 9, -1, -1);
     Check(wholeVisual.Width == 16 && CampaignTerrainEdits.BlockDrawBounds(7, 9, 0, 0).Left == wholeVisual.Left
-        && CampaignTerrainEdits.BlockDrawBounds(7, 9, 2, 2).Right == wholeVisual.Right,
-        "three ordinary blocks occupy the same native visual width as one campaign block");
+        && CampaignTerrainEdits.BlockDrawBounds(7, 9, 1, 1).Right == wholeVisual.Right,
+        "two ordinary blocks occupy the same native visual width as one campaign block");
     Check(CampaignTerrainEdits.CellAllowsSmallBlock(0, false), "small blocks allowed in original empty cells");
     Check(!CampaignTerrainEdits.CellAllowsSmallBlock(0x41, false), "original solid cell must be mined before small placement");
     Check(CampaignTerrainEdits.CellAllowsSmallBlock(0x50, true), "mined slope cell can accept small blocks");
+    var wholePieces = CampaignTerrainEdits.BlockDrawPieces(7, 9, -1, -1).ToArray();
+    var smallPieces = CampaignTerrainEdits.BlockDrawPieces(7, 9, 1, 0).ToArray();
+    Check(wholePieces.Length == 4 && wholePieces.All(piece => piece.Width == 8 && piece.Height == 8),
+        "whole block repeats four normalized tile samples without stretching logical pixels");
+    Check(wholePieces.Sum(piece => piece.Width * piece.Height) == 256, "normalized samples cover full native cell area");
+    Check(smallPieces.Length == 1 && smallPieces[0] == CampaignTerrainEdits.BlockDrawBounds(7, 9, 1, 0),
+        "small block uses the same normalized eight-pixel texture scale");
+    string legacy = Path.Combine(temporary, "legacy");
+    Directory.CreateDirectory(legacy);
+    File.WriteAllText(Path.Combine(legacy, "Profile.dat"), "checkpoint-preserved");
+    File.WriteAllText(Path.Combine(legacy, "terrain.json"), "{\"13\":{\"11:9\":511}}");
+    File.WriteAllText(Path.Combine(legacy, "TerrainBlocks.json"), "[{\"Stage\":13,\"X\":11,\"Y\":9}]");
+    File.WriteAllText(Path.Combine(legacy, "TerrainFurniture.json"), "[{\"Stage\":13,\"X\":11,\"Y\":9}]");
+    string otherProfile = Path.Combine(temporary, "other-campaign", "Profile.dat");
+    Directory.CreateDirectory(Path.GetDirectoryName(otherProfile)!); File.WriteAllText(otherProfile, "other campaign");
+    CampaignTerrainEdits.PrepareSaveLayout(legacy);
+    Check(File.ReadAllText(otherProfile) == "other campaign", "layout reset affects only selected campaign directory");
+    Check(!File.Exists(Path.Combine(legacy, "terrain.json")) && !File.Exists(Path.Combine(legacy, "TerrainBlocks.json")) && !File.Exists(Path.Combine(legacy, "TerrainFurniture.json")),
+        "legacy 3x3 terrain pair is removed from active version 2 save paths");
+    Check(Directory.GetFiles(legacy, "*.bak").Length == 0, "incompatible terrain is discarded without archival by user request");
+    Check(!File.Exists(Path.Combine(legacy, "Profile.dat")), "layout upgrade resets incompatible campaign checkpoint");
+    CampaignTerrainEdits.PrepareSaveLayout(legacy);
+    Check(Directory.GetFiles(legacy, "*.bak").Length == 0, "legacy layout reset is idempotent");
+    File.WriteAllText(Path.Combine(legacy, "Terrain.json"), "{\"version\":2,\"subdivisions\":2,\"stages\":{}}");
+    File.WriteAllText(Path.Combine(legacy, "TerrainBlocks.json"), Metadata("[]"));
+    CampaignTerrainEdits.PrepareSaveLayout(legacy);
+    Check(File.Exists(Path.Combine(legacy, "Terrain.json")) && File.Exists(Path.Combine(legacy, "TerrainBlocks.json")),
+        "version 2 terrain files are retained unchanged");
     // Load/save actual production metadata with two stages, then verify new-game cleanup.
     string metadata = Path.Combine(temporary, CampaignTerrainEdits.FileName);
-    File.WriteAllText(metadata, "[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0},{\"Stage\":4,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]");
+    File.WriteAllText(metadata, Metadata("[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0},{\"Stage\":4,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]"));
     CampaignTerrainEdits.ClearSession();
     typeof(CampaignTerrainEdits).GetMethod("EnsureLoaded", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, null);
     typeof(CampaignTerrainEdits).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, new object[] { false });
     using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
     {
-        Check(data.RootElement.GetArrayLength() == 2, "same cell in different stages persisted independently");
-        Check(data.RootElement[0].GetProperty("FrameX").GetInt32() == 18, "placed block source art retained");
+        Check(data.RootElement.GetProperty("Blocks").GetArrayLength() == 2, "same cell in different stages persisted independently");
+        Check(data.RootElement.GetProperty("Blocks")[0].GetProperty("FrameX").GetInt32() == 18, "placed block source art retained");
     }
     Check(!File.Exists(metadata + ".tmp"), "atomic metadata write leaves no temporary file");
     var dictionary = (System.Collections.IDictionary)typeof(CampaignTerrainEdits).GetField("blocks", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
     Check(dictionary.Values.Cast<object>().All(b => (int)b.GetType().GetProperty("SubX")!.GetValue(b)! == -1
-        && (int)b.GetType().GetProperty("SubY")!.GetValue(b)! == -1), "legacy metadata stays whole-cell after schema migration");
+        && (int)b.GetType().GetProperty("SubY")!.GetValue(b)! == -1), "version 2 whole-cell metadata has explicit whole-cell identity");
     CampaignTerrainEdits.SyncPersistence(false);
     dictionary.Clear(); // Represents mining saved placed blocks during a volatile session.
     typeof(CampaignTerrainEdits).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, new object[] { false });
     using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
-        Check(data.RootElement.GetArrayLength() == 2, "disabled persistence preserves saved metadata baseline");
+        Check(data.RootElement.GetProperty("Blocks").GetArrayLength() == 2, "disabled persistence preserves saved metadata baseline");
     CampaignTerrainEdits.ReloadSaved();
     Check(dictionary.Count == 2, "retry restores saved metadata and discards volatile changes");
     dictionary.Clear();
     CampaignTerrainEdits.SyncPersistence(true);
-    Check(File.ReadAllText(metadata) == "[]", "enabling persistence saves current session changes");
-    File.WriteAllText(metadata, "[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]");
+    Check(File.ReadAllText(metadata) == Metadata("[]"), "enabling persistence saves current session changes");
+    File.WriteAllText(metadata, Metadata("[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]"));
     CampaignTerrainEdits.ReloadSaved();
     CampaignTerrainEdits.SyncPersistence(false);
     Check(new CampaignViewConfig().PersistentTerrainEdits, "terrain persistence defaults enabled");
     CampaignTerrainEdits.ClearNewGame();
-    Check(File.ReadAllText(metadata) == "[]", "fresh campaign removes obsolete placed item metadata");
-    File.WriteAllText(metadata, "[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0,\"SubX\":0,\"SubY\":1},{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":0,\"Item\":2,\"Style\":0,\"FrameX\":0,\"FrameY\":0,\"SubX\":1,\"SubY\":1}]");
+    Check(File.ReadAllText(metadata) == Metadata("[]"), "fresh campaign removes obsolete placed item metadata");
+    File.WriteAllText(metadata, Metadata("[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0,\"SubX\":0,\"SubY\":1},{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":0,\"Item\":2,\"Style\":0,\"FrameX\":0,\"FrameY\":0,\"SubX\":1,\"SubY\":1}]"));
     CampaignTerrainEdits.ReloadSaved();
     Check(dictionary.Count == 2, "different small block item identities coexist in one native cell");
     CampaignTerrainEdits.SyncPersistence(true);
     using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
-        Check(data.RootElement[0].GetProperty("SubX").GetInt32() != data.RootElement[1].GetProperty("SubX").GetInt32(),
+        Check(data.RootElement.GetProperty("Blocks")[0].GetProperty("SubX").GetInt32() != data.RootElement.GetProperty("Blocks")[1].GetProperty("SubX").GetInt32(),
             "small block subcell identities survive metadata round trip");
     CampaignBootstrap.ClearWorldMarker();
     Check(protection.CanPlace(ox, oy, TileID.Stone), "ordinary world placement preserved");
@@ -138,6 +166,7 @@ finally
     Directory.Delete(temporary, true);
 }
 Console.WriteLine($"{checks} production terrain host contract checks passed (synthetic, no hosted mining/placement).");
+static string Metadata(string blocks) => "{\"Version\":2,\"Subdivisions\":2,\"Blocks\":" + blocks + "}";
 sealed class InertEngine : ICampaignEngine
 {
     public int Width => 320; public int Height => 240;

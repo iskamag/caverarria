@@ -10,9 +10,9 @@ namespace Caverarria;
 
 internal static class CampaignRuntime
 {
-    public const float Scale = 3f;
+    public const float Scale = 2f;
     public const int OriginTileX = 200, OriginTileY = 200;
-    public static Vector2 Origin => new(OriginTileX * 16 + 24, OriginTileY * 16 + 24);
+    public static Vector2 Origin => new(OriginTileX * 16 + 16, OriginTileY * 16 + 16);
     public static bool Active => Engine != null && CampaignBootstrap.IsCampaignWorld;
     public static ICampaignEngine? Engine { get; private set; }
     private static JsonElement snapshot, pendingMap;
@@ -66,6 +66,7 @@ internal static class CampaignRuntime
         {
             string data = Environment.GetEnvironmentVariable("CAVERARRIA_DATA") ?? Path.Combine(CampaignBootstrap.AssetsPath, "data");
             string save = CampaignBootstrap.SavePath;
+            CampaignTerrainEdits.PrepareSaveLayout(save);
             bool load = loadProfile && CampaignBootstrap.WantsLoad;
             int width = CampaignView.ViewportWidth, height = CampaignView.ViewportHeight;
             string? wasmPath = Environment.GetEnvironmentVariable("CAVERARRIA_WASM");
@@ -320,6 +321,22 @@ internal static class CampaignRuntime
             if (item.active) yield return item;
     }
 
+    private static Point LegacyProjectionFootprint(int width, int height)
+    {
+        string data = Environment.GetEnvironmentVariable("CAVERARRIA_DATA") ?? Path.Combine(CampaignBootstrap.AssetsPath, "data");
+        string stageDirectory = Path.Combine(data, "Stage");
+        if (Directory.Exists(stageDirectory))
+            foreach (string path in Directory.EnumerateFiles(stageDirectory).Where(path => Path.GetExtension(path).Equals(".pxm", StringComparison.OrdinalIgnoreCase)))
+            {
+                using var reader = new BinaryReader(File.OpenRead(path));
+                if (reader.BaseStream.Length < 8 || reader.ReadByte() != 'P' || reader.ReadByte() != 'X' || reader.ReadByte() != 'M') continue;
+                reader.ReadByte();
+                width = Math.Max(width, reader.ReadUInt16()); height = Math.Max(height, reader.ReadUInt16());
+            }
+        return new Point(Math.Min(Main.maxTilesX - OriginTileX, width * 3 + 3),
+            Math.Min(Main.maxTilesY - OriginTileY, height * 3 + 3));
+    }
+
     private static void ProjectMap(JsonElement map)
     {
         CurrentMap = map.Clone();
@@ -329,26 +346,29 @@ internal static class CampaignRuntime
         int[] attributes = map.Field("attributes").Elements().Select(x => x.GetInt32()).ToArray();
         int[] cellAttributes = map.Field("cell_attributes").Elements().Select(x => x.GetInt32()).ToArray();
         if (width <= 0 || height <= 0 || tiles.Length != width * height || attributes.Length < 256) return;
-        for (int y = 0; y < Math.Max(height, projectedHeight) * 3 + 3; y++)
-            for (int x = 0; x < Math.Max(width, projectedWidth) * 3 + 3; x++)
+        Point clear = projectedWidth == 0 && projectedHeight == 0 ? LegacyProjectionFootprint(width, height)
+            : new Point(Math.Min(Main.maxTilesX - OriginTileX, Math.Max(width, projectedWidth) * 2 + 2),
+                Math.Min(Main.maxTilesY - OriginTileY, Math.Max(height, projectedHeight) * 2 + 2));
+        for (int y = 0; y < clear.Y; y++)
+            for (int x = 0; x < clear.X; x++)
                 Main.tile[OriginTileX + x, OriginTileY + y].ClearEverything();
         var editMasks = map.Field("terrain_edits").Elements().ToDictionary(edit => (edit.Integer("x"), edit.Integer("y")),
-            edit => edit.Integer("mask", edit.Boolean("solid") ? 511 : 0));
+            edit => edit.Integer("mask", edit.Boolean("solid") ? 15 : 0));
         ushort tileType = (ushort)ModContent.TileType<CampaignSolid>();
         for (int y = 0; y < height; y++) for (int x = 0; x < width; x++)
         {
             int attribute = cellAttributes.Length == tiles.Length ? cellAttributes[y * width + x] : attributes[tiles[y * width + x]];
             bool water = attribute is 0x02 or 0x60 or 0x61 or 0x62 || attribute >= 0x70 && attribute <= 0x77;
-            for (int sy = 0; sy < 3; sy++) for (int sx = 0; sx < 3; sx++)
+            for (int sy = 0; sy < 2; sy++) for (int sx = 0; sx < 2; sx++)
             {
-                var tile = Main.tile[OriginTileX + x * 3 + sx, OriginTileY + y * 3 + sy];
+                var tile = Main.tile[OriginTileX + x * 2 + sx, OriginTileY + y * 2 + sy];
                 if (water) { tile.LiquidType = LiquidID.Water; tile.LiquidAmount = 255; }
                 bool solid = attribute is 0x05 or 0x41 or 0x43 or 0x44 or 0x46 or 0x61;
                 // Project the eight half-height Cave Story slopes as protected stair collision.
                 int slope = attribute >= 0x70 && attribute <= 0x77 ? attribute - 0x20 : attribute;
                 if (slope >= 0x50 && slope <= 0x57)
                 {
-                    float cx = (sx + .5f) / 3f, cy = (sy + .5f) / 3f;
+                    float cx = (sx + .5f) / 2f, cy = (sy + .5f) / 2f;
                     float boundary = slope switch { 0x50 => 1 - cx / 2, 0x51 => .5f - cx / 2, 0x52 => cx / 2, 0x53 => .5f + cx / 2, 0x54 => cx / 2, 0x55 => .5f + cx / 2, 0x56 => 1 - cx / 2, _ => .5f - cx / 2 };
                     solid = slope < 0x54 ? cy < boundary : cy > boundary;
                 }
@@ -592,18 +612,21 @@ internal static class CampaignRuntime
         Main.spriteBatch.Draw(Terraria.GameContent.TextureAssets.MagicPixel.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
         Main.spriteBatch.Draw(background, CampaignView.OutputRectangle(Engine!.Width, Engine.Height), Color.White);
         Main.spriteBatch.End();
+        var camera = Snapshot.Field("camera");
+        Vector2 nativeCamera = new(camera.Number("x"), camera.Number("y"));
+        CampaignFurniture.Prepare(nativeCamera);
+        CampaignTerrainEdits.Prepare();
         CampaignActorPixels.Begin();
         Rectangle output = CampaignView.OutputRectangle(Engine.Width, Engine.Height);
         Matrix grid = Matrix.CreateScale(CampaignView.PixelScale, CampaignView.PixelScale, 1)
             * Matrix.CreateTranslation(output.X, output.Y, 0);
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
             DepthStencilState.None, RasterizerState.CullNone, null, grid);
-        var camera = Snapshot.Field("camera");
-        CampaignTerrainEdits.Draw(Main.spriteBatch, new Vector2(camera.Number("x"), camera.Number("y")));
-        Main.spriteBatch.End();
-        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
-            DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
-        try { CampaignFurniture.Draw(Main.spriteBatch); }
+        try
+        {
+            CampaignTerrainEdits.Draw(Main.spriteBatch, nativeCamera);
+            CampaignFurniture.Draw(Main.spriteBatch);
+        }
         finally { Main.spriteBatch.End(); }
     }
     public static bool DrawForeground()

@@ -119,13 +119,13 @@ keeps the native weapon inactive while ordinary Terraria gear is held.
 projectile collisions through the original Polar Star tile-collision routine,
 including destructible snack tiles and their native effects.
 `terrain_edit` `{epoch,stage,x,y,solid}` edits one native map cell. Optional
-`sub_x` and `sub_y` (both 0–2) select one of its nine Terraria subtiles. Each
-subtile is 16 host pixels, or 16/3 native pixels; native fixed-point collision
+`sub_x` and `sub_y` (both 0–1) select one of its four Terraria subtiles. Each
+subtile is 16 host pixels, or exactly 8 native pixels; native fixed-point collision
 uses its precise rectangle without changing authored tile size. Partial edits
 require an empty or previously player-edited cell; original terrain is mined as
 a whole native cell first. All five base fields are required. Stale epochs, wrong stages and out-of-bounds
 cells return `terrain_edit_accepted:false`; valid edits return `true`. Empty and partial edits
-have coarse collision attribute 0; complete nine-bit masks have attribute 0x41.
+have coarse collision attribute 0; complete four-bit masks have attribute 0x41.
 Native player/NPC and bullet collision additionally test occupied subtile
 rectangles, so unoccupied parts remain passable. They bypass original tile art;
 the host draws placed block material on the same cell. Original authored tile
@@ -148,10 +148,13 @@ damage, age and position.
 `map` contains raw tile indices, the 256-entry authored tile attribute table,
 `cell_attributes` (effective per-cell collision in row-major order), and
 `terrain_edits` (`{x,y,solid,mask}` for the current stage; `mask` is row-major
-nine-bit occupancy and `solid` means any occupied subtile) when the content hash changes.
+four-bit occupancy and `solid` means any occupied subtile) when the content hash changes.
 Script tile edits and player overrides change its `revision`. Host projection
 must use `cell_attributes` plus `terrain_edits.mask`, since edited cells do not
-reserve authored tile IDs. Legacy bool terrain saves migrate to masks 0/511. Preserve the
+reserve authored tile IDs. The 0.2.0 terrain schema is `{version:2,subdivisions:2,stages:{stage:{cell:mask}}}`.
+Unversioned and 3x3 layouts are ignored without altering their bytes or
+`Profile.dat` in standalone engine use; the host discards incompatible terrain
+and resets that campaign checkpoint for 0.2.0, as requested. Preserve the
 previous map if omitted. Cave Story tile coordinates are **centers**: tile `(x,y)`
 starts at `(x*16-8,y*16-8)`. NPC bbox values `left/top/right/bottom` are extents
 from its center. `player.life_delta` describes native script healing/life changes

@@ -25,9 +25,9 @@ Check(CaveEntity.IsCombatTarget(Actor(0, true)), "zero-local-HP vulnerable boss 
 Check(CaveEntity.IsCombatTarget(Actor(5, true)), "ordinary shootable enemy lost its host target");
 Check(!CaveEntity.IsCombatTarget(Actor(1000, false)), "closed/invulnerable native phase became damageable");
 var bounds = CaveEntity.CombatBounds(Actor(0, true));
-Check(bounds.X == (int)CampaignRuntime.Origin.X + 80 * 3, "boss hitbox left edge differs from native bullet collision");
-Check(bounds.Width == 120, "boss right-only extents lost half of the combat hitbox");
-Check(bounds.Y == (int)CampaignRuntime.Origin.Y + 64 * 3 && bounds.Height == 72, "vertical combat bounds differ from native collision");
+Check(bounds.X == (int)CampaignRuntime.Origin.X + 80 * 2, "boss hitbox left edge differs from native bullet collision");
+Check(bounds.Width == 80, "boss right-only extents lost half of the combat hitbox");
+Check(bounds.Y == (int)CampaignRuntime.Origin.Y + 64 * 2 && bounds.Height == 48, "vertical combat bounds differ from native collision");
 Check(CaveEntity.CombatBounds(Actor(5, true, left: 4)) == bounds, "terrain left extent changed bullet collision bounds");
 Check(CaveEntity.CombatBounds(Actor(5, true, right: 0)).Width == 4, "degenerate native extents produce an invalid host target");
 foreach (var screen in new[] { new Point(1280, 720), new Point(1919, 1079), new Point(960, 540) })

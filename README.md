@@ -6,8 +6,7 @@ equipment and attacks come from Terraria; the original campaign runs in
 
 ## Play
 
-Download the alpha from [GitHub Releases](https://github.com/iskamag/caverarria/releases)
-and follow the [installation notes](docs/ALPHA.md). Enable the mod, select a
+Follow the [installation notes](docs/ALPHA.md). Enable the mod, select a
 character in **Single Player**, then enter the bundled **Caverarria — The Island**
 world or create one with seed **`caverarria`**. First entry downloads and verifies
 Cave Story's English freeware data; the engine is included in the mod.

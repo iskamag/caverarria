@@ -1,18 +1,15 @@
 [h1]Cave Story, inside Terraria[/h1]
-Bring your Terraria character into the original Cave Story freeware campaign. The Rust doukutsu-rs engine runs its maps, dialogue, enemies, bosses, story and saves. Terraria runs your character, equipment and combat.
+The Rust doukutsu-rs engine (compiled to sandboxed WASM) runs its maps, dialogue, enemies, bosses, story and saves. Terraria runs your character, equipment and combat.
 
 [h2]Play[/h2]
 Enable Caverarria, then create a single-player world with seed [b]caverarria[/b]. Enter it with your character. Each campaign world keeps its own story progress.
 
-The first entry downloads and verifies the original English freeware data. The portable engine is included in the mod. Original Organya music and PixTone sound effects play through Terraria's audio system.
+The first entry downloads and verifies the original English freeware data.
 
 Use Terraria movement and attacks. [b]E[/b]: interact and advance dialogue. [b]I[/b]: Terraria inventory (right-click story items). [b]M[/b]: story map. [b]V/C[/b]: cycle story weapons. [b]R[/b]: retry from the campaign save. Hold [b]X[/b] to skip cutscenes. New mod keys may be Unbound: assign them or use Reset to Default under Settings → Controls → Mod Controls → Caverarria (Alpha).
 
 Original save points work; [b]/caverarria save[/b] also saves your progress.
 
-[h2]Playable alpha 0.3.0[/h2]
-Single player. Linux client tested, including 60 Hz movement, original audio looping and a normal Save & Exit. Full campaign completion and Windows/macOS playthroughs remain under verification. Mine with pickaxes and build with solid blocks or supported furniture. Terrain persistence and Terraria-sized blocks are configurable. Digging can bypass story gates. Containers, tile entities, platforms, falling blocks and hammer reshaping are not supported.
+[url=https://github.com/iskamag/caverarria]Source, [/url] [url=https://github.com/iskamag/caverarria/issues]Issues page[/url]
 
-[url=https://github.com/iskamag/caverarria/issues]Report a bug[/url] with your platform, mod list, room, action and what happened. [url=https://github.com/iskamag/caverarria]Source and alpha downloads[/url].
-
-Cave Story by Studio Pixel; English freeware translation by Aeon Genesis. Campaign engine: doukutsu-rs. Managed WASM runtime: WebAssembly for .NET. Third-party notices are included in the mod. This is an unofficial fan project.
+Cave Story by Studio Pixel; English freeware translation by Aeon Genesis. Campaign engine: doukutsu-rs. Managed WASM runtime: WebAssembly for .NET. Third-party notices are included in the mod.

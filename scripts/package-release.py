@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Package a playable alpha from final build artifacts, without building the mod."""
+"""Package from final build artifacts, without building the mod."""
 from __future__ import annotations
 
 import argparse

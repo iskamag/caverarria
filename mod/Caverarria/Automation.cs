@@ -138,6 +138,12 @@ internal static class Automation
                 x = cave.X, y = cave.Y, worldX = player.position.X, worldY = player.position.Y,
                 vx = player.velocity.X / CampaignRuntime.Scale, vy = player.velocity.Y / CampaignRuntime.Scale,
                 life = player.statLife, maxLife = player.statLifeMax2, permanentMaxLife = player.statLifeMax, campaignId = CampaignBootstrap.CampaignId, dead = player.dead,
+                retryPose = new {
+                    head = new { x = player.headPosition.X, y = player.headPosition.Y, rotation = player.headRotation },
+                    body = new { x = player.bodyPosition.X, y = player.bodyPosition.Y, rotation = player.bodyRotation },
+                    legs = new { x = player.legPosition.X, y = player.legPosition.Y, rotation = player.legRotation },
+                    player.immuneAlpha
+                },
                 difficulty = player.difficulty, originalDifficulty = player.GetModPlayer<CampaignPlayer>().OriginalDifficulty,
                 width = player.width / CampaignRuntime.Scale, height = player.height / CampaignRuntime.Scale,
                 grounded = player.velocity.Y == 0, selectedItem = player.selectedItem,

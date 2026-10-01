@@ -7,6 +7,8 @@ and `Retry` with an inert engine and synthetic scene snapshots. It reproduces
 Terraria respawning before the native checkpoint reload, checks exact checkpoint
 HP and death flags, and checks that subsequent snapshots, ordinary transfers,
 hidden-but-alive drowning/rescue scenes, and non-game scenes do not restore HP.
+Checkpoint restoration also clears Terraria's separated body-part positions,
+velocities, rotations and death fade on both native restart and explicit R paths.
 It also exercises the real `CampaignPlayer.ProcessTriggers` hook with a dead
 player and a running respawn timer: fresh restart-menu selection/confirmation,
 button release, and rejection of remote/living players on that capture path.

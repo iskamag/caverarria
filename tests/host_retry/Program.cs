@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.ModLoader.IO;
 using Terraria.GameInput;
 using Terraria.ModLoader;
+using Microsoft.Xna.Framework;
 
 internal static class Program
 {
@@ -85,6 +86,7 @@ internal static class Program
 
         player.dead = true; player.statLife = 0;
         Apply(State(3, false, life: 0));
+        SetDeathPose(player);
         Check((bool)pending.GetValue(null)!, "native lethal death was not recorded");
         // Reproduce vanilla Spawn clearing dead and filling HP before native retry.
         player.dead = false; player.ghost = true; player.respawnTimer = 42; player.statLife = 50;
@@ -94,6 +96,7 @@ internal static class Program
         Check(player.statLife == 20 && player.statLifeMax2 == 50, "checkpoint retry retained vanilla full HP");
         Check(!player.dead && !player.ghost && player.respawnTimer == 0, "checkpoint retry retained death flags");
         Check(!(bool)pending.GetValue(null)!, "checkpoint retry did not clear pending death");
+        CheckRestoredPose(player, "native restart menu");
         player.statLife = 19;
         Apply(State(4, true));
         Check(player.statLife == 19, "repeated snapshot healed after retry");
@@ -104,9 +107,11 @@ internal static class Program
         Check(player.statLife == 30 && player.statLifeMax2 == 60 && !player.dead, "retry while Terraria was still dead failed");
 
         player.statLife = 57;
+        SetDeathPose(player);
         engine.RetrySnapshot = State(6, true, life: 2, maxLife: 6);
         CampaignRuntime.Retry();
         Check(player.statLife == 20 && player.statLifeMax2 == 60, "explicit R did not restore exact native checkpoint HP");
+        CheckRestoredPose(player, "explicit R during death script");
 
         player.statLife = 18;
         Apply(State(7, false, scene: "title"));
@@ -126,6 +131,26 @@ internal static class Program
             "failed resource disposal retained an active campaign engine");
         Check(CampaignRuntime.Snapshot.ValueKind == JsonValueKind.Undefined && CampaignRuntime.Frame == 0,
             "failed resource disposal retained campaign snapshot/frame state");
+    }
+
+    private static void SetDeathPose(Player player)
+    {
+        player.headPosition = new Vector2(-18, -30);
+        player.bodyPosition = new Vector2(10, 25);
+        player.legPosition = new Vector2(37, 60);
+        player.headVelocity = player.bodyVelocity = player.legVelocity = new Vector2(2, 4);
+        player.headRotation = .7f; player.bodyRotation = -.4f; player.legRotation = 1.2f;
+        player.immuneAlpha = 220;
+    }
+
+    private static void CheckRestoredPose(Player player, string path)
+    {
+        Check(player.headPosition == Vector2.Zero && player.bodyPosition == Vector2.Zero && player.legPosition == Vector2.Zero,
+            path + " left the living avatar's body parts separated");
+        Check(player.headVelocity == Vector2.Zero && player.bodyVelocity == Vector2.Zero && player.legVelocity == Vector2.Zero,
+            path + " retained death-animation velocities");
+        Check(player.headRotation == 0 && player.bodyRotation == 0 && player.legRotation == 0 && player.immuneAlpha == 0,
+            path + " retained death rotations/fade");
     }
 
     private static void CheckCapsules()

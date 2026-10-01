@@ -213,6 +213,13 @@ internal static class CampaignRuntime
             && (checkpointReload || nativeDeathPending || epoch != previousEpoch && Main.LocalPlayer.dead))
         {
             Main.LocalPlayer.dead = false; Main.LocalPlayer.ghost = false; Main.LocalPlayer.respawnTimer = 0;
+            // UpdateDead separates and rotates the actual player draw parts.
+            // Native retry bypasses Terraria's Spawn, which normally resets them.
+            // Restore the pose here without invoking host spawn/healing/teleports.
+            Main.LocalPlayer.headPosition = Main.LocalPlayer.bodyPosition = Main.LocalPlayer.legPosition = Vector2.Zero;
+            Main.LocalPlayer.headVelocity = Main.LocalPlayer.bodyVelocity = Main.LocalPlayer.legVelocity = Vector2.Zero;
+            Main.LocalPlayer.headRotation = Main.LocalPlayer.bodyRotation = Main.LocalPlayer.legRotation = 0f;
+            Main.LocalPlayer.immuneAlpha = 0;
             Main.LocalPlayer.statLifeMax2 = Math.Max(1, p.Integer("max_life", 3) * 10);
             Main.LocalPlayer.statLife = Math.Clamp(p.Integer("life", 3) * 10, 1, Main.LocalPlayer.statLifeMax2);
             nativeDeathPending = false;

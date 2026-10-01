@@ -1,3 +1,6 @@
+0.3.1
+- dummy release to satisfy TML
+
 0.3.0
 - Restore Terraria NPC visibility in the campaign actor layer.
 - Allow small Terraria blocks over non-colliding decorative cells.

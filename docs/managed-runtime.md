@@ -23,6 +23,13 @@ and license to `mod/Caverarria/lib/`. `--offline` requires the verified cache.
 This is a build/setup step. The finished mod embeds the DLL so players need no
 NuGet download or separate WASM runtime installation.
 
+For the in-game **Develop Mods → Build** compiler, launch tModLoader with
+`-unsafe true`; the managed adapter uses pointer access for bounded UTF-8 reads.
+The SDK project enables the same option with `AllowUnsafeBlocks`. Standard
+namespace imports live in `GlobalUsings.cs` because the in-game compiler does
+not generate the SDK's implicit usings. Develop Mods also requires a .NET 8 SDK
+on the launch process's PATH; these are developer requirements, not player setup.
+
 | Artifact | SHA256 |
 | --- | --- |
 | WebAssembly 2.1.0 nupkg | `f1f893988f13a58957eb7d6361ff085f84954aa5ed7739a21db1bcd2a1fe9238` |

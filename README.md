@@ -22,24 +22,19 @@ Use Terraria movement and item attacks.
 | **M** | Story map, once acquired |
 | **V / C** | Cycle Cave Story weapons |
 
-Assign **Cave Story: hold to skip cutscene** in Controls to enable cutscene skipping.
+Cutscene skipping and other key bindings are configurable in Controls.
 Terraria's world zoom works; **Settings → Mod Configuration → Caverarria** offers
 camera/avatar sizing, campaign music/effect volumes and campaign reset.
 
 Original save points, `/caverarria save` and Save & Exit while alive save progress.
 Each world has its own campaign; exiting while dead keeps the previous checkpoint.
-Life Capsules grant permanent character health once per upgrade. Cave Story guns
-work only inside the campaign.
+Cave Story guns work only inside the campaign.
 
 Mine with pickaxes and build with solid blocks or supported non-solid furniture.
 Blocks default to campaign size (2×2 Terraria tiles); **Place Terraria-sized blocks**
 uses ordinary 16-pixel blocks. **Save terrain edits** controls persistence.
 Digging can bypass story gates. Containers, tile entities, platforms, falling
 blocks, hammer reshaping and explosives are not supported yet.
-
-**Upgrading to 0.2.0 resets 0.1 campaign saves and placed terrain** for the new
-grid. Terraria characters stay intact. The public prerelease contains an earlier
-alpha; source features may differ.
 
 ## Limitations
 
@@ -67,11 +62,10 @@ More: [engine/build details](rust-bridge/README.md),
 
 ## Credits
 
-Cave Story and its original artwork: **Studio Pixel**. English translation:
-**Aeon Genesis**. Terraria and its icon artwork: **Re-Logic**.
+Cave Story: **Studio Pixel**. English translation: **Aeon Genesis**.
+Terraria: **Re-Logic**.
 Runtime: [doukutsu-rs](https://github.com/doukutsu-rs/doukutsu-rs).
 Host: [tModLoader](https://github.com/tModLoader/tModLoader).
 Managed runner: [WebAssembly for .NET](https://github.com/RyanLamansky/dotnet-webassembly).
 File-format reference: [NXEngine-evo](https://github.com/nxengine/nxengine-evo).
-Dependency notices and licenses are included in the mod. Original game data is
-downloaded separately; the icon and item thumbnails include credited artwork.
+Dependency notices and licenses are included in the mod.

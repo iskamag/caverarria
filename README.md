@@ -6,7 +6,7 @@ Cave Story's maps, dialogue, enemies, bosses, story items, music and saves run i
 equipment and attacks.
 
 Get the alpha from [GitHub Releases](https://github.com/iskamag/caverarria/releases)
-or find **Caverarria** in the tModLoader Steam Workshop. The GitHub ZIP includes
+or subscribe to [**Caverarria (Alpha)** on Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=3811267098). The GitHub ZIP includes
 `Caverarria.tmod` and a fresh campaign world. [Installation and player notes](docs/ALPHA.md)
 cover both options and the known alpha limitations.
 

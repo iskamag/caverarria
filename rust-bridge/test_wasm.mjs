@@ -1,0 +1,158 @@
+#!/usr/bin/env node
+// Runs the actual portable engine with host-fed original files and no imports.
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const modulePath=process.argv[2]??path.join(root,'runtime/wasm-check-target/wasm32-unknown-unknown/release/caverarria_bridge.wasm');
+const dataRoot=process.env.CAVERARRIA_WASM_DATA??path.join(root,'runtime/data');
+const module=new WebAssembly.Module(fs.readFileSync(modulePath));
+assert.deepEqual(WebAssembly.Module.imports(module),[]);
+const e=new WebAssembly.Instance(module,{}).exports;
+const encode=new TextEncoder(),decode=new TextDecoder();
+function bytes(data){const ptr=e.cave_alloc(data.length);new Uint8Array(e.memory.buffer,ptr,data.length).set(data);return ptr;}
+function string(text){return bytes(encode.encode(text+'\0'));}
+function read(ptr){const data=new Uint8Array(e.memory.buffer);let end=ptr;while(data[end])end++;return decode.decode(data.subarray(ptr,end));}
+function put(name,data,save=0){
+    const p=string(name),b=bytes(data);
+    assert.equal(0,e.cave_fs_put(p,b,data.length,save),read(e.cave_last_error()));
+    e.cave_free(p,encode.encode(name+'\0').length);e.cave_free(b,data.length);
+}
+function visit(dir,prefix=''){
+    for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+        const name=path.join(dir,entry.name),virtual=prefix+'/'+entry.name;
+        if(entry.isDirectory())visit(name,virtual);
+        else put(virtual,fs.readFileSync(name));
+    }
+}
+visit(dataRoot);
+const exe=fs.readFileSync(path.join(dataRoot,'../Doukutsu.exe'));
+const executable=bytes(exe);assert.equal(0,e.cave_extract_original(executable,exe.length),read(e.cave_last_error()));
+e.cave_free(executable,exe.length);
+// A private TSC fixture selects original ACCESS and plays a genuine PixTone SFX.
+const head=fs.readFileSync(path.join(dataRoot,'Head.tsc'));
+function cipher(data,sign){let middle=Math.floor(data.length/2),key=data[middle]||7;return Buffer.from(data.map((v,i)=>i===middle?v:(v+sign*key)&255));}
+put('/Head.tsc',cipher(Buffer.concat([cipher(head,-1),Buffer.from(
+    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n')]),1));
+e.cave_set_time(1790800000n);
+const empty=string('');let handle=e.cave_create(empty,empty,320,240);
+assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
+function command(request){const text=JSON.stringify(request),p=string(text);const response=JSON.parse(read(e.cave_command(handle,p)));e.cave_free(p,encode.encode(text+'\0').length);assert.ok(response.ok,JSON.stringify(response));return response;}
+let initial=command({op:'snapshot'});
+assert.equal(95,initial.stages.length);assert.equal(60,initial.timing_hz);assert.equal(3,initial.render_layers);
+if(process.env.CAVERARRIA_SILENT_AUDIO_TEST){
+    assert.equal(true,initial.audio_ready);
+    command({op:'warp',stage:0,x:160,y:120});
+    const tick=()=>command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    const event=id=>{command({op:'event',event:id});return tick();};
+    const pcm=(frames=4096)=>new Int16Array(e.memory.buffer,e.cave_audio(handle,frames),frames*2);
+    // Queue music/effects before disabling, without ever pumping the mixer.
+    assert.equal(21,event(9000).song);
+    let muted=command({op:'audio',enabled:false,music_volume:0,sfx_volume:1});
+    assert.equal(false,muted.audio_ready);assert.equal(21,muted.song);
+    const effects=muted.audio_trace.sfx_events;
+    for(let i=0;i<200;i++)muted=event(9012);
+    assert.equal(effects+200,muted.audio_trace.sfx_events);
+    assert.ok(pcm().every(x=>x===0));
+    // CMU/RMU must retain logical song IDs while playback is disabled.
+    assert.equal(8,event(9013).song);
+    assert.equal(21,event(9000).song);
+    command({op:'save'});
+    assert.equal(21,command({op:'load'}).song);
+    assert.equal(false,command({op:'snapshot'}).audio_ready);
+    assert.equal(true,command({op:'audio',enabled:true,music_volume:0,sfx_volume:1}).audio_ready);
+    for(let i=0;i<4;i++)assert.ok(pcm().every(x=>x===0),'discarded sounds replayed after enabling');
+    event(9012);
+    let peak=0;for(let i=0;i<4;i++)for(const sample of pcm())peak=Math.max(peak,Math.abs(sample));
+    assert.ok(peak>0,'fresh effects did not resume');
+    // Active/partially consumed sound buffers must also be removed by disable.
+    event(9012);pcm(64);
+    command({op:'audio',enabled:false});
+    command({op:'audio',enabled:true,music_volume:0,sfx_volume:1});
+    for(let i=0;i<4;i++)assert.ok(pcm().every(x=>x===0));
+    command({op:'audio',music_volume:1,sfx_volume:0});
+    assert.equal(8,event(9014).song);
+    let energy=0;for(let i=0;i<4;i++)for(const sample of pcm())energy+=sample*sample;
+    assert.ok(energy>0,'current music did not resume');
+    console.log(JSON.stringify({module:modulePath,muted_effect_requests:200,queued_and_active_audio_cleared:true,
+        silent_song_and_profile_preserved:true,reenable_has_no_stale_effects:true,fresh_pixtone_peak:peak}));
+    e.cave_destroy(handle);process.exit(0);
+}
+for(let i=0;i<180;i++)command({op:'tick',controls:0,player:{x:160,y:128,vx:0,vy:0}});
+const rendered=command({op:'snapshot'});
+let alpha=0;
+for(let layer=1;layer<=2;layer++){
+    const p=e.cave_pixels(handle,layer),data=new Uint8Array(e.memory.buffer,p,320*240*4);
+    for(let i=3;i<data.length;i+=4)alpha+=data[i];
+}
+assert.ok(alpha>0);
+command({op:'warp',stage:0,x:160,y:120});command({op:'event',event:9000});
+command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+assert.equal(48000,e.cave_audio_rate());let energy=0;
+const audioStarted=performance.now();
+for(let i=0;i<60;i++){
+    const ptr=e.cave_audio(handle,800);assert.equal(3200,e.cave_audio_length(handle));
+    const pcm=new Int16Array(e.memory.buffer,ptr,1600);
+    for(const sample of pcm)energy+=sample*sample;
+}
+assert.ok(energy>0);
+const audioMs=performance.now()-audioStarted;
+const before=command({op:'snapshot'}),after=command({op:'resize',width:426,height:240});
+assert.equal(before.tick,after.tick);assert.equal(426,after.viewport.width);
+const revision=e.cave_fs_revision?.(1)??0n;
+command({op:'save'});
+if(e.cave_fs_revision)assert.ok(e.cave_fs_revision(1)>revision);
+const list=JSON.parse(read(e.cave_fs_list(1)));
+assert.ok(list.some(name=>name.endsWith('/profile.dat')));
+const profile=string('/Profile.dat'),size=e.cave_fs_len(profile,1);
+assert.ok(size>0);assert.ok(e.cave_fs_get(profile,1));
+e.cave_free(profile,encode.encode('/Profile.dat\0').length);
+const t=performance.now();
+for(let i=0;i<120;i++)command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+const ms=(performance.now()-t)/120;
+console.log(JSON.stringify({module:modulePath,bytes:fs.statSync(modulePath).size,imports:0,stages:initial.stages.length,timing_hz:60,render_alpha_sum:alpha,pcm_rms:Math.sqrt(energy/96000),pcm_ms_per_second:audioMs,save_bytes:size,save_files:list,tick_ms:ms},null,2));
+if(process.env.CAVERARRIA_AUDIO_CORPUS){
+    command({op:'warp',stage:0,x:160,y:120});
+    command({op:'audio',music_volume:1,sfx_volume:0});
+    command({op:'event',event:9010});command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    const song=fs.readFileSync(path.join(root,'runtime/data/Org/ACCESS.org'));
+    const wait=song.readUInt16LE(6),start=song.readInt32LE(10),end=song.readInt32LE(14);
+    const loopFrames=(end-start)*48*wait,totalFrames=loopFrames*3;
+    const pcm=Buffer.alloc(totalFrames*4);
+    for(let at=0;at<totalFrames;){
+        const frames=Math.min(4096,totalFrames-at),pointer=e.cave_audio(handle,frames);
+        assert.equal(frames*4,e.cave_audio_length(handle));
+        pcm.set(new Uint8Array(e.memory.buffer,pointer,frames*4),at*4);at+=frames;
+    }
+    function rms(from,to){let sum=0;for(let frame=from;frame<to;frame++){
+        const l=pcm.readInt16LE(frame*4),r=pcm.readInt16LE(frame*4+2);sum+=l*l+r*r;
+    }return Math.sqrt(sum/(to-from)/2);}
+    const levels=[0,1,2].map(i=>rms(i*loopFrames,(i+1)*loopFrames));
+    const envelopes=[0,1,2].map(i=>Array.from({length:Math.floor(loopFrames/2400)},(_,j)=>
+        rms(i*loopFrames+j*2400,i*loopFrames+(j+1)*2400)));
+    function correlation(a,b){
+        const ma=a.reduce((s,v)=>s+v,0)/a.length,mb=b.reduce((s,v)=>s+v,0)/b.length;
+        let ab=0,aa=0,bb=0;for(let i=0;i<a.length;i++){const x=a[i]-ma,y=b[i]-mb;ab+=x*y;aa+=x*x;bb+=y*y;}
+        return ab/Math.sqrt(aa*bb);
+    }
+    const correlations=[correlation(envelopes[0],envelopes[1]),correlation(envelopes[1],envelopes[2])];
+    assert.ok(Math.min(...correlations)>.95);assert.ok(Math.min(...levels)/Math.max(...levels)>.8);
+    command({op:'audio',music_volume:0,sfx_volume:0});
+    let pointer=e.cave_audio(handle,4096);
+    assert.ok(new Uint8Array(e.memory.buffer,pointer,4096*4).every(x=>x===0));
+    command({op:'audio',music_volume:0,sfx_volume:1});
+    command({op:'event',event:9011});command({op:'tick',controls:0,player:{x:160,y:120,vx:0,vy:0}});
+    let peak=0;for(let i=0;i<4;i++){
+        pointer=e.cave_audio(handle,4096);for(const sample of new Int16Array(e.memory.buffer,pointer,8192))peak=Math.max(peak,Math.abs(sample));
+    }
+    assert.ok(peak>0);
+    const destination=process.env.CAVERARRIA_AUDIO_CORPUS;fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,pcm);
+    const report={module:modulePath,wasm_sha256:crypto.createHash('sha256').update(fs.readFileSync(modulePath)).digest('hex'),
+        sample_rate:48000,channels:2,format:'s16le',song:'ACCESS',original_sha256:crypto.createHash('sha256').update(song).digest('hex'),
+        loop_seconds:loopFrames/48000,complete_pcm_bytes:pcm.length,loop_rms:levels,loop_envelope_correlations:correlations,
+        full_composition_repeats:true,music_and_sfx_muted_are_silent:true,pixtone_sfx_id:15,pixtone_peak:peak};
+    fs.writeFileSync(destination.replace(/\.[^.]+$/,'')+'.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
+}
+e.cave_destroy(handle);

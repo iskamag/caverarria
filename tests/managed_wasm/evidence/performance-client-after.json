@@ -1,0 +1,35 @@
+{
+  "seconds": 3.000537321000593,
+  "updatesPerSecond": 59.98925550440252,
+  "audioSamplesPerSecond": 47991.404403522014,
+  "buffers": 6,
+  "performance": {
+    "update": {
+      "milliseconds": 0.008819765280650453,
+      "maximumMilliseconds": 4.236313,
+      "callsPerSecond": 27576.42948500123
+    },
+    "images": {
+      "milliseconds": 0.23881488524590164,
+      "maximumMilliseconds": 0.381611,
+      "callsPerSecond": 59.9872405172625
+    },
+    "draw": {
+      "milliseconds": 1.6651007868852459,
+      "maximumMilliseconds": 2.513531,
+      "callsPerSecond": 59.9872405172625
+    },
+    "audio": {
+      "milliseconds": 0.5340850163934426,
+      "maximumMilliseconds": 0.87071,
+      "callsPerSecond": 59.9872405172625
+    },
+    "engine": {
+      "milliseconds": 2.296654049180328,
+      "maximumMilliseconds": 2.585121,
+      "callsPerSecond": 59.9872405172625
+    }
+  },
+  "error": null,
+  "pathNormalization": "Local paths use ${REPO} and ${TML}; measurements are unchanged."
+}

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <BuildMod>false</BuildMod>
+    <OutputTmlReferences>true</OutputTmlReferences>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../mod/Caverarria/*.cs" />
+    <Reference Include="WebAssembly"><HintPath>../../mod/Caverarria/lib/WebAssembly.dll</HintPath></Reference>
+  </ItemGroup>
+  <Import Project="$(TmlDirectory)/tMLMod.targets" />
+</Project>

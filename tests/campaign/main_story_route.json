@@ -1,0 +1,4558 @@
+{
+  "scope": "Source-checked waypoint/gate specification. IDs are observations only; no event calls, flags, warps or direct damage are commands.",
+  "includes": [
+    "early_route.json"
+  ],
+  "default_ending": "normal",
+  "steps": [
+    {
+      "name": "Enter Egg No. 06",
+      "stage": 2,
+      "map": "Eggs",
+      "observed_event": 101,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 2864,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "expect_stage": 4
+    },
+    {
+      "name": "Open ID Card chest",
+      "stage": 4,
+      "map": "Egg6",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 15,
+          "x": 176,
+          "y": 112,
+          "appearance_flag": 140,
+          "flags": 24576
+        },
+        {
+          "type": 21,
+          "x": 176,
+          "y": 112,
+          "appearance_flag": 140,
+          "flags": 10240
+        }
+      ],
+      "expect_item": 7
+    },
+    {
+      "name": "Return to Egg Corridor",
+      "stage": 4,
+      "map": "Egg6",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 144,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 2
+    },
+    {
+      "name": "Enter Egg No. 01",
+      "stage": 2,
+      "map": "Eggs",
+      "observed_event": 107,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 4144,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "expect_stage": 23
+    },
+    {
+      "name": "Lower the shield with ID Card",
+      "stage": 23,
+      "map": "Egg1",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 85,
+          "x": 160,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "requires_item": 7,
+      "result_event": 201,
+      "expect_flags_set": [
+        470
+      ]
+    },
+    {
+      "name": "Return from Egg No. 01",
+      "stage": 23,
+      "map": "Egg1",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 144,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 2
+    },
+    {
+      "name": "Trigger Igor's encounter",
+      "stage": 2,
+      "map": "Eggs",
+      "observed_event": 600,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 4560,
+          "y": 32,
+          "appearance_flag": 103,
+          "flags": 20736
+        }
+      ],
+      "target_cs": [
+        4560,
+        32
+      ]
+    },
+    {
+      "name": "Defeat Igor",
+      "stage": 2,
+      "map": "Eggs",
+      "observed_event": 503,
+      "action": "combat",
+      "original_targets": [
+        {
+          "type": 83,
+          "x": 4624,
+          "y": 112,
+          "appearance_flag": 103,
+          "flags": 16896
+        }
+      ],
+      "enemy_type": 88,
+      "requires_real_damage": true,
+      "expect_flags_set": [
+        103
+      ]
+    },
+    {
+      "name": "Enter Egg No. 00",
+      "stage": 2,
+      "map": "Eggs",
+      "observed_event": 108,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 4656,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "result_event": 109,
+      "expect_stage": 3
+    },
+    {
+      "name": "Speak to Sue and complete the egg scene",
+      "stage": 3,
+      "map": "EggX",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 42,
+          "x": 160,
+          "y": 160,
+          "appearance_flag": 120,
+          "flags": 24576
+        }
+      ],
+      "dialogue_choice": "either",
+      "expect_flags_set": [
+        120,
+        105,
+        154,
+        155,
+        329,
+        106
+      ]
+    },
+    {
+      "name": "Leave Egg No. 00",
+      "stage": 3,
+      "map": "EggX",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 64,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 2
+    },
+    {
+      "name": "Return to Arthur's House through teleporter",
+      "stage": 2,
+      "map": "Eggs",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 80,
+          "y": 96,
+          "appearance_flag": 0,
+          "flags": 8192
+        },
+        {
+          "type": 23,
+          "x": 80,
+          "y": 80,
+          "appearance_flag": 0,
+          "flags": 0
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_stage": 24,
+      "note": "Original transfer also runs Pens2 700 and Shelter 700; record every stage."
+    },
+    {
+      "name": "Finish Sue's network conversation",
+      "stage": 24,
+      "map": "Pens2",
+      "observed_event": 700,
+      "action": "advance_dialogue",
+      "original_targets": [
+        {
+          "type": 92,
+          "x": 112,
+          "y": 112,
+          "appearance_flag": 0,
+          "flags": 0
+        }
+      ]
+    },
+    {
+      "name": "Leave Arthur's House to check on Sue",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 102,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 272,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "result_event": 103,
+      "expect_stage": 11
+    },
+    {
+      "name": "Finish the arrival scene",
+      "stage": 11,
+      "map": "Mimi",
+      "observed_event": 400,
+      "action": "advance_dialogue",
+      "original_targets": [
+        {
+          "type": 91,
+          "x": 352,
+          "y": 448,
+          "appearance_flag": 0,
+          "flags": 0
+        }
+      ]
+    },
+    {
+      "name": "Speak to caged Sue",
+      "stage": 11,
+      "map": "Mimi",
+      "observed_event": 600,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 42,
+          "x": 352,
+          "y": 464,
+          "appearance_flag": 329,
+          "flags": 14336
+        }
+      ],
+      "expect_flags_set": [
+        325
+      ],
+      "expect_teleporter": 2
+    },
+    {
+      "name": "Enter Arthur's House",
+      "stage": 11,
+      "map": "Mimi",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 256,
+          "y": 848,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 1
+    },
+    {
+      "name": "Teleport to Grasstown",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 500,
+      "action": "interact_and_select",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 80,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "select_teleporter": 2,
+      "observed_transfer_event": 6002,
+      "expect_stage": 6
+    },
+    {
+      "name": "Pick up Santa's Key",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 14,
+          "x": 864,
+          "y": 224,
+          "appearance_flag": 210,
+          "flags": 24576
+        }
+      ],
+      "expect_item": 3
+    },
+    {
+      "name": "Return the key to Santa",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 500,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 40,
+          "x": 240,
+          "y": 192,
+          "appearance_flag": 212,
+          "flags": 28672
+        }
+      ],
+      "expect_flags_set": [
+        212
+      ],
+      "note": "Interact again if initial conversation only describes lost key."
+    },
+    {
+      "name": "Enter Santa's House",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 101,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 64,
+          "y": 192,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 7
+    },
+    {
+      "name": "Receive Fireball",
+      "stage": 7,
+      "map": "Santa",
+      "observed_event": 500,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 40,
+          "x": 208,
+          "y": 80,
+          "appearance_flag": 243,
+          "flags": 28672
+        }
+      ],
+      "expect_weapon": 3,
+      "expect_flags_set": [
+        240,
+        241
+      ]
+    },
+    {
+      "name": "Leave Santa's House",
+      "stage": 7,
+      "map": "Santa",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 240,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 6
+    },
+    {
+      "name": "Defeat a Giant Jelly and collect Jellyfish Juice",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 202,
+      "action": "combat_and_interact",
+      "original_targets": [
+        {
+          "type": 94,
+          "x": 864,
+          "y": 32,
+          "appearance_flag": 261,
+          "flags": 2560
+        }
+      ],
+      "enemy_type": 94,
+      "expect_item": 8,
+      "note": "Native Giant Jelly death creates its chest; fire actual weapon then open chest."
+    },
+    {
+      "name": "Enter Chaco's House",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 103,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1904,
+          "y": 272,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 8
+    },
+    {
+      "name": "Use Juice on Chaco's fireplace",
+      "stage": 8,
+      "map": "Chako",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 38,
+          "x": 224,
+          "y": 96,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "requires_item": 8,
+      "dialogue_choice": "yes",
+      "result_event": 202,
+      "expect_stage": 6,
+      "expect_flags_set": [
+        213
+      ]
+    },
+    {
+      "name": "Talk to Kazuma through the crack",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 230,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 3536,
+          "y": 256,
+          "appearance_flag": 520,
+          "flags": 24576
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_item": 9,
+      "expect_flags_set": [
+        215
+      ]
+    },
+    {
+      "name": "Try the rusted door",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 220,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 3472,
+          "y": 256,
+          "appearance_flag": 520,
+          "flags": 24576
+        }
+      ],
+      "expect_flags_set": [
+        216
+      ]
+    },
+    {
+      "name": "Enter Power Room",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 104,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 2736,
+          "y": 272,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 25
+    },
+    {
+      "name": "Switch on the power",
+      "stage": 25,
+      "map": "Malco",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 101,
+          "x": 96,
+          "y": 112,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        481
+      ],
+      "result_event": 204
+    },
+    {
+      "name": "Defeat Power Room Balrog",
+      "stage": 25,
+      "map": "Malco",
+      "observed_event": 203,
+      "action": "combat",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 208,
+          "y": 16,
+          "appearance_flag": 0,
+          "flags": 512
+        }
+      ],
+      "enemy_type": 36,
+      "requires_real_damage": true,
+      "expect_flags_set": [
+        482
+      ],
+      "expect_flags_unset": [
+        480
+      ]
+    },
+    {
+      "name": "Pull MALCO out of the floor",
+      "stage": 25,
+      "map": "Malco",
+      "observed_event": 300,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 107,
+          "x": 208,
+          "y": 112,
+          "appearance_flag": 483,
+          "flags": 24576
+        }
+      ],
+      "dialogue_choice": "yes",
+      "result_event": 302,
+      "expect_flags_set": [
+        483
+      ]
+    },
+    {
+      "name": "Ask MALCO to make the bomb",
+      "stage": 25,
+      "map": "Malco",
+      "observed_event": 300,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 107,
+          "x": 208,
+          "y": 112,
+          "appearance_flag": 483,
+          "flags": 24576
+        }
+      ],
+      "result_event": 304,
+      "expect_flags_set": [
+        484
+      ]
+    },
+    {
+      "name": "Leave Power Room",
+      "stage": 25,
+      "map": "Malco",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 256,
+          "y": 112,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 6
+    },
+    {
+      "name": "Get Gum Key from Kazuma",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 230,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 3536,
+          "y": 256,
+          "appearance_flag": 520,
+          "flags": 24576
+        }
+      ],
+      "result_event": 236,
+      "expect_item": 10,
+      "expect_flags_set": [
+        221
+      ]
+    },
+    {
+      "name": "Collect Juice for Charcoal",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 202,
+      "action": "combat_and_interact",
+      "original_targets": [
+        {
+          "type": 94,
+          "x": 864,
+          "y": 32,
+          "appearance_flag": 261,
+          "flags": 2560
+        }
+      ],
+      "expect_item": 8
+    },
+    {
+      "name": "Return to Santa's House",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 101,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 64,
+          "y": 192,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 7
+    },
+    {
+      "name": "Use Juice on Santa's fireplace for Charcoal",
+      "stage": 7,
+      "map": "Santa",
+      "observed_event": 300,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 38,
+          "x": 240,
+          "y": 80,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "result_event": 301,
+      "expect_item": 12,
+      "expect_flags_set": [
+        242
+      ]
+    },
+    {
+      "name": "Leave Santa's House again",
+      "stage": 7,
+      "map": "Santa",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 240,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 6
+    },
+    {
+      "name": "Collect the final bomb Juice",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 202,
+      "action": "combat_and_interact",
+      "original_targets": [
+        {
+          "type": 94,
+          "x": 864,
+          "y": 32,
+          "appearance_flag": 261,
+          "flags": 2560
+        }
+      ],
+      "expect_item": 8
+    },
+    {
+      "name": "Enter Gum with Gum Key",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 109,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 4368,
+          "y": 96,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "requires_item": 10,
+      "expect_stage": 28
+    },
+    {
+      "name": "Open Gum Base chest and start Balfrog",
+      "stage": 28,
+      "map": "Frog",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 15,
+          "x": 224,
+          "y": 208,
+          "appearance_flag": 501,
+          "flags": 24576
+        },
+        {
+          "type": 21,
+          "x": 224,
+          "y": 192,
+          "appearance_flag": 501,
+          "flags": 14336
+        }
+      ],
+      "expect_item": 11
+    },
+    {
+      "name": "Defeat Balfrog",
+      "stage": 28,
+      "map": "Frog",
+      "observed_event": 1000,
+      "action": "combat",
+      "original_targets": [],
+      "boss_number": 2,
+      "requires_real_damage": true,
+      "note": "Shoot the open mouth; damage must reach native stage-boss component0."
+    },
+    {
+      "name": "Leave Gum",
+      "stage": 28,
+      "map": "Frog",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 96,
+          "y": 208,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 6
+    },
+    {
+      "name": "Return to MALCO",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 104,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 2736,
+          "y": 272,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 25
+    },
+    {
+      "name": "Give MALCO all three materials",
+      "stage": 25,
+      "map": "Malco",
+      "observed_event": 300,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 107,
+          "x": 208,
+          "y": 112,
+          "appearance_flag": 483,
+          "flags": 24576
+        }
+      ],
+      "requires_items": [
+        8,
+        11,
+        12
+      ],
+      "result_event": 312,
+      "expect_item": 13,
+      "expect_flags_set": [
+        486
+      ]
+    },
+    {
+      "name": "Leave Power Room with Explosive",
+      "stage": 25,
+      "map": "Malco",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 256,
+          "y": 112,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 6
+    },
+    {
+      "name": "Use Explosive on Kazuma's door",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 220,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 3472,
+          "y": 256,
+          "appearance_flag": 520,
+          "flags": 24576
+        }
+      ],
+      "requires_item": 13,
+      "result_event": 250,
+      "expect_stage": 18,
+      "expect_flags_set": [
+        521,
+        522
+      ]
+    },
+    {
+      "name": "Complete Kazuma's rescue",
+      "stage": 18,
+      "map": "Shelt",
+      "observed_event": 200,
+      "action": "advance_dialogue",
+      "original_targets": []
+    },
+    {
+      "name": "Leave Shelter with Kazuma and Professor",
+      "stage": 18,
+      "map": "Shelt",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 96,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "result_event": 105,
+      "expect_stage": 6
+    },
+    {
+      "name": "Watch Kazuma and Professor leave for the village",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 600,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "expect_flags_set": [
+        219,
+        225
+      ]
+    },
+    {
+      "name": "Return to Arthur's House via the Grasstown teleporter",
+      "stage": 6,
+      "map": "Weed",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 64,
+          "y": 288,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_stage": 1
+    },
+    {
+      "name": "Complete Sue's return scene",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 620,
+      "action": "advance_dialogue",
+      "original_targets": []
+    },
+    {
+      "name": "Ask Sue about red flowers",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 625,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 272,
+          "y": 112,
+          "appearance_flag": 157,
+          "flags": 14336
+        },
+        {
+          "type": 42,
+          "x": 192,
+          "y": 128,
+          "appearance_flag": 156,
+          "flags": 10240
+        }
+      ],
+      "expect_flags_set": [
+        158
+      ],
+      "expect_teleporter": 3
+    },
+    {
+      "name": "Teleport to Sand Zone",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 500,
+      "action": "interact_and_select",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 80,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "select_teleporter": 3,
+      "observed_transfer_event": 6003,
+      "expect_stage": 10
+    },
+    {
+      "name": "Enter Sand Zone Residence",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 101,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 48,
+          "y": 192,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 29
+    },
+    {
+      "name": "Trigger Curly's encounter",
+      "stage": 29,
+      "map": "Curly",
+      "observed_event": 300,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 224,
+          "y": 128,
+          "appearance_flag": 560,
+          "flags": 20736
+        }
+      ]
+    },
+    {
+      "name": "Defeat Curly and deny wanting to kill Mimigas",
+      "stage": 29,
+      "map": "Curly",
+      "observed_event": 400,
+      "action": "combat",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 192,
+          "y": 128,
+          "appearance_flag": 560,
+          "flags": 20992
+        }
+      ],
+      "enemy_type": 118,
+      "requires_real_damage": true,
+      "dialogue_choice": "no",
+      "result_event": 410,
+      "expect_flags_set": [
+        562
+      ],
+      "note": "Optional following machine-gun trade can be declined to keep Polar Star."
+    },
+    {
+      "name": "Ask the Colons about Jenka and her puppy",
+      "stage": 29,
+      "map": "Curly",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 120,
+          "x": 48,
+          "y": 144,
+          "appearance_flag": 565,
+          "flags": 28672
+        }
+      ],
+      "result_event": 206,
+      "expect_flags_set": [
+        564
+      ]
+    },
+    {
+      "name": "Enter Curly's Small Room",
+      "stage": 29,
+      "map": "Curly",
+      "observed_event": 101,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 96,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 32
+    },
+    {
+      "name": "Take the residence puppy",
+      "stage": 32,
+      "map": "CurlyS",
+      "observed_event": 400,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 130,
+          "x": 176,
+          "y": 144,
+          "appearance_flag": 580,
+          "flags": 24576
+        }
+      ],
+      "dialogue_choice": "yes",
+      "result_event": 401,
+      "expect_item": 14
+    },
+    {
+      "name": "Leave the Small Room",
+      "stage": 32,
+      "map": "CurlyS",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 128,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 29
+    },
+    {
+      "name": "Leave Sand Zone Residence",
+      "stage": 29,
+      "map": "Curly",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 288,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 10
+    },
+    {
+      "name": "Trigger and defeat Omega",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 202,
+      "action": "touch_and_combat",
+      "original_targets": [
+        {
+          "type": 124,
+          "x": 784,
+          "y": 160,
+          "appearance_flag": 273,
+          "flags": 16384
+        }
+      ],
+      "boss_number": 1,
+      "requires_real_damage": true,
+      "result_event": 210,
+      "expect_flags_set": [
+        272
+      ]
+    },
+    {
+      "name": "Enter Jenka's House",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 103,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 560,
+          "y": 416,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 33
+    },
+    {
+      "name": "Return the first puppy",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 133,
+          "x": 112,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "requires_item": 14,
+      "expect_flags_set": [
+        590
+      ]
+    },
+    {
+      "name": "Leave Jenka's House",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 10
+    },
+    {
+      "name": "Take the chest puppy through pawprint passage",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 412,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 15,
+          "x": 1600,
+          "y": 384,
+          "appearance_flag": 279,
+          "flags": 24576
+        }
+      ],
+      "expect_item": 14,
+      "note": "Original walk-through walls marked with pawprints must retain passability."
+    },
+    {
+      "name": "Bring chest puppy to Jenka",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 103,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 560,
+          "y": 416,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 33
+    },
+    {
+      "name": "Return the second puppy",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 133,
+          "x": 112,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "requires_item": 14,
+      "expect_flags_set": [
+        591
+      ]
+    },
+    {
+      "name": "Leave Jenka after second puppy",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 10
+    },
+    {
+      "name": "Enter Deserted House",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 104,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 1168,
+          "y": 416,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "expect_stage": 34
+    },
+    {
+      "name": "Take Deserted House puppy",
+      "stage": 34,
+      "map": "Dark",
+      "observed_event": 400,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 132,
+          "x": 256,
+          "y": 64,
+          "appearance_flag": 610,
+          "flags": 24576
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_item": 14
+    },
+    {
+      "name": "Leave Deserted House",
+      "stage": 34,
+      "map": "Dark",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 80,
+          "y": 192,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 10
+    },
+    {
+      "name": "Bring Deserted House puppy to Jenka",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 103,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 560,
+          "y": 416,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 33
+    },
+    {
+      "name": "Return the third puppy",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 133,
+          "x": 112,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "requires_item": 14,
+      "expect_flags_set": [
+        592
+      ]
+    },
+    {
+      "name": "Leave Jenka after third puppy",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 10
+    },
+    {
+      "name": "Catch the running puppy",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 402,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 126,
+          "x": 1904,
+          "y": 752,
+          "appearance_flag": 276,
+          "flags": 16384
+        }
+      ],
+      "dialogue_choice": "yes",
+      "target_cs": [
+        1904,
+        752
+      ],
+      "expect_item": 14,
+      "note": "The actor moves; use its live position."
+    },
+    {
+      "name": "Bring running puppy to Jenka",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 103,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 560,
+          "y": 416,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 33
+    },
+    {
+      "name": "Return the fourth puppy",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 133,
+          "x": 112,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "requires_item": 14,
+      "expect_flags_set": [
+        593
+      ]
+    },
+    {
+      "name": "Leave Jenka after fourth puppy",
+      "stage": 33,
+      "map": "Jenka1",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 10
+    },
+    {
+      "name": "Take sleeping puppy",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 401,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 131,
+          "x": 3408,
+          "y": 512,
+          "appearance_flag": 275,
+          "flags": 28672
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_item": 14
+    },
+    {
+      "name": "Carry last puppy across the original trigger",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 340,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 640,
+          "y": 384,
+          "appearance_flag": 280,
+          "flags": 20736
+        }
+      ],
+      "result_event": 342,
+      "expect_flags_set": [
+        280
+      ],
+      "note": "Trigger at(40,24) requires four returned dogs flag593 and currently carrying flag274."
+    },
+    {
+      "name": "Return to Jenka's changed house",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 103,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 560,
+          "y": 416,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 36
+    },
+    {
+      "name": "Complete Balrog's key-theft scene",
+      "stage": 36,
+      "map": "Jenka2",
+      "observed_event": 200,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "expect_flags_set": [
+        278,
+        595
+      ]
+    },
+    {
+      "name": "Return last puppy to Jenka",
+      "stage": 36,
+      "map": "Jenka2",
+      "observed_event": 220,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 143,
+          "x": 112,
+          "y": 160,
+          "appearance_flag": 596,
+          "flags": 24576
+        }
+      ],
+      "requires_item": 14,
+      "expect_flags_set": [
+        594,
+        596
+      ]
+    },
+    {
+      "name": "Leave Jenka's changed house",
+      "stage": 36,
+      "map": "Jenka2",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 10
+    },
+    {
+      "name": "Enter Sand Zone Storehouse",
+      "stage": 10,
+      "map": "Sand",
+      "observed_event": 230,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 137,
+          "x": 3600,
+          "y": 576,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "requires_flags_set": [
+        278
+      ],
+      "expect_stage": 35
+    },
+    {
+      "name": "Watch red-flower scene and defeat Frenzied Toroko",
+      "stage": 35,
+      "map": "Gard",
+      "observed_event": 502,
+      "action": "advance_and_combat",
+      "original_targets": [
+        {
+          "type": 82,
+          "x": 336,
+          "y": 144,
+          "appearance_flag": 620,
+          "flags": 20480
+        }
+      ],
+      "enemy_type": 140,
+      "requires_real_damage": true,
+      "result_event": 503,
+      "expect_flags_set": [
+        623
+      ]
+    },
+    {
+      "name": "Speak to the fallen King",
+      "stage": 35,
+      "map": "Gard",
+      "observed_event": 505,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 80,
+          "y": 128,
+          "appearance_flag": 620,
+          "flags": 28672
+        }
+      ],
+      "result_event": 600,
+      "expect_flags_set": [
+        622
+      ]
+    },
+    {
+      "name": "Accept King's Blade",
+      "stage": 35,
+      "map": "Gard",
+      "observed_event": 505,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 80,
+          "y": 128,
+          "appearance_flag": 620,
+          "flags": 28672
+        }
+      ],
+      "result_event": 601,
+      "expect_weapon": 9
+    },
+    {
+      "name": "Leave Storehouse",
+      "stage": 35,
+      "map": "Gard",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 80,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 37
+    },
+    {
+      "name": "Complete Misery's exile scene",
+      "stage": 37,
+      "map": "SandE",
+      "observed_event": 600,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "expect_stage": 9
+    },
+    {
+      "name": "Climb Labyrinth I and activate exit panel",
+      "stage": 9,
+      "map": "MazeI",
+      "observed_event": 402,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 85,
+          "x": 288,
+          "y": 64,
+          "appearance_flag": 641,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        641
+      ]
+    },
+    {
+      "name": "Use opened Labyrinth I exit",
+      "stage": 9,
+      "map": "MazeI",
+      "observed_event": 202,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 137,
+          "x": 192,
+          "y": 1024,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "result_event": 203,
+      "expect_stage": 38
+    },
+    {
+      "name": "Cross Labyrinth H",
+      "stage": 38,
+      "map": "MazeH",
+      "observed_event": 101,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 137,
+          "x": 80,
+          "y": 48,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 39
+    },
+    {
+      "name": "Enter Labyrinth Camp",
+      "stage": 39,
+      "map": "MazeW",
+      "observed_event": 102,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1344,
+          "y": 240,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 40
+    },
+    {
+      "name": "Ask the physician for a cure request",
+      "stage": 40,
+      "map": "MazeO",
+      "observed_event": 300,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 163,
+          "x": 144,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "expect_item": 17,
+      "expect_flags_set": [
+        700
+      ]
+    },
+    {
+      "name": "Return to Labyrinth W",
+      "stage": 40,
+      "map": "MazeO",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 64,
+          "y": 80,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 39
+    },
+    {
+      "name": "Enter Clinic Ruins",
+      "stage": 39,
+      "map": "MazeW",
+      "observed_event": 103,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1056,
+          "y": 64,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 41
+    },
+    {
+      "name": "Take Cure-All and defeat Puu Black",
+      "stage": 41,
+      "map": "MazeD",
+      "observed_event": 200,
+      "action": "interact_and_combat",
+      "original_targets": [
+        {
+          "type": 15,
+          "x": 144,
+          "y": 176,
+          "appearance_flag": 711,
+          "flags": 24576
+        },
+        {
+          "type": 15,
+          "x": 144,
+          "y": 160,
+          "appearance_flag": 711,
+          "flags": 24576
+        }
+      ],
+      "enemy_type": 160,
+      "expect_item": 16,
+      "requires_real_damage": true
+    },
+    {
+      "name": "Leave Clinic Ruins",
+      "stage": 41,
+      "map": "MazeD",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 240,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 39
+    },
+    {
+      "name": "Return Cure-All at Camp",
+      "stage": 39,
+      "map": "MazeW",
+      "observed_event": 102,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1344,
+          "y": 240,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 40
+    },
+    {
+      "name": "Give the physician Cure-All",
+      "stage": 40,
+      "map": "MazeO",
+      "observed_event": 300,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 163,
+          "x": 144,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "requires_item": 16,
+      "result_event": 302,
+      "expect_flags_set": [
+        702
+      ]
+    },
+    {
+      "name": "Leave Camp after Curly recovers",
+      "stage": 40,
+      "map": "MazeO",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 64,
+          "y": 80,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 39,
+      "expect_flags_set": [
+        704
+      ]
+    },
+    {
+      "name": "Trigger and defeat Monster X",
+      "stage": 39,
+      "map": "MazeW",
+      "observed_event": 302,
+      "action": "touch_and_combat",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 2384,
+          "y": 256,
+          "appearance_flag": 680,
+          "flags": 20736
+        }
+      ],
+      "boss_number": 3,
+      "requires_real_damage": true
+    },
+    {
+      "name": "Enter Labyrinth B",
+      "stage": 39,
+      "map": "MazeW",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 3152,
+          "y": 224,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 43
+    },
+    {
+      "name": "Take wounded Professor's Booster v0.8",
+      "stage": 43,
+      "map": "MazeB",
+      "observed_event": 501,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 167,
+          "x": 160,
+          "y": 432,
+          "appearance_flag": 741,
+          "flags": 24576
+        }
+      ],
+      "for_endings": [
+        "normal"
+      ],
+      "expect_item": 18,
+      "expect_flags_set": [
+        741,
+        834
+      ]
+    },
+    {
+      "name": "Equip Booster v0.8 through original inventory",
+      "action": "inventory_select_and_use",
+      "item": 18,
+      "observed_page": "ArmsItem",
+      "observed_event": 6018,
+      "for_endings": [
+        "normal"
+      ],
+      "dialogue_choice": "yes",
+      "expect_equipment_bit": 1
+    },
+    {
+      "name": "Cross the gap and enter Boulder Chamber",
+      "stage": 43,
+      "map": "MazeB",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 256,
+          "y": 208,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 44,
+      "note": "Best route skips wounded Professor and performs the original long jump."
+    },
+    {
+      "name": "Ask Curly about the boulder",
+      "stage": 44,
+      "map": "MazeS",
+      "observed_event": 300,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 117,
+          "x": 176,
+          "y": 224,
+          "appearance_flag": 760,
+          "flags": 10240
+        }
+      ],
+      "expect_flags_set": [
+        761
+      ]
+    },
+    {
+      "name": "Push the boulder from its left side",
+      "stage": 44,
+      "map": "MazeS",
+      "observed_event": 320,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 144,
+          "y": 224,
+          "appearance_flag": 764,
+          "flags": 24576
+        }
+      ],
+      "result_event": 321
+    },
+    {
+      "name": "Defeat Boulder Chamber Balrog",
+      "stage": 44,
+      "map": "MazeS",
+      "observed_event": 310,
+      "action": "combat",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 112,
+          "y": 48,
+          "appearance_flag": 0,
+          "flags": 512
+        }
+      ],
+      "enemy_type": 169,
+      "requires_real_damage": true,
+      "result_event": 600,
+      "expect_flags_set": [
+        764,
+        781
+      ]
+    },
+    {
+      "name": "Enter Labyrinth M",
+      "stage": 44,
+      "map": "MazeS",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 160,
+          "y": 208,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "expect_stage": 45
+    },
+    {
+      "name": "Traverse Labyrinth M with Curly",
+      "stage": 45,
+      "map": "MazeM",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1296,
+          "y": 848,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 46
+    },
+    {
+      "name": "Enter the Core room",
+      "stage": 46,
+      "map": "Drain",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 272,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 47
+    },
+    {
+      "name": "Activate first shutter console",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 85,
+          "x": 144,
+          "y": 176,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        821,
+        822
+      ]
+    },
+    {
+      "name": "Clear stuck shutter mechanism",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 340,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 152,
+          "x": 480,
+          "y": 224,
+          "appearance_flag": 823,
+          "flags": 20992
+        }
+      ],
+      "expect_flags_set": [
+        823,
+        826
+      ]
+    },
+    {
+      "name": "Use first console again to lower lift",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 85,
+          "x": 144,
+          "y": 176,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "result_event": 202,
+      "expect_flags_set": [
+        824
+      ]
+    },
+    {
+      "name": "Activate second shutter console",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 210,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 85,
+          "x": 592,
+          "y": 320,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        825
+      ]
+    },
+    {
+      "name": "Pass second shutter trigger",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 350,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 144,
+          "y": 336,
+          "appearance_flag": 0,
+          "flags": 4352
+        }
+      ],
+      "result_event": 351,
+      "expect_flags_set": [
+        827
+      ]
+    },
+    {
+      "name": "Take the Tow Rope before starting Core",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 240,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 70,
+          "x": 1136,
+          "y": 400,
+          "appearance_flag": 834,
+          "flags": 24576
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_unset": [
+        834,
+        828
+      ],
+      "dialogue_choice": "yes",
+      "expect_item": 30,
+      "expect_flags_set": [
+        839
+      ],
+      "note": "Original rope chest is at tile(71,25); Booster v0.8 flag834 prevents its appearance."
+    },
+    {
+      "name": "Investigate the damaged robot with Curly",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 450,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 117,
+          "x": 832,
+          "y": 208,
+          "appearance_flag": 827,
+          "flags": 14336
+        },
+        {
+          "type": 0,
+          "x": 832,
+          "y": 192,
+          "appearance_flag": 827,
+          "flags": 28672
+        }
+      ],
+      "result_event": 452,
+      "expect_flags_set": [
+        828
+      ]
+    },
+    {
+      "name": "Defeat Core and survive the drowning scene",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 1000,
+      "action": "combat_and_advance",
+      "original_targets": [],
+      "boss_number": 4,
+      "requires_real_damage": true,
+      "result_event": 1110,
+      "expect_item": 21,
+      "expect_equipment_bit": 16,
+      "expect_flags_set": [
+        830
+      ]
+    },
+    {
+      "name": "Tie the Tow Rope to the unconscious Curly",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 306,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 880,
+          "y": 272,
+          "appearance_flag": 829,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_item": 30,
+      "result_event": 307,
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        835,
+        836
+      ]
+    },
+    {
+      "name": "Return through Dark Place",
+      "stage": 47,
+      "map": "Almond",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 64,
+          "y": 272,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 46
+    },
+    {
+      "name": "Enter waterway grating",
+      "stage": 46,
+      "map": "Drain",
+      "observed_event": 121,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 128,
+          "y": 128,
+          "appearance_flag": 801,
+          "flags": 14336
+        }
+      ],
+      "expect_stage": 48
+    },
+    {
+      "name": "Enter Waterway Cabin while carrying Curly",
+      "stage": 48,
+      "map": "River",
+      "observed_event": 120,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 2448,
+          "y": 256,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_set": [
+        836
+      ],
+      "expect_stage": 73
+    },
+    {
+      "name": "Rest and lay Curly on the Cabin bed",
+      "stage": 73,
+      "map": "Pixel",
+      "observed_event": 250,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 34,
+          "x": 192,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 251,
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        1440
+      ],
+      "expect_flags_unset": [
+        836
+      ]
+    },
+    {
+      "name": "Read Cabin computer after laying Curly down",
+      "stage": 73,
+      "map": "Pixel",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 20,
+          "x": 240,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 202,
+      "expect_flags_set": [
+        1445
+      ]
+    },
+    {
+      "name": "Read notebook and learn how to drain Curly",
+      "stage": 73,
+      "map": "Pixel",
+      "observed_event": 221,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 80,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 222,
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        1441
+      ]
+    },
+    {
+      "name": "Drain Curly's water at the bed",
+      "stage": 73,
+      "map": "Pixel",
+      "observed_event": 250,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 34,
+          "x": 192,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 253,
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        1442
+      ]
+    },
+    {
+      "name": "Check Curly's reboot at the bed",
+      "stage": 73,
+      "map": "Pixel",
+      "observed_event": 250,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 34,
+          "x": 192,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 254,
+      "expect_flags_set": [
+        1443
+      ]
+    },
+    {
+      "name": "Refuse to leave Curly and carry her again",
+      "stage": 73,
+      "map": "Pixel",
+      "observed_event": 250,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 34,
+          "x": 192,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 255,
+      "dialogue_choice": "no",
+      "following_event": 256,
+      "expect_flags_set": [
+        836,
+        1444
+      ],
+      "expect_flags_unset": [
+        1440
+      ]
+    },
+    {
+      "name": "Leave Cabin carrying the drained Curly",
+      "stage": 73,
+      "map": "Pixel",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 96,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 48
+    },
+    {
+      "name": "Follow currents into Main Artery",
+      "stage": 48,
+      "map": "River",
+      "observed_event": 110,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 2176,
+          "y": 608,
+          "appearance_flag": 0,
+          "flags": 4352
+        }
+      ],
+      "expect_stage": 31,
+      "conditions_by_ending": {
+        "best": {
+          "flags_set": [
+            1444,
+            836
+          ],
+          "flags_unset": [
+            851
+          ]
+        }
+      },
+      "note": "Best route must visit and finish Cabin before River220 death trigger; passing it while carrying undrained Curly sets irreversible851."
+    },
+    {
+      "name": "Defeat Ironhead through original swimming sequence",
+      "stage": 31,
+      "map": "Stream",
+      "observed_event": 1000,
+      "action": "combat",
+      "original_targets": [],
+      "boss_number": 5,
+      "requires_real_damage": true,
+      "expect_stage": 15,
+      "conditions_by_ending": {
+        "best": {
+          "result_flags_set": [
+            1042
+          ],
+          "result_flags_unset": [
+            836,
+            851
+          ]
+        }
+      }
+    },
+    {
+      "name": "Leave Reservoir after Core",
+      "stage": 15,
+      "map": "Pool",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 576,
+          "y": 224,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 11
+    },
+    {
+      "name": "Return to Arthur's House after Core",
+      "stage": 11,
+      "map": "Mimi",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 256,
+          "y": 848,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 1
+    },
+    {
+      "name": "Watch Professor return and receive Booster v2.0",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 651,
+      "action": "touch_and_advance",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 176,
+          "y": 96,
+          "appearance_flag": 160,
+          "flags": 6400
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_unset": [
+        834
+      ],
+      "expect_item": 23,
+      "expect_flags_set": [
+        744,
+        162,
+        741
+      ]
+    },
+    {
+      "name": "Equip Booster v2.0 through original inventory",
+      "action": "inventory_select_and_use",
+      "item": 23,
+      "observed_page": "ArmsItem",
+      "observed_event": 6023,
+      "for_endings": [
+        "best"
+      ],
+      "dialogue_choice": "yes",
+      "expect_equipment_bit": 32
+    },
+    {
+      "name": "Read Kazuma's new message",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 20,
+          "x": 112,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ]
+    },
+    {
+      "name": "Teleport to the ruined Egg Corridor",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 500,
+      "action": "interact_and_select",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 80,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "select_teleporter": 1,
+      "observed_transfer_event": 6011,
+      "expect_stage": 49
+    },
+    {
+      "name": "Reach Egg No. 00 in ruined corridor",
+      "stage": 49,
+      "map": "Eggs2",
+      "observed_event": 108,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 4640,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 52
+    },
+    {
+      "name": "Read hatching terminal and speak to Kazuma",
+      "stage": 52,
+      "map": "EggX2",
+      "observed_event": 500,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 20,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "choices_by_ending": {
+        "bad": "yes",
+        "normal": "no",
+        "best": "no"
+      },
+      "expect_flags_set": [
+        940,
+        941
+      ]
+    },
+    {
+      "name": "Enter Outer Wall",
+      "stage": 52,
+      "map": "EggX2",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 272,
+          "y": 160,
+          "appearance_flag": 940,
+          "flags": 24576
+        },
+        {
+          "type": 18,
+          "x": 272,
+          "y": 160,
+          "appearance_flag": 940,
+          "flags": 14336
+        }
+      ],
+      "expect_stage": 53
+    },
+    {
+      "name": "Board Kazuma's Sky Dragon",
+      "stage": 53,
+      "map": "Oside",
+      "observed_event": 400,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 55,
+          "x": 400,
+          "y": 2672,
+          "appearance_flag": 961,
+          "flags": 24576
+        }
+      ],
+      "for_endings": [
+        "bad"
+      ],
+      "requires_flags_set": [
+        960
+      ],
+      "result_event": 401,
+      "terminal": "native narrative wait9999 and song26"
+    },
+    {
+      "name": "Climb Outer Wall and enter Itoh's Storehouse",
+      "stage": 53,
+      "map": "Oside",
+      "observed_event": 120,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1200,
+          "y": 80,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "normal",
+        "best"
+      ],
+      "expect_stage": 55
+    },
+    {
+      "name": "Enter Plantation",
+      "stage": 55,
+      "map": "Itoh",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 48,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Enter Rest Area",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 130,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 384,
+          "y": 1312,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 59
+    },
+    {
+      "name": "Talk to Mahin before he leaves",
+      "stage": 59,
+      "map": "lounge",
+      "observed_event": 250,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 226,
+          "x": 304,
+          "y": 144,
+          "appearance_flag": 1120,
+          "flags": 24576
+        }
+      ],
+      "expect_flags_set": [
+        1021
+      ]
+    },
+    {
+      "name": "Leave Rest Area",
+      "stage": 59,
+      "map": "lounge",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 416,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Ask Kanpachi about his strange catch",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 260,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 75,
+          "x": 320,
+          "y": 1664,
+          "appearance_flag": 1021,
+          "flags": 10240
+        }
+      ],
+      "expect_flags_set": [
+        1035
+      ]
+    },
+    {
+      "name": "Look in Kanpachi's bucket",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 265,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 227,
+          "x": 336,
+          "y": 1664,
+          "appearance_flag": 1021,
+          "flags": 10240
+        }
+      ],
+      "result_event": 266,
+      "expect_item": 25,
+      "expect_flags_set": [
+        1022
+      ]
+    },
+    {
+      "name": "Unlock Plantation teleporter room",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 135,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 16,
+          "y": 1648,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "requires_item": 25,
+      "result_event": 136,
+      "expect_stage": 60,
+      "expect_flags_set": [
+        1023
+      ]
+    },
+    {
+      "name": "Attempt teleporter and be captured",
+      "stage": 60,
+      "map": "CentW",
+      "observed_event": 150,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 144,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "expect_stage": 57,
+      "expect_item": 26
+    },
+    {
+      "name": "Speak to imprisoned Mahin",
+      "stage": 57,
+      "map": "Jail1",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 79,
+          "x": 256,
+          "y": 224,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "expect_flags_set": [
+        1080
+      ]
+    },
+    {
+      "name": "Leave Jail No. 1",
+      "stage": 57,
+      "map": "Jail1",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 80,
+          "y": 224,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Read Sue's Letter through normal inventory",
+      "action": "inventory_select_and_use",
+      "item": 26,
+      "observed_page": "ArmsItem",
+      "observed_event": 6026,
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        1024
+      ]
+    },
+    {
+      "name": "Speak to amnesiac Curly in the Plantation spring",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 320,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 165,
+          "x": 1760,
+          "y": 1648,
+          "appearance_flag": 1042,
+          "flags": 14336
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_flags_set": [
+        1041
+      ]
+    },
+    {
+      "name": "Ask Cthulhu about Curly's lost memories",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 310,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 29,
+          "x": 1728,
+          "y": 1664,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_set": [
+        1041
+      ],
+      "result_event": 311,
+      "expect_flags_set": [
+        1044
+      ]
+    },
+    {
+      "name": "Reenter unlocked Plantation teleporter room",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 135,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 16,
+          "y": 1648,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 137,
+      "expect_stage": 60
+    },
+    {
+      "name": "Use teleporter after the capture has already occurred",
+      "stage": 60,
+      "map": "CentW",
+      "observed_event": 150,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 144,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_set": [
+        1140
+      ],
+      "result_event": 152,
+      "dialogue_choice": "yes",
+      "expect_stage": 1
+    },
+    {
+      "name": "Leave Arthur's House for Ma Pignon",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 102,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 272,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 11
+    },
+    {
+      "name": "Enter Mimiga Graveyard",
+      "stage": 11,
+      "map": "Mimi",
+      "observed_event": 104,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 896,
+          "y": 528,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 112,
+      "expect_stage": 16
+    },
+    {
+      "name": "Enter Graveyard Storage",
+      "stage": 16,
+      "map": "Cemet",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 512,
+          "y": 32,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 83
+    },
+    {
+      "name": "Ask Ma Pignon about amnesia and the badge",
+      "stage": 83,
+      "map": "Mapi",
+      "observed_event": 400,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 313,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 1560,
+          "flags": 24576
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_set": [
+        1044
+      ],
+      "dialogue_choices": [
+        "yes",
+        "yes",
+        "no",
+        "yes",
+        "yes",
+        "no"
+      ],
+      "observed_events": [
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        410
+      ],
+      "expect_item": 33,
+      "expect_flags_set": [
+        1561,
+        1562
+      ],
+      "note": "Choices are: business yes, want badge yes, really do not want no, want that much yes, absolutely positively yes, really do not want no."
+    },
+    {
+      "name": "Read Mushroom Badge to expose the trick",
+      "action": "inventory_select_and_use",
+      "item": 33,
+      "observed_page": "ArmsItem",
+      "observed_event": 6033,
+      "for_endings": [
+        "best"
+      ],
+      "expect_flags_set": [
+        1563
+      ]
+    },
+    {
+      "name": "Confront Ma Pignon and defeat him",
+      "stage": 83,
+      "map": "Mapi",
+      "observed_event": 400,
+      "action": "interact_and_combat",
+      "original_targets": [
+        {
+          "type": 313,
+          "x": 192,
+          "y": 160,
+          "appearance_flag": 1560,
+          "flags": 24576
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 420,
+      "enemy_type": 313,
+      "requires_real_damage": true,
+      "native_death_event": 500,
+      "expect_item": 34
+    },
+    {
+      "name": "Leave Graveyard Storage",
+      "stage": 83,
+      "map": "Mapi",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 112,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 16
+    },
+    {
+      "name": "Leave Mimiga Graveyard",
+      "stage": 16,
+      "map": "Cemet",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 32,
+          "y": 192,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 11
+    },
+    {
+      "name": "Return to Arthur's House with Ma Pignon",
+      "stage": 11,
+      "map": "Mimi",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 256,
+          "y": 848,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 1
+    },
+    {
+      "name": "Teleport back to Plantation",
+      "stage": 1,
+      "map": "Pens1",
+      "observed_event": 500,
+      "action": "interact_and_select",
+      "original_targets": [
+        {
+          "type": 22,
+          "x": 80,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "select_teleporter": 5,
+      "observed_transfer_event": 6005,
+      "expect_stage": 60
+    },
+    {
+      "name": "Exit Plantation teleporter room",
+      "stage": 60,
+      "map": "CentW",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 288,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Feed Ma Pignon to Curly",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 320,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 165,
+          "x": 1760,
+          "y": 1648,
+          "appearance_flag": 1042,
+          "flags": 14336
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_item": 34,
+      "result_event": 322,
+      "dialogue_choice": "yes",
+      "expect_flags_set": [
+        1045
+      ]
+    },
+    {
+      "name": "Speak to Curly again and receive Iron Bond",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 320,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 165,
+          "x": 1760,
+          "y": 1648,
+          "appearance_flag": 1042,
+          "flags": 14336
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 324,
+      "expect_item": 39,
+      "expect_flags_set": [
+        1046
+      ]
+    },
+    {
+      "name": "Speak the Hideout password",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 120,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1152,
+          "y": 1344,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "requires_flags_set": [
+        1024
+      ],
+      "result_event": 121,
+      "expect_stage": 58
+    },
+    {
+      "name": "Help Momorin build the rocket",
+      "stage": 58,
+      "map": "Momo",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 223,
+          "x": 144,
+          "y": 128,
+          "appearance_flag": 1105,
+          "flags": 28672
+        }
+      ],
+      "dialogue_choice": "no",
+      "result_event": 205,
+      "expect_item": 24,
+      "expect_equipment_bit": 64,
+      "expect_flags_set": [
+        1101,
+        1020
+      ]
+    },
+    {
+      "name": "Leave Hideout disguised as a Mimiga",
+      "stage": 58,
+      "map": "Momo",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 144,
+          "y": 64,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Find the broken sprinkler",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 415,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 72,
+          "x": 240,
+          "y": 1104,
+          "appearance_flag": 1028,
+          "flags": 14336
+        }
+      ],
+      "result_event": 416,
+      "expect_item": 28,
+      "note": "Actor at(15,69); shootable ordinary enemies remain active while masked."
+    },
+    {
+      "name": "Enter Rest Area with Broken Sprinkler",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 130,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 384,
+          "y": 1312,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 59
+    },
+    {
+      "name": "Trade Broken Sprinkler for working Sprinkler",
+      "stage": 59,
+      "map": "lounge",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 225,
+          "x": 80,
+          "y": 96,
+          "appearance_flag": 1033,
+          "flags": 24576
+        }
+      ],
+      "requires_item": 28,
+      "result_event": 202,
+      "expect_item": 29
+    },
+    {
+      "name": "Leave Rest Area with Sprinkler",
+      "stage": 59,
+      "map": "lounge",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 416,
+          "y": 128,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Return to Momorin",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 120,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1152,
+          "y": 1344,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 58
+    },
+    {
+      "name": "Give Momorin the working Sprinkler",
+      "stage": 58,
+      "map": "Momo",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 223,
+          "x": 144,
+          "y": 128,
+          "appearance_flag": 1105,
+          "flags": 28672
+        }
+      ],
+      "requires_item": 29,
+      "result_event": 210,
+      "expect_flags_set": [
+        1102
+      ]
+    },
+    {
+      "name": "Leave Hideout for Itoh's Controller",
+      "stage": 58,
+      "map": "Momo",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 144,
+          "y": 64,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Return to Itoh's Storehouse",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1888,
+          "y": 1328,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 55
+    },
+    {
+      "name": "Ask Itoh for Controller",
+      "stage": 55,
+      "map": "Itoh",
+      "observed_event": 400,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 217,
+          "x": 176,
+          "y": 144,
+          "appearance_flag": 1004,
+          "flags": 24576
+        }
+      ],
+      "requires_flags_set": [
+        1102
+      ],
+      "result_event": 403,
+      "expect_item": 27
+    },
+    {
+      "name": "Return to Plantation with Controller",
+      "stage": 55,
+      "map": "Itoh",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 48,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Return to Hideout with Controller",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 120,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1152,
+          "y": 1344,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 58
+    },
+    {
+      "name": "Give Momorin the Controller",
+      "stage": 58,
+      "map": "Momo",
+      "observed_event": 200,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 223,
+          "x": 144,
+          "y": 128,
+          "appearance_flag": 1105,
+          "flags": 28672
+        }
+      ],
+      "requires_item": 27,
+      "result_event": 211,
+      "expect_flags_set": [
+        1103
+      ]
+    },
+    {
+      "name": "Sleep while rocket is completed",
+      "stage": 58,
+      "map": "Momo",
+      "observed_event": 280,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 34,
+          "x": 192,
+          "y": 192,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "dialogue_choice": "yes",
+      "result_event": 281,
+      "expect_flags_set": [
+        1030,
+        1031,
+        1032,
+        1033,
+        1105
+      ]
+    },
+    {
+      "name": "Leave the completed rocket Hideout",
+      "stage": 58,
+      "map": "Momo",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 144,
+          "y": 64,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "expect_stage": 56
+    },
+    {
+      "name": "Receive Booster back and return Mimiga Mask",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 370,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 223,
+          "x": 1152,
+          "y": 1232,
+          "appearance_flag": 1032,
+          "flags": 10240
+        }
+      ],
+      "expect_flags_set": [
+        1034
+      ],
+      "expect_flags_unset": [
+        1020
+      ],
+      "note": "Original flag162 chooses Booster v2.0; otherwise v0.8."
+    },
+    {
+      "name": "Equip returned Booster v0.8",
+      "action": "inventory_select_and_use",
+      "item": 18,
+      "observed_page": "ArmsItem",
+      "observed_event": 6018,
+      "for_endings": [
+        "normal"
+      ],
+      "dialogue_choice": "yes",
+      "expect_equipment_bit": 1
+    },
+    {
+      "name": "Equip returned Booster v2.0",
+      "action": "inventory_select_and_use",
+      "item": 23,
+      "observed_page": "ArmsItem",
+      "observed_event": 6023,
+      "for_endings": [
+        "best"
+      ],
+      "dialogue_choice": "yes",
+      "expect_equipment_bit": 32
+    },
+    {
+      "name": "Ride the rocket to Final Cave entrance",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 350,
+      "action": "interact_and_ride",
+      "original_targets": [
+        {
+          "type": 231,
+          "x": 1184,
+          "y": 1232,
+          "appearance_flag": 1030,
+          "flags": 10240
+        }
+      ],
+      "requires_flags_set": [
+        1030
+      ],
+      "note": "Native moving platform must carry actual Terraria avatar to tile(80,9)."
+    },
+    {
+      "name": "Enter Final Cave",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 150,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1280,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "result_event": 151,
+      "expect_stage": 63,
+      "for_endings": [
+        "normal"
+      ]
+    },
+    {
+      "name": "Traverse Final Cave and reach Balcony",
+      "stage": 63,
+      "map": "Priso1",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 144,
+          "y": 64,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "normal"
+      ],
+      "expect_stage": 62
+    },
+    {
+      "name": "Enter Final Cave Hidden with Booster v2.0",
+      "stage": 56,
+      "map": "Cent",
+      "observed_event": 150,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1280,
+          "y": 144,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "result_event": 151,
+      "following_event": 160,
+      "requires_item": 23,
+      "expect_stage": 67,
+      "note": "All weapon experience is removed by the original hidden-cave entry event; keep native progression."
+    },
+    {
+      "name": "Trigger and defeat Red Demon in Hidden Final Cave",
+      "stage": 67,
+      "map": "Priso2",
+      "observed_event": 241,
+      "action": "touch_and_combat",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 1168,
+          "y": 176,
+          "appearance_flag": 1320,
+          "flags": 20736
+        },
+        {
+          "type": 46,
+          "x": 1296,
+          "y": 176,
+          "appearance_flag": 1320,
+          "flags": 20736
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "enemy_type": 276,
+      "requires_real_damage": true,
+      "native_death_event": 250
+    },
+    {
+      "name": "Traverse Hidden Final Cave and reach Balcony",
+      "stage": 67,
+      "map": "Priso2",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 144,
+          "y": 64,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 62
+    },
+    {
+      "name": "Enter Throne Room",
+      "stage": 62,
+      "map": "Blcny1",
+      "observed_event": 110,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 1904,
+          "y": 992,
+          "appearance_flag": 0,
+          "flags": 4352
+        }
+      ],
+      "expect_stage": 64
+    },
+    {
+      "name": "Trigger and defeat Misery",
+      "stage": 64,
+      "map": "Ring1",
+      "observed_event": 500,
+      "action": "touch_and_combat",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 368,
+          "y": 96,
+          "appearance_flag": 1250,
+          "flags": 20736
+        }
+      ],
+      "enemy_type": 247,
+      "requires_real_damage": true,
+      "result_event": 400
+    },
+    {
+      "name": "Enter The King's Table",
+      "stage": 64,
+      "map": "Ring1",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 48,
+          "y": 0,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "expect_stage": 65
+    },
+    {
+      "name": "Trigger Doctor battle",
+      "stage": 65,
+      "map": "Ring2",
+      "observed_event": 500,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 352,
+          "y": 144,
+          "appearance_flag": 1270,
+          "flags": 20736
+        }
+      ],
+      "result_event": 502
+    },
+    {
+      "name": "Defeat Doctor's first form",
+      "stage": 65,
+      "map": "Ring2",
+      "observed_event": 410,
+      "action": "combat",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 448,
+          "y": 144,
+          "appearance_flag": 1270,
+          "flags": 16896
+        }
+      ],
+      "enemy_type": 263,
+      "requires_real_damage": true
+    },
+    {
+      "name": "Defeat Frenzied Doctor",
+      "stage": 65,
+      "map": "Ring2",
+      "observed_event": 420,
+      "action": "combat",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 448,
+          "y": 112,
+          "appearance_flag": 1270,
+          "flags": 16896
+        }
+      ],
+      "enemy_type": 267,
+      "requires_real_damage": true
+    },
+    {
+      "name": "Enter Black Space",
+      "stage": 65,
+      "map": "Ring2",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 48,
+          "y": 0,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "expect_stage": 68
+    },
+    {
+      "name": "Trigger Undead Core confrontation",
+      "stage": 68,
+      "map": "Ring3",
+      "observed_event": 500,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 432,
+          "y": 144,
+          "appearance_flag": 1340,
+          "flags": 20736
+        }
+      ],
+      "result_event": 502
+    },
+    {
+      "name": "Defeat Undead Core",
+      "stage": 68,
+      "map": "Ring3",
+      "observed_event": 1000,
+      "action": "combat",
+      "original_targets": [],
+      "boss_number": 7,
+      "requires_real_damage": true,
+      "expect_flags_set": [
+        1340
+      ],
+      "expect_stage": 70
+    },
+    {
+      "name": "Complete escape quake scene",
+      "stage": 70,
+      "map": "Blcny2",
+      "observed_event": 300,
+      "action": "advance_dialogue",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 896,
+          "y": 1168,
+          "appearance_flag": 0,
+          "flags": 0
+        }
+      ],
+      "note": "The original scene returns to Ring3 600 before releasing the player."
+    },
+    {
+      "name": "Escape through Throne Room",
+      "stage": 68,
+      "map": "Ring3",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 48,
+          "y": 240,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "expect_stage": 65
+    },
+    {
+      "name": "Escape The King's Table",
+      "stage": 65,
+      "map": "Ring2",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 48,
+          "y": 240,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "expect_stage": 64
+    },
+    {
+      "name": "Follow Sue back to collapsing Balcony",
+      "stage": 64,
+      "map": "Ring1",
+      "observed_event": 100,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 0,
+          "y": 160,
+          "appearance_flag": 0,
+          "flags": 4352
+        }
+      ],
+      "expect_stage": 70
+    },
+    {
+      "name": "Escape the falling island",
+      "stage": 70,
+      "map": "Blcny2",
+      "observed_event": 400,
+      "action": "touch_and_advance",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 0,
+          "y": 1184,
+          "appearance_flag": 0,
+          "flags": 4352
+        }
+      ],
+      "for_endings": [
+        "normal"
+      ],
+      "note": "Sue's jump/escape carries the authored cutscene through Eggs2, Weed, MazeW, Almond, Cent and Island100; retain scripted movement/camera."
+    },
+    {
+      "name": "Finish Island destruction cinematic",
+      "stage": 91,
+      "map": "Island",
+      "observed_event": 100,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "for_endings": [
+        "normal"
+      ],
+      "expect_stage": 71
+    },
+    {
+      "name": "Finish Kazuma rescue scene",
+      "stage": 71,
+      "map": "Fall",
+      "observed_event": 100,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "for_endings": [
+        "normal"
+      ],
+      "expect_stage": 0
+    },
+    {
+      "name": "Let original credits finish",
+      "stage": 0,
+      "map": "0",
+      "observed_event": 100,
+      "action": "wait_original_credits",
+      "original_targets": [],
+      "for_endings": [
+        "normal"
+      ],
+      "terminal": "stage0 actor360 THANK YOU and native event1100 WaitTicks(...,9999) infinite hold; credits startup alone is insufficient"
+    },
+    {
+      "name": "Enter the reopened Prefab Building on collapsing Balcony",
+      "stage": 70,
+      "map": "Blcny2",
+      "observed_event": 121,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 1264,
+          "y": 1168,
+          "appearance_flag": 1393,
+          "flags": 14336
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_set": [
+        1393,
+        1046
+      ],
+      "requires_item": 23,
+      "expect_stage": 79,
+      "note": "Ring3 original victory event1002 sets1393 only when Booster v2.0 and Iron Bond conditions hold."
+    },
+    {
+      "name": "Descend Prefab hole into Sacred Ground",
+      "stage": 79,
+      "map": "Prefa2",
+      "observed_event": 110,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 0,
+          "x": 144,
+          "y": 176,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 80
+    },
+    {
+      "name": "Attach Curly with the Tow Rope in Sacred Ground",
+      "stage": 80,
+      "map": "Hell1",
+      "observed_event": 500,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 117,
+          "x": 272,
+          "y": 1552,
+          "appearance_flag": 1531,
+          "flags": 10240
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_flags_set": [
+        1532
+      ],
+      "expect_flags_unset": [
+        1531
+      ]
+    },
+    {
+      "name": "Traverse Sacred Ground B1",
+      "stage": 80,
+      "map": "Hell1",
+      "observed_event": 110,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 288,
+          "y": 1552,
+          "appearance_flag": 0,
+          "flags": 12288
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 81
+    },
+    {
+      "name": "Traverse Sacred Ground B2",
+      "stage": 81,
+      "map": "Hell2",
+      "observed_event": 110,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 2400,
+          "y": 240,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 82
+    },
+    {
+      "name": "Trigger Heavy Press at the end of Sacred Ground B3",
+      "stage": 82,
+      "map": "Hell3",
+      "observed_event": 300,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 160,
+          "y": 176,
+          "appearance_flag": 1550,
+          "flags": 6400
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "boss_number": 8
+    },
+    {
+      "name": "Defeat Heavy Press and let it fall through the floor",
+      "stage": 82,
+      "map": "Hell3",
+      "observed_event": 1000,
+      "action": "combat",
+      "original_targets": [],
+      "for_endings": [
+        "best"
+      ],
+      "boss_number": 8,
+      "requires_real_damage": true,
+      "expect_flags_set": [
+        1534
+      ],
+      "note": "Native Heavy Press sets1534 while falling; its physical fall and CMP floor openings must remain active."
+    },
+    {
+      "name": "Follow Heavy Press into the opened passage",
+      "stage": 82,
+      "map": "Hell3",
+      "observed_event": 110,
+      "action": "touch",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 160,
+          "y": 240,
+          "appearance_flag": 0,
+          "flags": 256
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "requires_flags_set": [
+        1534
+      ],
+      "result_event": 111,
+      "expect_stage": 85
+    },
+    {
+      "name": "Enter the Seal Chamber corridor",
+      "stage": 85,
+      "map": "Hell42",
+      "observed_event": 130,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 304,
+          "y": 464,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 88
+    },
+    {
+      "name": "Enter the Seal Chamber",
+      "stage": 88,
+      "map": "Ostep",
+      "observed_event": 110,
+      "action": "interact",
+      "original_targets": [
+        {
+          "type": 18,
+          "x": 560,
+          "y": 96,
+          "appearance_flag": 0,
+          "flags": 8192
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 87
+    },
+    {
+      "name": "Hear Ballos and begin his human-form battle",
+      "stage": 87,
+      "map": "Ballo1",
+      "observed_event": 500,
+      "action": "touch_and_advance",
+      "original_targets": [
+        {
+          "type": 46,
+          "x": 368,
+          "y": 192,
+          "appearance_flag": 0,
+          "flags": 4352
+        }
+      ],
+      "for_endings": [
+        "best"
+      ]
+    },
+    {
+      "name": "Defeat human Ballos",
+      "stage": 87,
+      "map": "Ballo1",
+      "observed_event": 900,
+      "action": "combat",
+      "original_targets": [
+        {
+          "type": 340,
+          "x": 448,
+          "y": 304,
+          "appearance_flag": 0,
+          "flags": 512
+        }
+      ],
+      "for_endings": [
+        "best"
+      ],
+      "enemy_type": 340,
+      "requires_real_damage": true,
+      "note": "Human actor death starts original stage boss9; this is an observed death event."
+    },
+    {
+      "name": "Defeat Ballos's next form",
+      "stage": 87,
+      "map": "Ballo1",
+      "observed_event": 1000,
+      "action": "combat",
+      "original_targets": [],
+      "for_endings": [
+        "best"
+      ],
+      "boss_number": 9,
+      "requires_real_damage": true,
+      "expect_flags_set": [
+        1600
+      ]
+    },
+    {
+      "name": "Defeat Ballos's final forms",
+      "stage": 87,
+      "map": "Ballo1",
+      "observed_event": 1001,
+      "action": "combat",
+      "original_targets": [],
+      "for_endings": [
+        "best"
+      ],
+      "boss_number": 9,
+      "requires_real_damage": true,
+      "expect_stage": 91
+    },
+    {
+      "name": "Watch the island survive",
+      "stage": 91,
+      "map": "Island",
+      "observed_event": 110,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 92
+    },
+    {
+      "name": "Complete Balrog's rescue of Quote and Curly",
+      "stage": 92,
+      "map": "Ballo2",
+      "observed_event": 500,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "for_endings": [
+        "best"
+      ],
+      "expect_stage": 71
+    },
+    {
+      "name": "Finish the best ending's flight conversation",
+      "stage": 71,
+      "map": "Fall",
+      "observed_event": 120,
+      "action": "advance_dialogue",
+      "original_targets": [],
+      "for_endings": [
+        "best"
+      ],
+      "expect_flags_set": [
+        2000,
+        1460
+      ],
+      "expect_stage": 0
+    },
+    {
+      "name": "Let original best ending credits finish",
+      "stage": 0,
+      "map": "0",
+      "observed_event": 100,
+      "action": "wait_original_credits",
+      "original_targets": [],
+      "for_endings": [
+        "best"
+      ],
+      "terminal": "stage0 actor360 THANK YOU and native event1200 WaitTicks(...,9999) infinite hold; credits startup alone is insufficient"
+    }
+  ]
+}

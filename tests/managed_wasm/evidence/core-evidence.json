@@ -1,0 +1,67 @@
+{
+  "scope": "Real engine standalone managed ABI and Start render/audio diagnostic; not Terraria/campaign completion",
+  "wasmPath": "${REPO}/runtime/silent-audio-core.wasm",
+  "wasmSha256": "bba853ac8ba13e832c4660a818b5d259ee1514b60426b4e8bdc3bc63b61faee7",
+  "runtime": ".NET 8.0.0",
+  "compileMilliseconds": 1377.3252,
+  "dataLoadAndInitializationMilliseconds": 1148.4444,
+  "loadedOriginalFileCount": 460,
+  "originalMemoryExtraction": true,
+  "saveVfsRoundtrip": true,
+  "audioRate": 48000,
+  "memoryBytes": 15073280,
+  "initialState": {
+    "stage": 13,
+    "stages": 95,
+    "timingHz": 60,
+    "player": {
+      "air": 0,
+      "alive": true,
+      "booster_active": false,
+      "booster_direction": 0,
+      "booster_fuel": 0,
+      "equipment": 0,
+      "flags": 0,
+      "force_position": false,
+      "force_velocity": false,
+      "hidden": false,
+      "ironhead": false,
+      "life": 3,
+      "life_delta": 0,
+      "max_life": 3,
+      "native_support": false,
+      "pending_damage_raw": 0,
+      "script_locked": false,
+      "shock": 0,
+      "vx": 0.0,
+      "vy": 0.0,
+      "x": 160.0,
+      "y": 128.0
+    }
+  },
+  "timings": [
+    {
+      "width": 320,
+      "height": 240,
+      "frames": 60,
+      "millisecondsPerFrame": 4.216348333333333,
+      "includes": "tick, original software raster, JSON snapshot parse, 3 RGBA copies, 800 stereo PCM frames",
+      "pcmEnergy": 265790880,
+      "frameHash": "8cbeae11c4a8552213344d4c669f19409ababd8f24d47505eb19412d61e5b9d7",
+      "finalStage": 13
+    },
+    {
+      "width": 426,
+      "height": 240,
+      "frames": 60,
+      "millisecondsPerFrame": 4.556711666666667,
+      "includes": "tick, original software raster, JSON snapshot parse, 3 RGBA copies, 800 stereo PCM frames",
+      "pcmEnergy": 18933664,
+      "frameHash": "bb2eab928a09efe8d910b2e8c8704556eb702daaf68cf8f597b817b38dd17e04",
+      "finalStage": 13
+    }
+  ],
+  "declaredImports": [],
+  "dotnetHost": "${TML}/dotnet/dotnet",
+  "pathNormalization": "Local paths use ${REPO}, ${TML} and ${NUGET_CACHE}; measurements are unchanged."
+}

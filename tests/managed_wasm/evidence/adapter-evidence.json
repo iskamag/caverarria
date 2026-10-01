@@ -1,0 +1,49 @@
+{
+  "scope": "Exact mod managed adapter standalone .NET 8 render/audio/disk-save reopen diagnostic; not Terraria/campaign completion",
+  "wasmPath": "${REPO}/runtime/silent-audio-core.wasm",
+  "wasmSha256": "bba853ac8ba13e832c4660a818b5d259ee1514b60426b4e8bdc3bc63b61faee7",
+  "runtime": ".NET 8.0.0",
+  "dataPath": "${REPO}/runtime/freeware/CaveStory/data",
+  "loadedFileCount": 399,
+  "originalExecutableMemoryExtraction": true,
+  "adapterStartupMilliseconds": 2433.8222,
+  "reopenMilliseconds": 2552.5168,
+  "saveDirectory": "${REPO}/runtime/managed-wasm-probe/saves/c995ed92c2ff4afda86c08400e6690da",
+  "profileBytes": 1553,
+  "profileSha256": "3df581fbdcd99f8c5efb42081f2f2294f1f680c500dc53700e0775617ac7cb16",
+  "stage": 18,
+  "playerLife": 3,
+  "commandsUsed": [
+    "snapshot",
+    "tick (ordinary controls)",
+    "resize",
+    "save",
+    "load"
+  ],
+  "diskSaveReopen": true,
+  "timings": [
+    {
+      "width": 320,
+      "height": 240,
+      "frames": 60,
+      "millisecondsPerFrame": 3.4542599999999997,
+      "pcmEnergy": 233950668,
+      "alpha": 14272350,
+      "includes": "exact mod adapter tick, software raster, JSON parse, three RGBA copies, original stereo PCM, save-revision polling",
+      "frameSha256": "4a2eb54e4147c99e0b570164c5cc3ec607faf06a1b751f6e6ac3119542a1df81"
+    },
+    {
+      "width": 426,
+      "height": 240,
+      "frames": 60,
+      "millisecondsPerFrame": 2.9348983333333334,
+      "pcmEnergy": 235575556,
+      "alpha": 19831350,
+      "includes": "exact mod adapter tick, software raster, JSON parse, three RGBA copies, original stereo PCM, save-revision polling",
+      "frameSha256": "6ba3258bef04ca807b547d81509469f34768a125e93d7c7a9c3289a2a11245ca"
+    }
+  ],
+  "declaredImports": [],
+  "dotnetHost": "${TML}/dotnet/dotnet",
+  "pathNormalization": "Local paths use ${REPO}, ${TML} and ${NUGET_CACHE}; measurements are unchanged."
+}

@@ -1,0 +1,106 @@
+Mods: {
+	Caverarria: {
+		Keybinds: {
+			Interact.DisplayName: Cave Story: interact / advance dialogue
+			Retry.DisplayName: Cave Story: retry from save
+			Inventory.DisplayName: Cave Story: inventory / quest items
+			Map.DisplayName: Cave Story: map
+			NextWeapon.DisplayName: Cave Story: next weapon
+			PreviousWeapon.DisplayName: Cave Story: previous weapon
+		}
+
+		Items: {
+			Snake: {
+				DisplayName: Snake
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			PolarStar: {
+				DisplayName: Polar Star
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			Fireball: {
+				DisplayName: Fireball
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			MachineGun: {
+				DisplayName: Machine Gun
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			MissileLauncher: {
+				DisplayName: Missile Launcher
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			Bubbler: {
+				DisplayName: Bubbler
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			Blade: {
+				DisplayName: Blade
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			SuperMissileLauncher: {
+				DisplayName: Super Missile Launcher
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			Nemesis: {
+				DisplayName: Nemesis
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+
+			Spur: {
+				DisplayName: Spur
+				Tooltip:
+					'''
+					The original island weapon
+					Uses Cave Story weapon levels, ammo, and projectiles
+					'''
+			}
+		}
+
+		NPCs.CaveEntity.DisplayName: Cave Story creature
+	}
+}

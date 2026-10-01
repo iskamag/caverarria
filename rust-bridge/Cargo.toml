@@ -1,0 +1,21 @@
+[package]
+name = "caverarria-bridge"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["native"]
+native = ["doukutsu-rs/audio-cpal", "doukutsu-rs/imgui"]
+portable = ["doukutsu-rs/portable"]
+pull-audio = ["doukutsu-rs/pull-audio", "doukutsu-rs/imgui"]
+
+[dependencies]
+doukutsu-rs = { path = "../vendor/doukutsu-rs", default-features = false, features = ["cavebridge"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 2
+panic = "unwind"

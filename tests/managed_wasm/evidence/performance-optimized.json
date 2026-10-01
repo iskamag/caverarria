@@ -1,0 +1,532 @@
+{
+  "scope": "Standalone exact-adapter performance partition; diagnostic warp/event fixtures, never campaign completion",
+  "wasmSha256": "fbc3e74d8e9876c7c27f4d21f4f89a0d041133d67a501e555d7ebc31875cad03",
+  "runtime": ".NET 8.0.0",
+  "initializationMilliseconds": 2429.4175,
+  "processId": 29309,
+  "notes": [
+    "Actual Terraria player fields matched in external-kinematics tick request",
+    "Three full RGBA buffers and800 stereo PCM frames per tick",
+    "Managed allocation counters exclude guest linear-memory allocator",
+    "Results may include live-client contention; no CPU affinity or process suspension"
+  ],
+  "results": [
+    {
+      "scene": "Start",
+      "stage": 13,
+      "width": 320,
+      "height": 240,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "Ended",
+      "scriptAfter": "Ended",
+      "songBefore": 8,
+      "songAfter": 8,
+      "npcCount": 7,
+      "snapshotSerializedBytes": 7485,
+      "send": {
+        "meanMilliseconds": 1.9101906666666673,
+        "p50Milliseconds": 1.8048,
+        "p95Milliseconds": 2.6812,
+        "p99Milliseconds": 3.0621,
+        "maxMilliseconds": 5.1574,
+        "meanAllocatedBytes": 41577.62666666666,
+        "maxAllocatedBytes": 42520
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.052888000000000046,
+        "p50Milliseconds": 0.0436,
+        "p95Milliseconds": 0.1105,
+        "p99Milliseconds": 0.1636,
+        "maxMilliseconds": 0.2914,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 0.6235559999999996,
+        "p50Milliseconds": 0.7154,
+        "p95Milliseconds": 0.9138,
+        "p99Milliseconds": 1.079,
+        "maxMilliseconds": 1.1821,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 2.587741,
+        "p50Milliseconds": 2.5031,
+        "p95Milliseconds": 3.4116,
+        "p99Milliseconds": 4.1524,
+        "maxMilliseconds": 6.0365,
+        "meanAllocatedBytes": 41577.62666666666,
+        "maxAllocatedBytes": 42520
+      },
+      "initialWorkingSet": 175886336,
+      "finalWorkingSet": 185974784,
+      "gcCollections": [
+        2,
+        2,
+        0
+      ]
+    },
+    {
+      "scene": "Start",
+      "stage": 13,
+      "width": 426,
+      "height": 240,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "Ended",
+      "scriptAfter": "Ended",
+      "songBefore": 8,
+      "songAfter": 8,
+      "npcCount": 8,
+      "snapshotSerializedBytes": 7671,
+      "send": {
+        "meanMilliseconds": 1.9464876666666657,
+        "p50Milliseconds": 1.8354,
+        "p95Milliseconds": 2.6953,
+        "p99Milliseconds": 2.9975,
+        "maxMilliseconds": 3.0862,
+        "meanAllocatedBytes": 41361.52,
+        "maxAllocatedBytes": 43488
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.08217433333333332,
+        "p50Milliseconds": 0.0719,
+        "p95Milliseconds": 0.1456,
+        "p99Milliseconds": 0.2192,
+        "maxMilliseconds": 0.4091,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 0.9712786666666668,
+        "p50Milliseconds": 0.8955,
+        "p95Milliseconds": 1.4803,
+        "p99Milliseconds": 1.7148,
+        "maxMilliseconds": 1.9744,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 3.0006113333333313,
+        "p50Milliseconds": 2.9302,
+        "p95Milliseconds": 3.8865,
+        "p99Milliseconds": 4.4328,
+        "maxMilliseconds": 4.8835,
+        "meanAllocatedBytes": 41361.52,
+        "maxAllocatedBytes": 43488
+      },
+      "initialWorkingSet": 188039168,
+      "finalWorkingSet": 188080128,
+      "gcCollections": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "scene": "Start",
+      "stage": 13,
+      "width": 640,
+      "height": 360,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "Ended",
+      "scriptAfter": "Ended",
+      "songBefore": 8,
+      "songAfter": 8,
+      "npcCount": 8,
+      "snapshotSerializedBytes": 7675,
+      "send": {
+        "meanMilliseconds": 2.4867629999999994,
+        "p50Milliseconds": 2.4137,
+        "p95Milliseconds": 3.0938,
+        "p99Milliseconds": 3.357,
+        "maxMilliseconds": 3.4442,
+        "meanAllocatedBytes": 41583.253333333334,
+        "maxAllocatedBytes": 43496
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.25674766666666676,
+        "p50Milliseconds": 0.2211,
+        "p95Milliseconds": 0.5122,
+        "p99Milliseconds": 0.7005,
+        "maxMilliseconds": 1.0245,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 1.145673,
+        "p50Milliseconds": 1.2795,
+        "p95Milliseconds": 1.5801,
+        "p99Milliseconds": 1.7237,
+        "maxMilliseconds": 1.8581,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 3.8901906666666695,
+        "p50Milliseconds": 3.8954,
+        "p95Milliseconds": 4.7448,
+        "p99Milliseconds": 5.2059,
+        "maxMilliseconds": 5.6688,
+        "meanAllocatedBytes": 41583.253333333334,
+        "maxAllocatedBytes": 43496
+      },
+      "initialWorkingSet": 194908160,
+      "finalWorkingSet": 195133440,
+      "gcCollections": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "scene": "Shelt",
+      "stage": 18,
+      "width": 320,
+      "height": 240,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "Ended",
+      "scriptAfter": "Ended",
+      "songBefore": 8,
+      "songAfter": 8,
+      "npcCount": 17,
+      "snapshotSerializedBytes": 9361,
+      "send": {
+        "meanMilliseconds": 2.002712333333333,
+        "p50Milliseconds": 1.9028,
+        "p95Milliseconds": 2.6369,
+        "p99Milliseconds": 3.0593,
+        "maxMilliseconds": 3.1078,
+        "meanAllocatedBytes": 50288,
+        "maxAllocatedBytes": 50288
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.06286233333333335,
+        "p50Milliseconds": 0.0523,
+        "p95Milliseconds": 0.1326,
+        "p99Milliseconds": 0.1626,
+        "maxMilliseconds": 0.2595,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 1.0447773333333332,
+        "p50Milliseconds": 1.1449,
+        "p95Milliseconds": 1.4679,
+        "p99Milliseconds": 1.688,
+        "maxMilliseconds": 1.7358,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 3.1110113333333365,
+        "p50Milliseconds": 3.1165,
+        "p95Milliseconds": 3.9413,
+        "p99Milliseconds": 4.4811,
+        "maxMilliseconds": 4.8563,
+        "meanAllocatedBytes": 50288,
+        "maxAllocatedBytes": 50288
+      },
+      "initialWorkingSet": 196169728,
+      "finalWorkingSet": 196177920,
+      "gcCollections": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "scene": "Shelt",
+      "stage": 18,
+      "width": 426,
+      "height": 240,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "Ended",
+      "scriptAfter": "Ended",
+      "songBefore": 8,
+      "songAfter": 8,
+      "npcCount": 17,
+      "snapshotSerializedBytes": 9363,
+      "send": {
+        "meanMilliseconds": 2.086016333333333,
+        "p50Milliseconds": 2.0204,
+        "p95Milliseconds": 2.4773,
+        "p99Milliseconds": 3.0675,
+        "maxMilliseconds": 3.4251,
+        "meanAllocatedBytes": 50296,
+        "maxAllocatedBytes": 50296
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.08838833333333335,
+        "p50Milliseconds": 0.0793,
+        "p95Milliseconds": 0.1744,
+        "p99Milliseconds": 0.2246,
+        "maxMilliseconds": 0.3414,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 1.0647739999999997,
+        "p50Milliseconds": 1.1514,
+        "p95Milliseconds": 1.4738,
+        "p99Milliseconds": 1.6335,
+        "maxMilliseconds": 2.0769,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 3.2400106666666644,
+        "p50Milliseconds": 3.2705,
+        "p95Milliseconds": 3.824,
+        "p99Milliseconds": 4.657,
+        "maxMilliseconds": 5.2592,
+        "meanAllocatedBytes": 50296,
+        "maxAllocatedBytes": 50296
+      },
+      "initialWorkingSet": 197423104,
+      "finalWorkingSet": 197431296,
+      "gcCollections": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "scene": "Shelt",
+      "stage": 18,
+      "width": 640,
+      "height": 360,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "Ended",
+      "scriptAfter": "Ended",
+      "songBefore": 8,
+      "songAfter": 8,
+      "npcCount": 17,
+      "snapshotSerializedBytes": 9366,
+      "send": {
+        "meanMilliseconds": 4.547735000000002,
+        "p50Milliseconds": 4.0748,
+        "p95Milliseconds": 8.3286,
+        "p99Milliseconds": 10.0679,
+        "maxMilliseconds": 10.7421,
+        "meanAllocatedBytes": 50304,
+        "maxAllocatedBytes": 50304
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.43961266666666643,
+        "p50Milliseconds": 0.3659,
+        "p95Milliseconds": 0.7135,
+        "p99Milliseconds": 2.3511,
+        "maxMilliseconds": 2.8176,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 1.6135306666666667,
+        "p50Milliseconds": 1.5978,
+        "p95Milliseconds": 3.2694,
+        "p99Milliseconds": 4.6299,
+        "maxMilliseconds": 6.4095,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 6.602284666666663,
+        "p50Milliseconds": 5.9906,
+        "p95Milliseconds": 12.7339,
+        "p99Milliseconds": 13.6928,
+        "maxMilliseconds": 15.9299,
+        "meanAllocatedBytes": 50304,
+        "maxAllocatedBytes": 50304
+      },
+      "initialWorkingSet": 200208384,
+      "finalWorkingSet": 200208384,
+      "gcCollections": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "scene": "SheltDialogue",
+      "stage": 18,
+      "width": 320,
+      "height": 240,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "WaitInput(502, 29, 16)",
+      "scriptAfter": "WaitInput(502, 29, 16)",
+      "songBefore": 21,
+      "songAfter": 21,
+      "npcCount": 17,
+      "snapshotSerializedBytes": 9385,
+      "send": {
+        "meanMilliseconds": 2.6303336666666652,
+        "p50Milliseconds": 2.4191,
+        "p95Milliseconds": 3.4419,
+        "p99Milliseconds": 3.6632,
+        "maxMilliseconds": 4.6124,
+        "meanAllocatedBytes": 50356,
+        "maxAllocatedBytes": 50360
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.123689,
+        "p50Milliseconds": 0.0793,
+        "p95Milliseconds": 0.1922,
+        "p99Milliseconds": 0.3142,
+        "maxMilliseconds": 10.7233,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 0.6357226666666672,
+        "p50Milliseconds": 0.617,
+        "p95Milliseconds": 1.0498,
+        "p99Milliseconds": 1.2118,
+        "maxMilliseconds": 1.2941,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 3.3906809999999994,
+        "p50Milliseconds": 3.1558,
+        "p95Milliseconds": 4.4928,
+        "p99Milliseconds": 4.7791,
+        "maxMilliseconds": 14.3194,
+        "meanAllocatedBytes": 50356,
+        "maxAllocatedBytes": 50360
+      },
+      "initialWorkingSet": 201359360,
+      "finalWorkingSet": 201748480,
+      "gcCollections": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "scene": "SheltDialogue",
+      "stage": 18,
+      "width": 426,
+      "height": 240,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "WaitInput(502, 29, 16)",
+      "scriptAfter": "WaitInput(502, 29, 16)",
+      "songBefore": 21,
+      "songAfter": 21,
+      "npcCount": 17,
+      "snapshotSerializedBytes": 9381,
+      "send": {
+        "meanMilliseconds": 2.3105059999999993,
+        "p50Milliseconds": 2.2144,
+        "p95Milliseconds": 2.8744,
+        "p99Milliseconds": 3.4565,
+        "maxMilliseconds": 3.6451,
+        "meanAllocatedBytes": 50344,
+        "maxAllocatedBytes": 50344
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.06969666666666663,
+        "p50Milliseconds": 0.0508,
+        "p95Milliseconds": 0.1601,
+        "p99Milliseconds": 0.3282,
+        "maxMilliseconds": 0.5066,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 0.5581923333333331,
+        "p50Milliseconds": 0.5854,
+        "p95Milliseconds": 0.8766,
+        "p99Milliseconds": 1.0007,
+        "maxMilliseconds": 1.0358,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 2.938885333333332,
+        "p50Milliseconds": 2.8777,
+        "p95Milliseconds": 3.6115,
+        "p99Milliseconds": 4.4264,
+        "maxMilliseconds": 4.7277,
+        "meanAllocatedBytes": 50344,
+        "maxAllocatedBytes": 50344
+      },
+      "initialWorkingSet": 202981376,
+      "finalWorkingSet": 202981376,
+      "gcCollections": [
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "scene": "SheltDialogue",
+      "stage": 18,
+      "width": 640,
+      "height": 360,
+      "warmupFrames": 100,
+      "sampleFrames": 300,
+      "scriptBefore": "WaitInput(502, 29, 16)",
+      "scriptAfter": "WaitInput(502, 29, 16)",
+      "songBefore": 21,
+      "songAfter": 21,
+      "npcCount": 17,
+      "snapshotSerializedBytes": 9385,
+      "send": {
+        "meanMilliseconds": 2.87261,
+        "p50Milliseconds": 2.7327,
+        "p95Milliseconds": 3.485,
+        "p99Milliseconds": 4.3858,
+        "maxMilliseconds": 4.5869,
+        "meanAllocatedBytes": 50356,
+        "maxAllocatedBytes": 50360
+      },
+      "copyThreeLayers": {
+        "meanMilliseconds": 0.21520866666666658,
+        "p50Milliseconds": 0.1644,
+        "p95Milliseconds": 0.5337,
+        "p99Milliseconds": 0.8105,
+        "maxMilliseconds": 0.9774,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "read800StereoFrames": {
+        "meanMilliseconds": 0.5606586666666669,
+        "p50Milliseconds": 0.5869,
+        "p95Milliseconds": 0.8855,
+        "p99Milliseconds": 1.1518,
+        "maxMilliseconds": 1.3608,
+        "meanAllocatedBytes": 0,
+        "maxAllocatedBytes": 0
+      },
+      "total": {
+        "meanMilliseconds": 3.6492846666666687,
+        "p50Milliseconds": 3.4851,
+        "p95Milliseconds": 4.7091,
+        "p99Milliseconds": 5.6232,
+        "maxMilliseconds": 6.2558,
+        "meanAllocatedBytes": 50356,
+        "maxAllocatedBytes": 50360
+      },
+      "initialWorkingSet": 199540736,
+      "finalWorkingSet": 195350528,
+      "gcCollections": [
+        2,
+        0,
+        0
+      ]
+    }
+  ],
+  "dotnetHost": "${TML}/dotnet/dotnet",
+  "adapterSha256": "02d6afd0601b70afe42bf03a47dd9f3652ed7ca1d88cd9f67e671ba8d6d93f33",
+  "dotnetEnvironment": {},
+  "pathNormalization": "Local paths use ${REPO}, ${TML} and ${NUGET_CACHE}; measurements are unchanged."
+}

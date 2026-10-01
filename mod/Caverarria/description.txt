@@ -1,0 +1,5 @@
+Playable alpha: bring your real Terraria character into the original Cave Story freeware campaign.
+The original doukutsu-rs engine runs the story, enemies, and encounters. Terraria runs your character, equipment, and combat.
+Create a world with seed caverarria, then enter it from the normal world selector with any character. Each campaign world keeps its own progress. The portable engine and managed WASM runner are embedded in the mod. Original freeware data is downloaded and verified separately on first entry, under the tModLoader save folder's Caverarria directory.
+World editing is planned; authored campaign terrain is protected for now.
+Single player. Tested on Linux; full campaign completion and Windows/macOS playthroughs are still being verified. Report the room, what happened, and your platform/mod list at https://github.com/iskamag/caverarria/issues.

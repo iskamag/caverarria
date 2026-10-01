@@ -1,0 +1,2144 @@
+{
+  "schemaVersion": 1,
+  "cargoTarget": "wasm32-unknown-unknown",
+  "rootFeatures": [
+    "portable"
+  ],
+  "defaultFeatures": false,
+  "cargoLockSha256": "13db3a35bc21ae49715f240b1a8bc62dede6bd1ed831acbbfb67f1a6178af137",
+  "graphCommand": "cargo metadata --locked --format-version 1 --filter-platform wasm32-unknown-unknown --no-default-features --features portable --manifest-path rust-bridge/Cargo.toml",
+  "scope": "Locked normal/build dependency graph for the portable target, including build-time proc macros; not a claim that every graph package is embedded in the module.",
+  "resolvedPackageCount": 67,
+  "thirdPartyPackageCount": 66,
+  "packages": [
+    {
+      "name": "adler2",
+      "version": "2.0.1",
+      "licenseExpression": "0BSD OR MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/oyvindln/adler2",
+      "features": [],
+      "cargoPackageChecksum": "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/adler2-2.0.1/LICENSE-0BSD",
+          "bytes": 665,
+          "sha256": "861399f8c21c042b110517e76dc6b63a2b334276c8cf17412fc3c8908ca8dc17",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-0BSD"
+          }
+        },
+        {
+          "path": "licenses/rust/adler2-2.0.1/LICENSE-APACHE",
+          "bytes": 10860,
+          "sha256": "8ada45cd9f843acf64e4722ae262c622a2b3b3007c7310ef36ac1061a30f6adb",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/adler2-2.0.1/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "anstyle",
+      "version": "1.0.14",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-cli/anstyle.git",
+      "features": [
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/anstyle-1.0.14/LICENSE-APACHE",
+          "bytes": 11358,
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/anstyle-1.0.14/LICENSE-MIT",
+          "bytes": 1062,
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "autocfg",
+      "version": "1.5.1",
+      "licenseExpression": "Apache-2.0 OR MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/cuviper/autocfg",
+      "features": [],
+      "cargoPackageChecksum": "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/autocfg-1.5.1/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/autocfg-1.5.1/LICENSE-MIT",
+          "bytes": 1054,
+          "sha256": "27995d58ad5c1145c1a8cd86244ce844886958a35eb2b78c6b772748669999ac",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "bitfield",
+      "version": "0.16.1",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dzamlo/rust-bitfield",
+      "features": [],
+      "cargoPackageChecksum": "d5acf59e2452f0c4b968b15ce4b9468f57b45f7733b919d68b19fcc39264bfb8",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/bitfield-0.16.1/LICENSE-APACHE",
+          "bytes": 11358,
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/bitfield-0.16.1/LICENSE-MIT",
+          "bytes": 1056,
+          "sha256": "af6b8d2c7ab89b819e3c2db77b572f145d14c8578dbd25015d739b30d4cc92f7",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "bitflags",
+      "version": "1.3.2",
+      "licenseExpression": "MIT/Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/bitflags/bitflags",
+      "features": [
+        "default"
+      ],
+      "cargoPackageChecksum": "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/bitflags-1.3.2/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/bitflags-1.3.2/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "bytemuck",
+      "version": "1.25.2",
+      "licenseExpression": "Zlib OR Apache-2.0 OR MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/Lokathor/bytemuck",
+      "features": [
+        "extern_crate_alloc"
+      ],
+      "cargoPackageChecksum": "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/bytemuck-1.25.2/LICENSE-APACHE",
+          "bytes": 10398,
+          "sha256": "e3ba223bb1423f0aad8c3dfce0fe3148db48926d41e6fbc3afbbf5ff9e1c89cb",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/bytemuck-1.25.2/LICENSE-MIT",
+          "bytes": 1110,
+          "sha256": "9df9ba60a11af705f2e451b53762686e615d86f76b169cf075c3237730dbd7e2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        },
+        {
+          "path": "licenses/rust/bytemuck-1.25.2/LICENSE-ZLIB",
+          "bytes": 851,
+          "sha256": "84b34dd7608f7fb9b17bd588a6bf392bf7de504e2716f024a77d89f1b145a151",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-ZLIB"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "byteorder",
+      "version": "1.5.0",
+      "licenseExpression": "Unlicense OR MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/BurntSushi/byteorder",
+      "features": [
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/byteorder-1.5.0/COPYING",
+          "bytes": 126,
+          "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "COPYING"
+          }
+        },
+        {
+          "path": "licenses/rust/byteorder-1.5.0/LICENSE-MIT",
+          "bytes": 1081,
+          "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        },
+        {
+          "path": "licenses/rust/byteorder-1.5.0/UNLICENSE",
+          "bytes": 1211,
+          "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "UNLICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "case_insensitive_hashmap",
+      "version": "1.0.1",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/PhilipDaniels/case-insensitive-hashmap",
+      "features": [],
+      "cargoPackageChecksum": "59ca1ed8675a76594ea5a5ad5cc318d72238cd4975d88f73768508fa577986b8",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/case_insensitive_hashmap-1.0.1/LICENSE",
+          "bytes": 1057,
+          "sha256": "afb11426e09da40a1ae4f8fa17ddcc6b6a52d14df04c29bc5bcd06eb8730624d",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "caverarria-bridge",
+      "version": "0.1.0",
+      "licenseExpression": null,
+      "source": "workspace/rust-bridge",
+      "repository": null,
+      "features": [
+        "portable"
+      ],
+      "cargoPackageChecksum": null,
+      "licenseFiles": [],
+      "exception": "Project-owned integration code; no license grant selected. This inventory does not license that code."
+    },
+    {
+      "name": "cfg-if",
+      "version": "1.0.5",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-lang/cfg-if",
+      "features": [],
+      "cargoPackageChecksum": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/cfg-if-1.0.5/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/cfg-if-1.0.5/LICENSE-MIT",
+          "bytes": 1057,
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "chrono",
+      "version": "0.4.45",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/chronotope/chrono",
+      "features": [
+        "alloc",
+        "clock",
+        "iana-time-zone",
+        "now",
+        "std",
+        "winapi",
+        "windows-link"
+      ],
+      "cargoPackageChecksum": "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/chrono-0.4.45/LICENSE.txt",
+          "bytes": 12307,
+          "sha256": "946c9835d8034d24404f8cfec5f4654cee5dad17e944afc3d06d742cf2882831",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE.txt"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "clap",
+      "version": "4.6.7",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/clap-rs/clap",
+      "features": [
+        "cargo",
+        "derive",
+        "error-context",
+        "help",
+        "std",
+        "usage"
+      ],
+      "cargoPackageChecksum": "aa8876b300ab35ba921adea3dfd70157a46249b33f95c9084ae5709785478946",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/clap-4.6.7/LICENSE-APACHE",
+          "bytes": 11349,
+          "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/clap-4.6.7/LICENSE-MIT",
+          "bytes": 1062,
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "clap_builder",
+      "version": "4.6.7",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/clap-rs/clap",
+      "features": [
+        "cargo",
+        "error-context",
+        "help",
+        "std",
+        "usage"
+      ],
+      "cargoPackageChecksum": "ec0797fb7aeb1406c84efac526901f7ec3ead2124f946b494e72879d4b54704d",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/clap_builder-4.6.7/LICENSE-APACHE",
+          "bytes": 11349,
+          "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/clap_builder-4.6.7/LICENSE-MIT",
+          "bytes": 1062,
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "clap_derive",
+      "version": "4.6.7",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/clap-rs/clap",
+      "features": [
+        "default"
+      ],
+      "cargoPackageChecksum": "f9c751b79415d4e559e3d1fcf128e09e720eb673a06d26cf6f392d37d75b66e0",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/clap_derive-4.6.7/LICENSE-APACHE",
+          "bytes": 11349,
+          "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/clap_derive-4.6.7/LICENSE-MIT",
+          "bytes": 1062,
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "clap_lex",
+      "version": "1.1.1",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/clap-rs/clap",
+      "features": [],
+      "cargoPackageChecksum": "1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/clap_lex-1.1.1/LICENSE-APACHE",
+          "bytes": 11349,
+          "sha256": "249fdb6694467dd615b259f7ddde07be3f8ae5a72cecebb0e24f6629af4215fe",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/clap_lex-1.1.1/LICENSE-MIT",
+          "bytes": 1062,
+          "sha256": "6efb0476a1cc085077ed49357026d8c173bf33017278ef440f222fb9cbcb66e6",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "color_quant",
+      "version": "1.1.0",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/image-rs/color_quant.git",
+      "features": [],
+      "cargoPackageChecksum": "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/color_quant-1.1.0/LICENSE",
+          "bytes": 1083,
+          "sha256": "592dc80f1a865d20d61a2006a2d29ce34a2bc28cd7e868ab300fdeed6da154ca",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "crc32fast",
+      "version": "1.5.2",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/srijs/rust-crc32fast",
+      "features": [
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/crc32fast-1.5.2/LICENSE-APACHE",
+          "bytes": 11358,
+          "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/crc32fast-1.5.2/LICENSE-MIT",
+          "bytes": 1097,
+          "sha256": "61d383b05b87d78f94d2937e2580cce47226d17823c0430fbcad09596537efcf",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "dataview",
+      "version": "1.1.0",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/CasualX/dataview",
+      "features": [],
+      "cargoPackageChecksum": "404d2b123c6e7e4d88965413607164a07afb8ffa2beb176323c009a223a98fdc",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/dataview-1.1.0/license.txt",
+          "bytes": 1085,
+          "sha256": "e4379b3fda55aa063750f54abb6360688dc8404583e7a22cc522660a6825f3c1",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "license.txt"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "directories",
+      "version": "3.0.2",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/soc/directories-rs",
+      "features": [],
+      "cargoPackageChecksum": "e69600ff1703123957937708eb27f7a564e48885c537782722ed0ba3189ce1d7",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/directories-3.0.2/LICENSE-APACHE",
+          "bytes": 9694,
+          "sha256": "d3174ad63e721d4c9dccb8ad4320848992d314369bc46319720b5802c9153fe9",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/directories-3.0.2/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "11955c617c19899b5c36d78c916739d1686f2e7ad8e3cec684c2f0f73b0db950",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "dirs-sys",
+      "version": "0.3.7",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dirs-dev/dirs-sys-rs",
+      "features": [],
+      "cargoPackageChecksum": "1b1d1d91c932ef41c0f2663aa8b0ca0342d444d842c06914aa0a7e352d0bada6",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/dirs-sys-0.3.7/LICENSE-APACHE",
+          "bytes": 9694,
+          "sha256": "d3174ad63e721d4c9dccb8ad4320848992d314369bc46319720b5802c9153fe9",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/dirs-sys-0.3.7/LICENSE-MIT",
+          "bytes": 1069,
+          "sha256": "6a2e0ade09a7d5f816f11566fee2b151b32235a7fad52b41d49cce96f833c1a9",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "doukutsu-rs",
+      "version": "1.0.0",
+      "licenseExpression": "MIT",
+      "source": "vendor/doukutsu-rs",
+      "repository": null,
+      "features": [
+        "cavebridge",
+        "portable",
+        "pull-audio"
+      ],
+      "cargoPackageChecksum": null,
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/doukutsu-rs-1.0.0/LICENSE",
+          "bytes": 1086,
+          "sha256": "ff8b25f74a24d87521c64c107ec94d967ae8fa4be9d9c73d639925e11161282c",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "upstreamRevision": "7e6870e55f072e3f056dc1eef3974a1af26c7aae",
+      "modificationNotice": "Caverarria modifies the upstream engine for host stepping, external Terraria kinematics, a portable memory VFS and PCM, and software rendering."
+    },
+    {
+      "name": "downcast",
+      "version": "0.11.0",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/fkoep/downcast-rs",
+      "features": [
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "1435fa1053d8b2fbbe9be7e97eca7f33d37b28409959813daefc1446a14247f1",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/downcast-0.11.0/LICENSE-MIT",
+          "bytes": 1075,
+          "sha256": "c81038315054072db233f9c9ed10c3303935be1630d0e91737defac4cb7f3d2e",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "either",
+      "version": "1.18.0",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rayon-rs/either",
+      "features": [
+        "default",
+        "std",
+        "use_std"
+      ],
+      "cargoPackageChecksum": "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/either-1.18.0/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/either-1.18.0/LICENSE-MIT",
+          "bytes": 1043,
+          "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "encoding_rs",
+      "version": "0.8.42",
+      "licenseExpression": "(Apache-2.0 OR MIT) AND BSD-3-Clause",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/hsivonen/encoding_rs",
+      "features": [
+        "alloc",
+        "default"
+      ],
+      "cargoPackageChecksum": "8e985e0451871ad22fb8d2b6b076e2028a502a0d3950998c2c5c0a4f9b5d9679",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/encoding_rs-0.8.42/COPYRIGHT",
+          "bytes": 713,
+          "sha256": "11789f45bb180841cd362a5eee6789c68ddb573a11105e30768c308a6add0190",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "COPYRIGHT"
+          }
+        },
+        {
+          "path": "licenses/rust/encoding_rs-0.8.42/LICENSE-APACHE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/encoding_rs-0.8.42/LICENSE-MIT",
+          "bytes": 1053,
+          "sha256": "3fa4ca83dcc9237839b1bdeb2e6d16bdfb5ec0c5ce42b24694d8bbf0dcbef72c",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        },
+        {
+          "path": "licenses/rust/encoding_rs-0.8.42/LICENSE-WHATWG",
+          "bytes": 1501,
+          "sha256": "838118388fe5c2e7f1dbbaeed13e1c7f3ebf88be91319c7c1d77c18e987d1a50",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-WHATWG"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "erasable",
+      "version": "1.3.0",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/CAD97/pointer-utils/tree/master/crates/erasable",
+      "features": [
+        "alloc",
+        "default"
+      ],
+      "cargoPackageChecksum": "437cfb75878119ed8265685c41a115724eae43fb7cc5a0bf0e4ecc3b803af1c4",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/erasable-1.3.0/LICENSE-MIT",
+          "bytes": 1087,
+          "sha256": "68360edd6e6db7a433dd72abcd0f81516c0dd438d9b9f7d687cb6ba0afc7242e",
+          "provenance": {
+            "kind": "exact-upstream-vcs-file",
+            "url": "https://raw.githubusercontent.com/CAD97/pointer-utils/0fe399f8f7e519959224069360f3900189086683/LICENSE/MIT",
+            "revision": "0fe399f8f7e519959224069360f3900189086683"
+          }
+        },
+        {
+          "path": "licenses/rust/erasable-1.3.0/LICENSE-APACHE",
+          "bytes": 10173,
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "provenance": {
+            "kind": "exact-upstream-vcs-file",
+            "url": "https://raw.githubusercontent.com/CAD97/pointer-utils/0fe399f8f7e519959224069360f3900189086683/LICENSE/APACHE",
+            "revision": "0fe399f8f7e519959224069360f3900189086683"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "fdeflate",
+      "version": "0.3.7",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/image-rs/fdeflate",
+      "features": [],
+      "cargoPackageChecksum": "1e6853b52649d4ac5c0bd02320cddc5ba956bdb407c4b75a2c6b75bf51500f8c",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/fdeflate-0.3.7/LICENSE-APACHE",
+          "bytes": 10174,
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/fdeflate-0.3.7/LICENSE-MIT",
+          "bytes": 1036,
+          "sha256": "c77a4cf9da729987d0fe7ccd811e3bd27393914ddf3d23467c18cc22954513b3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "fern",
+      "version": "0.6.2",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/daboross/fern",
+      "features": [],
+      "cargoPackageChecksum": "d9f0c14694cbd524c8720dd69b0e3179344f04ebb5f90f2e4a440c6ea3b2f1ee",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/fern-0.6.2/LICENSE",
+          "bytes": 1059,
+          "sha256": "618bcda011fe31b4710082efc2785b51da642e236ed99fc1b5e34229836c915e",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "flate2",
+      "version": "1.1.10",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-lang/flate2-rs",
+      "features": [
+        "any_impl",
+        "default",
+        "miniz_oxide",
+        "runtime_detection",
+        "rust_backend"
+      ],
+      "cargoPackageChecksum": "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/flate2-1.1.10/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/flate2-1.1.10/LICENSE-MIT",
+          "bytes": 1062,
+          "sha256": "025436edff4cfcdde17a5811fdea78892d8482efd1abdec5a17872d07a4f2112",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "heck",
+      "version": "0.4.1",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/withoutboats/heck",
+      "features": [
+        "default"
+      ],
+      "cargoPackageChecksum": "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/heck-0.4.1/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/heck-0.4.1/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "heck",
+      "version": "0.5.0",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/withoutboats/heck",
+      "features": [],
+      "cargoPackageChecksum": "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/heck-0.5.0/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/heck-0.5.0/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "7b63ecd5f1902af1b63729947373683c32745c16a10e8e6292e2e2dcd7e90ae0",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "image",
+      "version": "0.24.9",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/image-rs/image",
+      "features": [
+        "bmp",
+        "png"
+      ],
+      "cargoPackageChecksum": "5690139d2f55868e080017335e4b94cb7414274c74f1669c84fb5feba2c9f69d",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/image-0.24.9/LICENSE-APACHE",
+          "bytes": 10174,
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/image-0.24.9/LICENSE-MIT",
+          "bytes": 1036,
+          "sha256": "c77a4cf9da729987d0fe7ccd811e3bd27393914ddf3d23467c18cc22954513b3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "itertools",
+      "version": "0.10.5",
+      "licenseExpression": "MIT/Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-itertools/itertools",
+      "features": [
+        "default",
+        "use_alloc",
+        "use_std"
+      ],
+      "cargoPackageChecksum": "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/itertools-0.10.5/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/itertools-0.10.5/LICENSE-MIT",
+          "bytes": 1043,
+          "sha256": "7576269ea71f767b99297934c0b2367532690f8c4badc695edf8e04ab6a1e545",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "itoa",
+      "version": "1.0.18",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/itoa",
+      "features": [],
+      "cargoPackageChecksum": "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/itoa-1.0.18/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/itoa-1.0.18/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "lazy_static",
+      "version": "1.5.0",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-lang-nursery/lazy-static.rs",
+      "features": [],
+      "cargoPackageChecksum": "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/lazy_static-1.5.0/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/lazy_static-1.5.0/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "0621878e61f0d0fda054bcbe02df75192c28bde1ecc8289cbd86aeba2dd72720",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "log",
+      "version": "0.4.34",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-lang/log",
+      "features": [
+        "alloc",
+        "std"
+      ],
+      "cargoPackageChecksum": "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/log-0.4.34/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/log-0.4.34/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "memchr",
+      "version": "2.8.3",
+      "licenseExpression": "Unlicense OR MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/BurntSushi/memchr",
+      "features": [
+        "alloc",
+        "std"
+      ],
+      "cargoPackageChecksum": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/memchr-2.8.3/COPYING",
+          "bytes": 126,
+          "sha256": "01c266bced4a434da0051174d6bee16a4c82cf634e2679b6155d40d75012390f",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "COPYING"
+          }
+        },
+        {
+          "path": "licenses/rust/memchr-2.8.3/LICENSE-MIT",
+          "bytes": 1081,
+          "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        },
+        {
+          "path": "licenses/rust/memchr-2.8.3/UNLICENSE",
+          "bytes": 1211,
+          "sha256": "7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "UNLICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "miniz_oxide",
+      "version": "0.8.9",
+      "licenseExpression": "MIT OR Zlib OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+      "features": [
+        "default",
+        "simd",
+        "simd-adler32",
+        "with-alloc"
+      ],
+      "cargoPackageChecksum": "1fa76a2c86f704bdb222d66965fb3d63269ce38518b83cb0575fca855ebb6316",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/miniz_oxide-0.8.9/LICENSE",
+          "bytes": 1213,
+          "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        },
+        {
+          "path": "licenses/rust/miniz_oxide-0.8.9/LICENSE-APACHE.md",
+          "bytes": 10174,
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE.md"
+          }
+        },
+        {
+          "path": "licenses/rust/miniz_oxide-0.8.9/LICENSE-MIT.md",
+          "bytes": 1212,
+          "sha256": "799e9ca9d179295ef372f25d3769cdda7d25bb2668add6a6a1e22d1e4c678b8d",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT.md"
+          }
+        },
+        {
+          "path": "licenses/rust/miniz_oxide-0.8.9/LICENSE-ZLIB.md",
+          "bytes": 984,
+          "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-ZLIB.md"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "miniz_oxide",
+      "version": "0.9.1",
+      "licenseExpression": "MIT OR Zlib OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+      "features": [
+        "default",
+        "simd",
+        "simd-adler32",
+        "with-alloc"
+      ],
+      "cargoPackageChecksum": "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/miniz_oxide-0.9.1/LICENSE",
+          "bytes": 1213,
+          "sha256": "4108245a1f2df9d4e94df8abed5b4ba0759bb2f9b40a6b939f1be141077ae50b",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        },
+        {
+          "path": "licenses/rust/miniz_oxide-0.9.1/LICENSE-APACHE.md",
+          "bytes": 10174,
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE.md"
+          }
+        },
+        {
+          "path": "licenses/rust/miniz_oxide-0.9.1/LICENSE-MIT.md",
+          "bytes": 1212,
+          "sha256": "799e9ca9d179295ef372f25d3769cdda7d25bb2668add6a6a1e22d1e4c678b8d",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT.md"
+          }
+        },
+        {
+          "path": "licenses/rust/miniz_oxide-0.9.1/LICENSE-ZLIB.md",
+          "bytes": 984,
+          "sha256": "0a54e647fe54104658b5e563c04c6f9edf251710e47bce692e0bd990a4ddaa39",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-ZLIB.md"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "multiversion_no_op",
+      "version": "1.0.0",
+      "licenseExpression": "Apache-2.0 OR MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/hsivonen/multiversion_no_op",
+      "features": [],
+      "cargoPackageChecksum": "743fb55ba31b18fb1ecef6bdc9aa2743314978ac084044301a7eee33fb99a20d",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/multiversion_no_op-1.0.0/COPYRIGHT",
+          "bytes": 644,
+          "sha256": "d2a809eafabba137f508bea16a1b93d8ff24df7da6f38129d830db9bc118bdfe",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "COPYRIGHT"
+          }
+        },
+        {
+          "path": "licenses/rust/multiversion_no_op-1.0.0/LICENSE-APACHE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/multiversion_no_op-1.0.0/LICENSE-MIT",
+          "bytes": 1053,
+          "sha256": "3fa4ca83dcc9237839b1bdeb2e6d16bdfb5ec0c5ce42b24694d8bbf0dcbef72c",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "no-std-compat",
+      "version": "0.4.1",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://gitlab.com/jD91mZM2/no-std-compat",
+      "features": [
+        "alloc",
+        "std"
+      ],
+      "cargoPackageChecksum": "b93853da6d84c2e3c7d730d6473e8817692dd89be387eb01b94d7f108ecb5b8c",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/no-std-compat-0.4.1/LICENSE",
+          "bytes": 1065,
+          "sha256": "a82f9dd9371fddd9b1b5ad38f970bcfa4197c0da07b3dfb3f568089edf79f168",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "num-derive",
+      "version": "0.3.3",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-num/num-derive",
+      "features": [],
+      "cargoPackageChecksum": "876a53fff98e03a936a674b29568b0e605f06b29372c2489ff4de23f1949743d",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/num-derive-0.3.3/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/num-derive-0.3.3/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "num-traits",
+      "version": "0.2.19",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/rust-num/num-traits",
+      "features": [
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/num-traits-0.2.19/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/num-traits-0.2.19/LICENSE-MIT",
+          "bytes": 1071,
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "paste",
+      "version": "1.0.15",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/paste",
+      "features": [],
+      "cargoPackageChecksum": "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/paste-1.0.15/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/paste-1.0.15/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "pelite",
+      "version": "0.10.0",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/CasualX/pelite",
+      "features": [
+        "std"
+      ],
+      "cargoPackageChecksum": "88dccf4bd32294364aeb7bd55d749604450e9db54605887551f21baea7617685",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/pelite-0.10.0/license.txt",
+          "bytes": 1097,
+          "sha256": "cfa38e9bf55639eafb56b8f8dca63314f8c5f9b401e6e701660c77102bb8d7e5",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "license.txt"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "pelite-macros",
+      "version": "0.1.1",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/CasualX/pelite",
+      "features": [],
+      "cargoPackageChecksum": "7a7cf3f8ecebb0f4895f4892a8be0a0dc81b498f9d56735cb769dc31bf00815b",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/pelite-macros-0.1.1/license.txt",
+          "bytes": 1090,
+          "sha256": "1365d50f7e842b1e743ba450b43eb711d748dd04f04554c43b39dd4715d30e11",
+          "provenance": {
+            "kind": "exact-upstream-vcs-file",
+            "url": "https://raw.githubusercontent.com/CasualX/pelite/432e769bf3152f21452a4b8908639f5ed1595912/license.txt",
+            "revision": "432e769bf3152f21452a4b8908639f5ed1595912"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "png",
+      "version": "0.17.16",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/image-rs/image-png",
+      "features": [],
+      "cargoPackageChecksum": "82151a2fc869e011c153adc57cf2789ccb8d9906ce52c0b39a6b5697749d7526",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/png-0.17.16/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/png-0.17.16/LICENSE-MIT",
+          "bytes": 1048,
+          "sha256": "eaf40297c75da471f7cda1f3458e8d91b4b2ec866e609527a13acfa93b638652",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "proc-macro2",
+      "version": "1.0.107",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/proc-macro2",
+      "features": [
+        "default",
+        "proc-macro"
+      ],
+      "cargoPackageChecksum": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/proc-macro2-1.0.107/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/proc-macro2-1.0.107/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "quote",
+      "version": "1.0.47",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/quote",
+      "features": [
+        "default",
+        "proc-macro"
+      ],
+      "cargoPackageChecksum": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/quote-1.0.47/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/quote-1.0.47/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "rc-box",
+      "version": "1.3.0",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/CAD97/pointer-utils/tree/master/crates/rc-box",
+      "features": [
+        "default",
+        "erasable"
+      ],
+      "cargoPackageChecksum": "897fecc9fac6febd4408f9e935e86df739b0023b625e610e0357535b9c8adad0",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/rc-box-1.3.0/LICENSE-MIT",
+          "bytes": 1087,
+          "sha256": "68360edd6e6db7a433dd72abcd0f81516c0dd438d9b9f7d687cb6ba0afc7242e",
+          "provenance": {
+            "kind": "exact-upstream-vcs-file",
+            "url": "https://raw.githubusercontent.com/CAD97/pointer-utils/0fe399f8f7e519959224069360f3900189086683/LICENSE/MIT",
+            "revision": "0fe399f8f7e519959224069360f3900189086683"
+          }
+        },
+        {
+          "path": "licenses/rust/rc-box-1.3.0/LICENSE-APACHE",
+          "bytes": 10173,
+          "sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+          "provenance": {
+            "kind": "exact-upstream-vcs-file",
+            "url": "https://raw.githubusercontent.com/CAD97/pointer-utils/0fe399f8f7e519959224069360f3900189086683/LICENSE/APACHE",
+            "revision": "0fe399f8f7e519959224069360f3900189086683"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "rustversion",
+      "version": "1.0.23",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/rustversion",
+      "features": [],
+      "cargoPackageChecksum": "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/rustversion-1.0.23/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/rustversion-1.0.23/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "scopeguard",
+      "version": "1.2.0",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/bluss/scopeguard",
+      "features": [],
+      "cargoPackageChecksum": "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/scopeguard-1.2.0/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/scopeguard-1.2.0/LICENSE-MIT",
+          "bytes": 1097,
+          "sha256": "fb77f0a9c53e473abe5103c8632ef9f0f2874d4fb3f17cb2d8c661aab9cee9d7",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "serde",
+      "version": "1.0.229",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/serde-rs/serde",
+      "features": [
+        "default",
+        "derive",
+        "serde_derive",
+        "std"
+      ],
+      "cargoPackageChecksum": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/serde-1.0.229/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/serde-1.0.229/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "serde_core",
+      "version": "1.0.229",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/serde-rs/serde",
+      "features": [
+        "result",
+        "std"
+      ],
+      "cargoPackageChecksum": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/serde_core-1.0.229/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/serde_core-1.0.229/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "serde_derive",
+      "version": "1.0.229",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/serde-rs/serde",
+      "features": [
+        "default"
+      ],
+      "cargoPackageChecksum": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/serde_derive-1.0.229/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/serde_derive-1.0.229/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "serde_json",
+      "version": "1.0.151",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/serde-rs/json",
+      "features": [
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/serde_json-1.0.151/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/serde_json-1.0.151/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "simd-adler32",
+      "version": "0.3.10",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/mcountryman/simd-adler32",
+      "features": [
+        "const-generics",
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/simd-adler32-0.3.10/LICENSE.md",
+          "bytes": 1078,
+          "sha256": "42a35170233e83e18856792e748de4c1ce4a63b2afce9a370c89ef3fe23f9f2d",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE.md"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "strum",
+      "version": "0.24.1",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/Peternator7/strum",
+      "features": [
+        "default",
+        "std"
+      ],
+      "cargoPackageChecksum": "063e6045c0e62079840579a7e47a355ae92f60eb74daaf156fb1e84ba164e63f",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/strum-0.24.1/LICENSE",
+          "bytes": 1072,
+          "sha256": "8bce3b45e49ecd1461f223b46de133d8f62cd39f745cfdaf81bee554b908bd42",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "strum_macros",
+      "version": "0.24.3",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/Peternator7/strum",
+      "features": [],
+      "cargoPackageChecksum": "1e385be0d24f186b4ce2f9982191e7101bb737312ad61c1f2f984f34bcf85d59",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/strum_macros-0.24.3/LICENSE",
+          "bytes": 1072,
+          "sha256": "8bce3b45e49ecd1461f223b46de133d8f62cd39f745cfdaf81bee554b908bd42",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "syn",
+      "version": "1.0.109",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/syn",
+      "features": [
+        "clone-impls",
+        "default",
+        "derive",
+        "extra-traits",
+        "full",
+        "parsing",
+        "printing",
+        "proc-macro",
+        "quote",
+        "visit-mut"
+      ],
+      "cargoPackageChecksum": "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/syn-1.0.109/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/syn-1.0.109/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "syn",
+      "version": "3.0.6",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/syn",
+      "features": [
+        "clone-impls",
+        "default",
+        "derive",
+        "extra-traits",
+        "full",
+        "parsing",
+        "printing",
+        "proc-macro",
+        "visit",
+        "visit-mut"
+      ],
+      "cargoPackageChecksum": "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/syn-3.0.6/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/syn-3.0.6/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "unicase",
+      "version": "2.9.0",
+      "licenseExpression": "MIT OR Apache-2.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/seanmonstar/unicase",
+      "features": [],
+      "cargoPackageChecksum": "dbc4bc3a9f746d862c45cb89d705aa10f187bb96c76001afab07a0d35ce60142",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/unicase-2.9.0/LICENSE-APACHE",
+          "bytes": 10847,
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/unicase-2.9.0/LICENSE-MIT",
+          "bytes": 1063,
+          "sha256": "4f6bd11a0f17fe5b085ace1daaedb7b002a08316850dd9577c246c6a68a68e8c",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "unicode-ident",
+      "version": "1.0.26",
+      "licenseExpression": "(MIT OR Apache-2.0) AND Unicode-3.0",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/unicode-ident",
+      "features": [],
+      "cargoPackageChecksum": "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/unicode-ident-1.0.26/LICENSE-APACHE",
+          "bytes": 9723,
+          "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-APACHE"
+          }
+        },
+        {
+          "path": "licenses/rust/unicode-ident-1.0.26/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        },
+        {
+          "path": "licenses/rust/unicode-ident-1.0.26/LICENSE-UNICODE",
+          "bytes": 1995,
+          "sha256": "f7db81051789b729fea528a63ec4c938fdcb93d9d61d97dc8cc2e9df6d47f2a1",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-UNICODE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "vec_mut_scan",
+      "version": "0.4.0",
+      "licenseExpression": "0BSD",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/jix/vec_mut_scan",
+      "features": [],
+      "cargoPackageChecksum": "a24f38c144e0e800ae2950826b67f4fe7f0b5983f7999f8bec5aef472448cb20",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/vec_mut_scan-0.4.0/COPYRIGHT",
+          "bytes": 1140,
+          "sha256": "e91f37c4101b9fb8946287d96bc4cb2b0fa0bdc35c561c74be90325fcd3895d8",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "COPYRIGHT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "xml-rs",
+      "version": "0.8.29",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/kornelski/xml-rs",
+      "features": [],
+      "cargoPackageChecksum": "e450f9b2ed1dff33c94c12589a87338689467b9c4f5d8a5710bd09a847d2c8a7",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/xml-rs-0.8.29/LICENSE",
+          "bytes": 1083,
+          "sha256": "0dc18d924dc0a5f41172a393012843a5eaaef338e795b3645da9cc3b6068220b",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "xmltree",
+      "version": "0.10.3",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/eminence/xmltree-rs",
+      "features": [
+        "default"
+      ],
+      "cargoPackageChecksum": "d7d8a75eaf6557bb84a65ace8609883db44a29951042ada9b393151532e41fcb",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/xmltree-0.10.3/LICENSE",
+          "bytes": 1067,
+          "sha256": "8fca205ae3806d61379f2c91524275d85da99677ec3a4965351485470498238a",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "zlib-rs",
+      "version": "0.6.8",
+      "licenseExpression": "Zlib",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/trifectatechfoundation/zlib-rs",
+      "features": [
+        "rust-allocator",
+        "std"
+      ],
+      "cargoPackageChecksum": "b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/zlib-rs-0.6.8/LICENSE",
+          "bytes": 856,
+          "sha256": "e72111c52b7d96ebe25348dee19f0744f444d3c95ae6b1ecb6ccaecc5bce05ba",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    },
+    {
+      "name": "zmij",
+      "version": "1.0.23",
+      "licenseExpression": "MIT",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "repository": "https://github.com/dtolnay/zmij",
+      "features": [],
+      "cargoPackageChecksum": "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b",
+      "licenseFiles": [
+        {
+          "path": "licenses/rust/zmij-1.0.23/LICENSE-MIT",
+          "bytes": 1023,
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+          "provenance": {
+            "kind": "package-source-file",
+            "path": "LICENSE-MIT"
+          }
+        }
+      ],
+      "licenseSourceVerification": "Exact license files compared with Cargo.lock-checksummed registry archive"
+    }
+  ],
+  "rustTargetDistribution": {
+    "name": "Rust target standard library",
+    "rustcVersionVerbose": "rustc 1.98.1 (48a229cea 2026-09-01) (Artix Linux rust 1:1.98.1-1)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+    "licenseExpression": "Apache-2.0 OR MIT, with separately noted components",
+    "licenseFiles": [
+      {
+        "path": "licenses/rust-standard-library/COPYRIGHT",
+        "sha256": "172020dbfd5b53a226dfde77616190a48dcff519b0bc0e6deb91a8450782c4af",
+        "bytes": 1571
+      },
+      {
+        "path": "licenses/rust-standard-library/LICENSE-MIT",
+        "sha256": "b71bd43a069ca0641a9ecfe585ca7b3c53b5cc1608f8b68321168698e28b5ea1",
+        "bytes": 1068
+      },
+      {
+        "path": "licenses/rust-standard-library/COPYRIGHT-library.html",
+        "sha256": "e865f7bd5018634399d00f92f049ccfa84a4c1d60c2483d1a81eb63a5038d659",
+        "bytes": 4021
+      }
+    ],
+    "additionalUnicodeText": "licenses/rust/unicode-ident-1.0.26/LICENSE-UNICODE"
+  },
+  "managedRuntime": {
+    "name": "WebAssembly",
+    "version": "2.1.0",
+    "licenseExpression": "Apache-2.0",
+    "licenseFile": "lib/WebAssembly.LICENSE",
+    "copyright": "Copyright © Ryan Lamansky. All rights reserved."
+  },
+  "excluded": [
+    "Optional native/audio/windowing runners not in the portable graph",
+    "NXEngine-evo (reference only)",
+    "WACS (comparison probe only)",
+    "Original freeware game data (first-use download, not bundled)"
+  ]
+}

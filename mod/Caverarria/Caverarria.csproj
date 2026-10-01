@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TmlDirectory Condition="'$(TmlDirectory)' == ''">/home/iskam/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/tModLoader</TmlDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="WebAssembly">
+      <HintPath>lib/WebAssembly.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(TmlDirectory)/tMLMod.targets" />
+</Project>

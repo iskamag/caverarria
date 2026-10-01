@@ -1,0 +1,12 @@
+{
+  "nxengine-evo": {
+    "repository": "https://github.com/nxengine/nxengine-evo",
+    "revision": "1f093d1423cc395eb199230cd609b806ef1daa36",
+    "role": "reference audit only"
+  },
+  "doukutsu-rs": {
+    "repository": "https://github.com/doukutsu-rs/doukutsu-rs",
+    "revision": "7e6870e55f072e3f056dc1eef3974a1af26c7aae",
+    "role": "campaign runtime"
+  }
+}

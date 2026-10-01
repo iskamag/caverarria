@@ -1,0 +1,16 @@
+{
+  "backend": "Terraria/FNA",
+  "rate": 48000,
+  "loop_seconds": 12.8,
+  "rms": [
+    1291.5583732278917,
+    1291.4273035110828,
+    1292.8129944056998
+  ],
+  "envelope_correlations": [
+    0.9993058522255722,
+    0.999360107899477
+  ],
+  "whole_composition_repeats": true,
+  "pathNormalization": "Local paths use ${REPO} and ${TML}; measurements are unchanged."
+}

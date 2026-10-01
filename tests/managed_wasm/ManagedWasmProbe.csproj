@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="CoreProbe.cs" />
+    <Compile Include="AdapterProbe.cs" />
+    <Compile Include="PerformanceProbe.cs" />
+    <Compile Include="../../mod/Caverarria/WasmEngine.cs" Link="WasmEngine.cs" />
+    <Compile Include="../../mod/Caverarria/ICampaignEngine.cs" Link="ICampaignEngine.cs" />
+    <Compile Include="../../mod/Caverarria/NativeEngine.cs" Link="JsonFields.cs" />
+    <Reference Include="WebAssembly">
+      <HintPath>../../mod/Caverarria/lib/WebAssembly.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

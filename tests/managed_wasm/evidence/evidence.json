@@ -1,0 +1,138 @@
+{
+  "scope": "Rust feature and synthetic RGBA probe; not real Cave Story simulation/render throughput",
+  "rust_version": "rustc 1.98.1 (48a229cea 2026-09-01) (Artix Linux rust 1:1.98.1-1)",
+  "wasm_sha256": "8825993cb77eac04ea82618e2ced84f4138ddb194c1f4a89dd81e8620dce616a",
+  "dotnet_host": "${TML}/dotnet/dotnet",
+  "package_native_assets": {
+    "FluentValidation/11.10.0": [],
+    "Microsoft.Extensions.ObjectPool/9.0.0": [],
+    "WACS/0.16.14": [],
+    "WebAssembly/2.1.0": []
+  },
+  "package_dependencies": {
+    "net8.0": {
+      "FluentValidation/11.10.0": {},
+      "Microsoft.Extensions.ObjectPool/9.0.0": {},
+      "WACS/0.16.14": {
+        "FluentValidation": "11.10.0",
+        "Microsoft.Extensions.ObjectPool": "9.0.0"
+      },
+      "WebAssembly/2.1.0": {}
+    }
+  },
+  "results": [
+    {
+      "mode": "cil",
+      "runtime": ".NET 8.0.0",
+      "startupMilliseconds": 147.7119,
+      "checks": [
+        "host import",
+        "f32",
+        "f64 sqrt",
+        "call_indirect",
+        "overlapping memory.copy",
+        "memory.fill",
+        "memory.grow / memory reacquisition",
+        "mutable global get / set",
+        "multivalue function result"
+      ],
+      "memoryType": "WebAssembly.Runtime.UnmanagedMemory",
+      "pinvoke": [],
+      "loadedProbeAssemblies": [
+        {
+          "name": "WebAssembly",
+          "version": "2.0.0.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/WebAssembly.dll"
+        },
+        {
+          "name": "Wacs.Core",
+          "version": "0.16.14.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/Wacs.Core.dll"
+        },
+        {
+          "name": "FluentValidation",
+          "version": "11.0.0.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/FluentValidation.dll"
+        },
+        {
+          "name": "Microsoft.Extensions.ObjectPool",
+          "version": "9.0.0.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/Microsoft.Extensions.ObjectPool.dll"
+        }
+      ],
+      "timings": [
+        {
+          "width": 320,
+          "height": 240,
+          "frames": 20,
+          "millisecondsPerFrame": 0.21997499999999998,
+          "generatedAndCopiedFramesPerSecond": 4545.971133083305
+        },
+        {
+          "width": 426,
+          "height": 240,
+          "frames": 20,
+          "millisecondsPerFrame": 0.18187,
+          "generatedAndCopiedFramesPerSecond": 5498.432946610216
+        }
+      ]
+    },
+    {
+      "mode": "wacs",
+      "runtime": ".NET 8.0.0",
+      "startupMilliseconds": 325.1446,
+      "checks": [
+        "host import",
+        "f32",
+        "f64 sqrt",
+        "call_indirect",
+        "overlapping memory.copy",
+        "memory.fill",
+        "memory.grow / memory reacquisition",
+        "mutable global get / set",
+        "multivalue function result"
+      ],
+      "memoryType": "Wacs.Core.Runtime.Types.MemoryInstance",
+      "pinvoke": [],
+      "loadedProbeAssemblies": [
+        {
+          "name": "WebAssembly",
+          "version": "2.0.0.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/WebAssembly.dll"
+        },
+        {
+          "name": "Wacs.Core",
+          "version": "0.16.14.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/Wacs.Core.dll"
+        },
+        {
+          "name": "Microsoft.Extensions.ObjectPool",
+          "version": "9.0.0.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/Microsoft.Extensions.ObjectPool.dll"
+        },
+        {
+          "name": "FluentValidation",
+          "version": "11.0.0.0",
+          "path": "${REPO}/runtime/managed-wasm-probe/bin/Release/net8.0/FluentValidation.dll"
+        }
+      ],
+      "timings": [
+        {
+          "width": 320,
+          "height": 240,
+          "frames": 20,
+          "millisecondsPerFrame": 32.03359,
+          "generatedAndCopiedFramesPerSecond": 31.217231662139646
+        },
+        {
+          "width": 426,
+          "height": 240,
+          "frames": 20,
+          "millisecondsPerFrame": 36.56709,
+          "generatedAndCopiedFramesPerSecond": 27.346994250841398
+        }
+      ]
+    }
+  ],
+  "pathNormalization": "Local paths use ${REPO}, ${TML} and ${NUGET_CACHE}; measurements are unchanged."
+}

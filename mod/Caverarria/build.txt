@@ -1,0 +1,9 @@
+displayName = Caverarria (Alpha)
+author = Caverarria contributors
+version = 0.1.0
+homepage = https://github.com/iskamag/caverarria
+buildIgnore = *.csproj, bin/*, obj/*, .vs/*
+hideCode = false
+includeSource = true
+side = Both
+dllReferences = WebAssembly

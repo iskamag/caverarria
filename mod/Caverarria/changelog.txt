@@ -1,0 +1,5 @@
+Initial playable alpha.
+Original Cave Story campaign hosted by a real Terraria character.
+Portable WASM engine; original music and sound effects through Terraria/FNA.
+60 Hz engine mode, separate foreground and HUD layers, optimized drawing.
+Campaign worlds, first-use data download, saves and checkpoint retry.

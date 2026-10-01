@@ -1,0 +1,10 @@
+{
+  "runner": "WebAssembly for .NET 2.1.0; WASM to CIL to .NET JIT",
+  "baseline_file": "artifacts/performance-client-before.json",
+  "optimized_file": "artifacts/performance-client-after.json",
+  "audio": "artifacts/terraria-fna-audio-optimized-verification.json",
+  "controls": "artifacts/portable-optimized-controls.json",
+  "install": "artifacts/portable-install-verification.json",
+  "scope": "Linux actual tModLoader client, 1280x720 Xvfb software renderer; full campaign completion remains unverified",
+  "pathNormalization": "Local paths use ${REPO} and ${TML}; measurements are unchanged."
+}

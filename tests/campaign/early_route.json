@@ -1,0 +1,29 @@
+{
+  "scope": "A route specification for genuine controls. Stage/event IDs are expected observations, never commands to execute.",
+  "coordinates": "Original Cave Story pixels, NPC centers at PXE tile coordinates times 16; the Terraria host scales by 3.",
+  "steps": [
+    {"name": "Leave Start Point", "stage": 13, "map": "Start", "event": 100, "npc": [10, 3], "action": "interact", "expect_stage": 12, "corridor_tiles": [[13, 10], [12, 8], [8, 7], [7, 5], [8, 3], [10, 3]]},
+    {"name": "Reach the Hermit Gunsmith", "stage": 12, "map": "Cave", "event": 110, "npc": [53, 36], "action": "interact", "expect_stage": 90, "corridor_tiles": [[37, 11], [31, 13], [23, 17], [11, 24], [12, 29], [18, 34], [30, 36], [43, 38], [53, 36]]},
+    {"name": "Open the Polar Star chest", "stage": 90, "map": "Pole", "event": 200, "npc": [14, 9], "action": "interact", "expect_stage": 18, "expect_weapon": 2, "expect_flags_set": [1640], "dialogue": "advance; the original radio cutscene enters Shelter automatically"},
+    {"name": "Wait for the gun acquisition radio scene", "stage": 18, "map": "Shelt", "event": 501, "action": "advance_dialogue", "expect_stage": 90},
+    {"name": "Leave the Gunsmith", "stage": 90, "map": "Pole", "event": 100, "npc": [7, 9], "action": "interact", "expect_stage": 12},
+    {"name": "Climb First Cave and defeat the Village door enemy", "stage": 12, "map": "Cave", "event": 102, "npc": [55, 9], "action": "combat", "enemy_type": 59, "requires_weapon": 2, "requires_real_damage": true, "expect_flags_set": [301], "corridor_tiles": [[53, 36], [43, 38], [30, 36], [18, 34], [12, 29], [11, 24], [23, 17], [31, 13], [37, 11], [44, 10], [50, 8], [55, 9]]},
+    {"name": "Open the Village entrance", "stage": 12, "map": "Cave", "event": 102, "npc": [55, 9], "action": "interact", "requires_flags_set": [301], "expect_stage": 18, "expect_flags_set": [302, 1641, 1642]},
+    {"name": "Wait for the Village radio scene", "stage": 18, "map": "Shelt", "event": 502, "action": "advance_dialogue", "expect_stage": 11},
+    {"name": "Pass the authored village arrival scene", "stage": 11, "map": "Mimi", "event": 302, "action": "advance_dialogue", "expect_flags_set": [320, 321], "expected_scripted_position_tiles": [13, 22]},
+    {"name": "Enter the Reservoir", "stage": 11, "map": "Mimi", "event": 103, "npc": [1, 38], "action": "interact", "expect_stage": 15},
+    {"name": "Collect Toroko's Silver Locket", "stage": 15, "map": "Pool", "event": 300, "npc": [4, 15], "action": "interact", "expect_item": 4, "expect_flags_set": [370, 326, 371, 362], "environment": "water; do not drown while advancing text"},
+    {"name": "Return from the Reservoir", "stage": 15, "map": "Pool", "event": 100, "npc": [36, 14], "action": "interact", "expect_stage": 11, "dialogue": "Toroko/King scene runs as part of the transfer when flag371 is set"},
+    {"name": "Enter the Shack", "stage": 11, "map": "Mimi", "event": 105, "npc": [42, 52], "action": "interact", "expect_stage": 14},
+    {"name": "Meet Toroko", "stage": 14, "map": "Barr", "event": 290, "npc": [9, 9], "action": "touch_and_combat", "result_event": 1000, "dialogue": "Original angry Toroko NPC has to be hit; scene asks whether to fight Balrog. Yes fights; No legitimately skips this optional boss.", "expect_flags_set": [360, 440]},
+    {"name": "Fight Balrog", "stage": 14, "map": "Barr", "event": 400, "action": "combat", "optional": true, "boss_event": 400, "boss_type": 68, "requires_real_damage": true, "expect_flags_unset": [361, 362]},
+    {"name": "Leave the Shack", "stage": 14, "map": "Barr", "event": 102, "npc": [5, 10], "action": "interact", "expect_stage": 11},
+    {"name": "Tell Jack Toroko was kidnapped", "stage": 11, "map": "Mimi", "event": 104, "npc": [56, 33], "action": "interact", "expect_flags_set": [327, 443], "requires_flags_set": [360]},
+    {"name": "Enter the Graveyard", "stage": 11, "map": "Mimi", "event": 104, "npc": [56, 33], "action": "interact", "expect_stage": 16, "requires_flags_set": [327]},
+    {"name": "Read Arthur's tombstone", "stage": 16, "map": "Cemet", "event": 300, "npc": [9, 5], "action": "interact", "expect_item": 1, "expect_flags_set": [390]},
+    {"name": "Leave the Graveyard", "stage": 16, "map": "Cemet", "event": 100, "npc": [2, 12], "action": "interact", "expect_stage": 11},
+    {"name": "Unlock Arthur's House", "stage": 11, "map": "Mimi", "event": 100, "npc": [16, 53], "action": "interact", "expect_stage": 1, "requires_item": 1, "expect_flags_set": [324, 441]},
+    {"name": "Authorize the Egg Corridor teleporter", "stage": 1, "map": "Pens1", "event": 200, "npc": [7, 8], "action": "interact", "dialogue_choice": "yes", "expect_flags_set": [153], "expect_teleporter": 1},
+    {"name": "Take the first teleporter", "stage": 1, "map": "Pens1", "event": 500, "npc": [5, 8], "action": "interact_and_select", "select_teleporter": 1, "expect_stage": 2, "observed_transfer_event": 6001}
+  ]
+}

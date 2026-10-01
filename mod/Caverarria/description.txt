@@ -1,1 +1,4 @@
 Play Cave Story in Terraria. The whole game.
+
+Destroy terrain, place blocks, sequence break and destroy with items of another world. This will download the freeware files on first start of the world.
+the mod works through literally bridging the engines together.

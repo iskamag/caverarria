@@ -6,8 +6,7 @@ equipment and attacks come from Terraria; the original campaign runs in
 
 ## Play
 
-Follow the [installation notes](docs/ALPHA.md). Enable the mod, select a
-character in **Single Player**, then enter the bundled **Caverarria — The Island**
+select a character in **Single Player**, then enter the bundled **Caverarria — The Island** 
 world or create one with seed **`caverarria`**. First entry downloads and verifies
 Cave Story's English freeware data; the engine is included in the mod.
 
@@ -16,7 +15,7 @@ Characters in the same world share campaign progress; copying a world also copie
 its campaign ID and shares that progress.
 
 Use Terraria movement and item attacks. Set the mod keys in **Settings → Controls
-→ Mod Controls → Caverarria (Alpha)**. New bindings can be **Unbound**; assign
+→ Mod Controls → Caverarria**. New bindings can be **Unbound**; assign
 keys yourself or use **Reset to Default** in that section for the keys below.
 
 | Suggested key | Action |

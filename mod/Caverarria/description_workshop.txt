@@ -6,7 +6,7 @@ Enable Caverarria, then create a single-player world with seed [b]caverarria[/b]
 
 The first entry downloads and verifies the original English freeware data.
 
-Use Terraria movement and attacks. [b]E[/b]: interact and advance dialogue. [b]I[/b]: Terraria inventory (right-click story items). [b]M[/b]: story map. [b]V/C[/b]: cycle story weapons. [b]R[/b]: retry from the campaign save. Hold [b]X[/b] to skip cutscenes. New mod keys may be Unbound: assign them or use Reset to Default under Settings → Controls → Mod Controls → Caverarria (Alpha).
+Use Terraria movement and attacks. [b]E[/b]: interact and advance dialogue. [b]I[/b]: Terraria inventory (right-click story items). [b]M[/b]: story map. [b]V/C[/b]: cycle story weapons. [b]R[/b]: retry from the campaign save. Hold [b]X[/b] to skip cutscenes. New mod keys may be Unbound: assign them or use Reset to Default under Settings → Controls → Mod Controls → Caverarria.
 
 Original save points work; [b]/caverarria save[/b] also saves your progress.
 

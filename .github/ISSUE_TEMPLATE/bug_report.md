@@ -1,11 +1,10 @@
 ---
-name: Alpha bug report
+name: bug report
 about: Report a movement, campaign, combat, save, audio or installation problem.
-title: "[Alpha] "
 labels: bug
 ---
 
-**Alpha version:**
+**mod version:**
 **tModLoader version:**
 **Platform / hardware:**
 **Enabled mods:**

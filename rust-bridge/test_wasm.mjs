@@ -35,7 +35,7 @@ e.cave_free(executable,exe.length);
 const head=fs.readFileSync(path.join(dataRoot,'Head.tsc'));
 function cipher(data,sign){let middle=Math.floor(data.length/2),key=data[middle]||7;return Buffer.from(data.map((v,i)=>i===middle?v:(v+sign*key)&255));}
 put('/Head.tsc',cipher(Buffer.concat([cipher(head,-1),Buffer.from(
-    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<FAI0000<AM+0002:0000<END\r\n#9017\r\n<FAO0000<END\r\n#9020\r\n<KEY<MSGSkip this dialogue through the ordinary replay controller.<NOD<FL+7999<END\r\n#9021\r\n<KEY<ML+0003<END\r\n#9022\r\n<END\r\n')]),1));
+    '\r\n#9000\r\n<CMU0021<SOU0012<END\r\n#9010\r\n<CMU0000<CMU0021<END\r\n#9011\r\n<CMU0000<SOU0015<END\r\n#9012\r\n<SOU0015<END\r\n#9013\r\n<CMU0008<CMU0021<RMU<END\r\n#9014\r\n<RMU<END\r\n#9015\r\n<MSGHigh zoom dialogue remains readable.<NOD<END\r\n#9016\r\n<FAI0000<AM+0002:0000<END\r\n#9018\r\n<FAI0000<AM+0005:0010<AM+0010:0020<END\r\n#9017\r\n<FAO0000<END\r\n#9020\r\n<KEY<MSGSkip this dialogue through the ordinary replay controller.<NOD<FL+7999<END\r\n#9021\r\n<KEY<ML+0003<END\r\n#9022\r\n<END\r\n')]),1));
 e.cave_set_time(1790800000n);
 const empty=string('');let handle=e.cave_create(empty,empty,320,240);
 assert.ok(handle,read(e.cave_last_error()));e.cave_free(empty,1);
@@ -269,6 +269,40 @@ if(process.env.CAVERARRIA_LOAD_AUDIO_TEST){
     }
     assert.ok(energy>0,'saved music did not start before the first game tick');
     console.log(JSON.stringify({module:modulePath,saved_song:21,load_pcm_rms:Math.sqrt(energy/19200)}));
+    e.cave_destroy(handle);process.exit(0);
+}
+if(process.env.CAVERARRIA_AMMO_HUD_TEST){
+    command({op:'audio',enabled:false});
+    command({op:'warp',stage:0,x:160,y:120});
+    command({op:'event',event:9018});
+    const pose={x:160,y:120,vx:0,vy:0};
+    for(let i=0;i<60;i++)command({op:'tick',controls:0,player:pose});
+    const ammoPixels=()=>{
+        const pixels=new Uint8Array(e.memory.buffer,e.cave_pixels(handle,2),320*240*4);
+        return Buffer.concat(Array.from({length:16},(_,y)=>Buffer.from(pixels.slice(((y+40)*320)*4,((y+40)*320+80)*4))));
+    };
+    const visible=()=>ammoPixels().some((value,index)=>index%4===3&&value>0);
+    for(const weapon of [5,10]){
+        let state=command({op:'tick',controls:0,weapon,player:pose});
+        assert.ok(state.weapons.find(w=>w.id===weapon).max_ammo>0);
+        assert.ok(visible(),'missile ammo missing below XP');
+        const full=ammoPixels();
+        command({op:'tick',controls:0,weapon,host_ammo_in_slots:true,player:pose});
+        assert.equal(visible(),false,'inventory mode left duplicate HUD ammo');
+        command({op:'tick',controls:0,weapon,host_ammo_in_slots:false,player:pose});
+        assert.deepEqual(ammoPixels(),full,'HUD mode did not restore ammo');
+        command({op:'tick',controls:0,weapon,host_inventory_open:true,player:pose});
+        assert.equal(visible(),false,'ammo overlaps inventory');
+        command({op:'tick',controls:0,weapon,host_inventory_open:false,player:pose});
+        assert.deepEqual(ammoPixels(),full,'ammo did not return after inventory');
+        for(let i=0;i<120;i++)state=command({op:'tick',controls:i%12===0?128:0,weapon,player:pose});
+        assert.ok(state.weapons.find(w=>w.id===weapon).ammo<state.weapons.find(w=>w.id===weapon).max_ammo,'fixture did not fire missiles');
+        assert.notDeepEqual(ammoPixels(),full,'ammo digits did not change after shooting');
+        for(let i=0;i<1800;i++)state=command({op:'tick',controls:i%12===0?128:0,weapon,player:pose});
+        assert.equal(state.weapons.find(w=>w.id===weapon).ammo,0,'fixture did not exhaust missiles');
+        assert.ok(visible(),'zero ammo display disappeared');
+    }
+    console.log(JSON.stringify({missile_and_super_missile:true,firing_updates_count:true,zero_visible:true,inventory_hides_ammo:true,toggle_hides_duplicate_hud:true}));
     e.cave_destroy(handle);process.exit(0);
 }
 if(process.env.CAVERARRIA_UI_VIEWPORT_TEST){

@@ -18,6 +18,9 @@ public sealed class CampaignViewConfig : ModConfig
     [Header("View"), DefaultValue(4), Range(2, 6)]
     public int CameraPixelScale = 4;
 
+    [DefaultValue(false)]
+    public bool AmmoInInventorySlots;
+
     [DefaultValue(1f), Range(.75f, 1.5f), Increment(.25f)]
     public float PlayerBodyScale = 1f;
 

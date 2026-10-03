@@ -157,6 +157,7 @@ internal static class CampaignRuntime
             Snapshot = Engine!.Send(new
             {
                 op = "tick", controls, weapon = nativeWeapon, external = true, host_inventory_open = Main.playerInventory,
+                host_ammo_in_slots = ModContent.GetInstance<CampaignViewConfig>().AmmoInInventorySlots,
                 player = new { x = p.X, y = p.Y, vx = velocity.X, vy = velocity.Y, width = player.width / Scale, height = player.height / Scale, direction = player.direction, life, max_life = maxLife, grounded = player.velocity.Y == 0, jump_started = player.justJumped, wet = player.wet }
             });
             FramePerformance.End("engine", tickStarted);

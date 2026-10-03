@@ -66,6 +66,11 @@ Mods: {
 					Tooltip: Larger values bring the camera closer. Terraria's world zoom slider and + / - adjust it in crisp pixel steps.
 				}
 
+				AmmoInInventorySlots: {
+					Label: Show ammo in inventory slots
+					Tooltip: On: show remaining Cave Story ammo on inventory and hotbar items, like Terraria ammo counts. Off: show remaining / maximum ammo below the XP bar. Applies to both missile launchers and other guns with limited ammo.
+				}
+
 				PlayerBodyScale: {
 					Label: Player body size
 					Tooltip: Scales your character and body collision together. Terrain can be mined to open tight passages; world pixels stay on the campaign grid.

@@ -1,4 +1,7 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria.GameContent;
+using Terraria.UI.Chat;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
@@ -33,6 +36,20 @@ public abstract class CaveGun : ModItem
         return false;
     }
     public override bool CanUseItem(Player player) => CampaignRuntime.Active && CampaignRuntime.ControlsEnabled;
+    public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame,
+        Color drawColor, Color itemColor, Vector2 origin, float scale)
+    {
+        if (!CampaignRuntime.Active || !ModContent.GetInstance<CampaignViewConfig>().AmmoInInventorySlots) return;
+        var weapon = CampaignRuntime.Snapshot.Field("weapons").Elements().FirstOrDefault(value => value.Integer("id") == NativeType);
+        if (weapon.Integer("max_ammo") <= 0) return;
+        // Match vanilla's ammo-count font, slot offset and scale. The hook's
+        // position is the slot center; its scale is for the icon, not the slot.
+        float slotScale = Main.inventoryScale;
+        Vector2 countPosition = position + new Vector2(8f - 26f, 30f - 26f) * slotScale;
+        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.Value,
+            weapon.Integer("ammo").ToString(), countPosition, drawColor, 0f, Vector2.Zero,
+            new Vector2(slotScale * .8f), -1f, slotScale);
+    }
     public override Vector2? HoldoutOffset() => new Vector2(-3, 0);
     public override void ModifyTooltips(List<TooltipLine> tooltips)
     {

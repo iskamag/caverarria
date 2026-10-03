@@ -139,29 +139,31 @@ index 9a15ba7..772c413 100644
              _ => {
                  return Ok(());
 diff --git a/src/components/hud.rs b/src/components/hud.rs
-index e167bc3..6cec8ff 100644
+index e167bc3..0acb11c 100644
 --- a/src/components/hud.rs
 +++ b/src/components/hud.rs
-@@ -15,6 +15,9 @@ pub struct HUD {
+@@ -15,6 +15,10 @@ pub struct HUD {
      pub weapon_x_pos: usize,
      pub visible: bool,
      pub has_player2: bool,
 +    /// Host inventory temporarily covers the native weapon progress display.
 +    pub hide_weapon_progress: bool,
++    pub hide_host_ammo: bool,
 +    external_player: bool,
      ammo: u16,
      max_ammo: u16,
      xp: u16,
-@@ -41,6 +44,8 @@ impl HUD {
+@@ -41,6 +45,9 @@ impl HUD {
              weapon_x_pos: 16,
              visible: false,
              has_player2: false,
 +            hide_weapon_progress: false,
++            hide_host_ammo: false,
 +            external_player: false,
              ammo: 0,
              max_ammo: 0,
              xp: 0,
-@@ -64,6 +69,7 @@ impl HUD {
+@@ -64,6 +71,7 @@ impl HUD {
  
  impl GameEntity<(&Player, &mut Inventory)> for HUD {
      fn tick(&mut self, state: &mut SharedGameState, (player, inventory): (&Player, &mut Inventory)) -> GameResult {
@@ -169,7 +171,7 @@ index e167bc3..6cec8ff 100644
          let (ammo, max_ammo) = inventory.get_current_ammo();
          let (xp, max_xp, max_level) = inventory.get_current_max_exp(&state.constants);
  
-@@ -203,14 +209,17 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -203,14 +211,17 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
              0.0
          };
  
@@ -183,15 +185,15 @@ index e167bc3..6cec8ff 100644
 -            // per
 -            batch.add_rect(bar_offset + weap_x + 32.0, 24.0 + top, &Rect::new_size(72, 48, 8, 8));
 +        if !self.shock && (!self.external_player || (self.weapon_count != 0 && !self.hide_weapon_progress)) {
-+            // Terraria owns health/ammo presentation, but native weapon level
-+            // and experience still belong to the original campaign.
++            // Terraria owns health presentation; campaign weapon progress and
++            // ammunition remain native.
 +            if !self.external_player {
 +                batch.add_rect(bar_offset + weap_x + 32.0, 24.0 + top, &Rect::new_size(72, 48, 8, 8));
 +            }
              // lv
              batch.add_rect(num_offset + weap_x, 32.0 + top, &Rect::new_size(80, 80, 16, 8));
              // xp box
-@@ -229,7 +238,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -229,7 +240,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
                  batch.add_rect(bar_offset + weap_x + 24.0, 32.0 + top, &Rect::new_size(40, 80, 40, 8));
              }
  
@@ -200,7 +202,20 @@ index e167bc3..6cec8ff 100644
                  let yellow_bar_width = (self.life_bar as f32 / self.max_life as f32 * 39.0) as u16;
                  let bar_width = (self.life as f32 / self.max_life as f32 * 39.0) as u16;
  
-@@ -257,7 +266,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -244,6 +255,12 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+             }
+         }
+ 
++        let show_host_ammo = self.external_player && !self.hide_host_ammo && self.max_ammo != 0
++            && self.weapon_count != 0 && !self.hide_weapon_progress && !self.shock;
++        if show_host_ammo {
++            batch.add_rect(bar_offset + weap_x + 40.0, 44.0 + top, &Rect::new_size(72, 48, 8, 8));
++        }
++
+         if self.air_counter > 0 {
+             let rect = if self.air % 30 > 10 { Rect::new_size(112, 72, 32, 8) } else { Rect::new_size(112, 80, 32, 8) };
+ 
+@@ -257,7 +274,7 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
          batch.draw(ctx)?;
          let batch = state.texture_set.get_or_load_batch(ctx, &state.constants, "ArmsImage")?;
  
@@ -209,7 +224,25 @@ index e167bc3..6cec8ff 100644
              let mut rect = Rect::new(0, 0, 0, 16);
  
              // First frame of animation is off by one weapon
-@@ -311,13 +320,15 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+@@ -298,8 +315,17 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
+             }
+         }
+ 
++        if show_host_ammo {
++            let wtype = self.weapon_types[self.current_weapon as usize] as u16;
++            batch.add_rect(bar_offset + weap_x, 40.0 + top, &Rect::new_size(wtype * 16, 0, 16, 16));
++        }
+         batch.draw(ctx)?;
+ 
++        if show_host_ammo {
++            draw_number(bar_offset + weap_x + 40.0, 44.0 + top, self.ammo as usize, Alignment::Right, state, ctx)?;
++            draw_number(bar_offset + weap_x + 72.0, 44.0 + top, self.max_ammo as usize, Alignment::Right, state, ctx)?;
++        }
++
+         if self.air_counter > 0 && self.air_counter % 6 < 4 {
+             draw_number(
+                 left + ((state.canvas_size.0 - left - right) / 2.0).floor() + 8.0 + air_offset,
+@@ -311,13 +337,15 @@ impl GameEntity<(&Player, &mut Inventory)> for HUD {
              )?;
          }
  

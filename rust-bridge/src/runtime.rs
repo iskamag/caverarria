@@ -846,6 +846,10 @@ impl Raster {
         }
     }
     fn reset(&mut self, color: Color) {
+        // Frame start always returns to the world canvas so a later layer
+        // switch cannot leave a UI stride over a world-sized buffer.
+        self.width = self.world_width;
+        self.height = self.world_height;
         self.layer = 0;
         self.clip = None;
         let c = color.to_rgba();
@@ -854,6 +858,15 @@ impl Raster {
         }
         self.buffers[1].fill(0);
         self.buffers[2].fill(0);
+    }
+    /// `graphics::clear` runs mid-frame and must fill only the active layer's
+    /// own canvas. Clearing all three with a single stride corrupts the world
+    /// buffer whenever a larger interface canvas is active.
+    fn clear(&mut self, color: Color) {
+        let c = color.to_rgba();
+        for px in self.buffers[self.layer].chunks_exact_mut(4) {
+            px.copy_from_slice(&[c.0, c.1, c.2, 255]);
+        }
     }
     fn resize(&mut self, width: usize, height: usize) {
         self.width = width;
@@ -1074,7 +1087,7 @@ impl BackendRenderer for Renderer {
         "Caverarria capture".into()
     }
     fn clear(&mut self, c: Color) {
-        self.raster.borrow_mut().reset(c);
+        self.raster.borrow_mut().clear(c);
     }
     fn present(&mut self) -> GameResult {
         Ok(())

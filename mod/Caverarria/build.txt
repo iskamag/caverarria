@@ -1,6 +1,6 @@
 displayName = Caverarria
 author = iskamag
-version = 0.3.3
+version = 0.3.4
 homepage = https://github.com/iskamag/caverarria
 buildIgnore = *.csproj, bin/*, obj/*, .vs/*
 hideCode = false

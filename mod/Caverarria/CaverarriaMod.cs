@@ -54,6 +54,7 @@ public sealed class CaverarriaMod : Mod
     public override void Load()
     {
         if (Main.dedServ) return;
+        WeaponIcons.Load();
         Interact = KeybindLoader.RegisterKeybind(this, "Interact", "E");
         var update = typeof(Main).GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic)!;
         menuUpdateHook = new Hook(update, UpdateAfter);
@@ -71,6 +72,7 @@ public sealed class CaverarriaMod : Mod
 
     public override void Unload()
     {
+        WeaponIcons.Unload();
         audioUpdateHook?.Dispose(); audioUpdateHook = null;
         drawHook?.Dispose(); drawHook = null;
         menuUpdateHook?.Dispose();

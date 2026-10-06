@@ -36,6 +36,13 @@ public abstract class CaveGun : ModItem
         return false;
     }
     public override bool CanUseItem(Player player) => CampaignRuntime.Active && CampaignRuntime.ControlsEnabled;
+    public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame,
+        Color drawColor, Color itemColor, Vector2 origin, float scale)
+    {
+        // Draw the original icon and skip vanilla's held-gun sprite. Held and
+        // dropped items still use the weapon texture unchanged.
+        return !WeaponIcons.Draw(spriteBatch, position, NativeType, drawColor);
+    }
     public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame,
         Color drawColor, Color itemColor, Vector2 origin, float scale)
     {

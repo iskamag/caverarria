@@ -1,3 +1,6 @@
+0.3.4
+- Use the original Cave Story weapon icons in inventory slots, and draw all campaign item icons at a normal item size instead of tiny.
+
 0.3.3
 - Fix map hotkey crash when the interface canvas is larger than the world.
 

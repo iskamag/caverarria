@@ -38,10 +38,8 @@ Mine with pickaxes and build with solid blocks or supported non-solid furniture.
 Blocks default to campaign size (2×2 Terraria tiles); **Place Terraria-sized blocks**
 uses ordinary 16-pixel blocks. **Terrain persistence** controls what survives: by
 default edits last until the room reloads and a `/caverarria save` commits them;
-`Persistent` saves every edit, `Off` never saves. `/repair_room` restores the
-current room's authored terrain. Digging can bypass story gates. Containers, tile
-entities, platforms, falling blocks, hammer reshaping and explosives are not
-supported yet.
+`/repair_room` restores the current room's authored terrain. Containers, tile
+entities, platforms, falling blocks, hammer reshaping are not supported yet.
 
 ## Limitations
 

@@ -620,6 +620,14 @@ internal static class CampaignRuntime
         ApplySnapshot(false); imageDirty = true;
         return true;
     }
+    /// <summary>Re-enters the current room as if arriving through its door.</summary>
+    public static bool ReloadRoom()
+    {
+        if (!Active) return false;
+        Snapshot = Engine!.Send(new { op = "reload_room" });
+        ApplySnapshot(true); imageDirty = true;
+        return true;
+    }
     public static void TestCommand(string command)
     {
         if (!Active) return;

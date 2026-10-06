@@ -18,6 +18,7 @@ use crate::game::player::ControlMode;
 use crate::game::shared_game_state::{SharedGameState, TimingMode};
 use crate::input::replay_player_controller::{KeyState, ReplayController};
 use crate::scene::game_scene::GameScene;
+use crate::game::scripting::tsc::text_script::TextScriptExecutionState;
 use crate::scene::Scene;
 use serde_json::{json, Value};
 use std::any::Any;
@@ -46,6 +47,9 @@ pub struct Runtime {
     terrain_persistence: u8,
     terrain_dirty: bool,
     terrain_saved_at: u64,
+    // Room entry point, recorded on each load, for /reload_room.
+    last_stage: usize,
+    last_entry: (i32, i32),
     force_position: bool,
     force_velocity: bool,
     life_delta: i32,
@@ -160,6 +164,8 @@ impl Runtime {
             terrain_persistence: 1,
             terrain_dirty: false,
             terrain_saved_at: 0,
+            last_stage: usize::MAX,
+            last_entry: (0, 0),
             force_position: true,
             force_velocity: true,
             life_delta: 0,
@@ -220,6 +226,40 @@ impl Runtime {
         }
         Ok(())
     }
+    /// Remember where the current room was entered, for /reload_room.
+    fn record_entry(&mut self) {
+        if let Ok(game) = downcast::Downcast::<GameScene>::downcast_ref(&*self.scene) {
+            self.last_stage = game.stage_id;
+            self.last_entry = (game.player1.x, game.player1.y);
+        }
+    }
+    /// Re-enter the current room as if arriving through its door: rebuild the
+    /// stage so entities reset, keep the player and inventory, and place the
+    /// player back at the recorded entry.
+    fn reload_room(&mut self) -> Result<(), String> {
+        let (stage, player, inventory) = match downcast::Downcast::<GameScene>::downcast_ref(&*self.scene) {
+            Ok(game) => (game.stage_id, game.player1.clone(), game.inventory_player1.clone()),
+            Err(_) => return Ok(()),
+        };
+        let (entry_x, entry_y) = if self.last_stage == stage { self.last_entry } else { (player.x, player.y) };
+        let mut next = GameScene::new(&mut self.state, &mut self.ctx, stage).map_err(err)?;
+        next.player1 = player;
+        next.player1.x = entry_x;
+        next.player1.y = entry_y;
+        next.player1.vel_x = 0;
+        next.player1.vel_y = 0;
+        next.player1.cond.set_alive(true);
+        next.inventory_player1 = inventory;
+        next.intro_mode = false;
+        // Neutral control state, like a fresh door arrival.
+        self.state.control_flags.set_control_enabled(true);
+        self.state.control_flags.set_interactions_disabled(false);
+        self.state.control_flags.set_tick_world(true);
+        self.state.textscript_vm.state = TextScriptExecutionState::Ended;
+        self.state.next_scene = Some(Box::new(next));
+        self.transitions()?;
+        Ok(())
+    }
     pub fn pixels(&self, layer: usize) -> *const u8 {
         self.raster.borrow().buffers[layer].as_ptr()
     }
@@ -253,6 +293,7 @@ impl Runtime {
             // starts from the last checkpoint, not the abandoned edits.
             self.revert_terrain();
             self.apply_terrain();
+            self.record_entry();
         }
         Ok(changed)
     }
@@ -334,6 +375,10 @@ impl Runtime {
             }
             "repair_room" => {
                 self.repair_room()?;
+            }
+            "reload_room" => {
+                self.reload_room()?;
+                changed = true;
             }
             "hit" => {
                 if v["epoch"].as_u64().unwrap_or(self.epoch) == self.epoch {

@@ -116,3 +116,18 @@ public sealed class RepairRoomCommand : ModCommand
         caller.Reply(CampaignRuntime.RepairRoom() ? "Room repaired." : "No room to repair.");
     }
 }
+
+/// <summary>Re-enters the current room as if arriving through its door.</summary>
+public sealed class ReloadRoomCommand : ModCommand
+{
+    public override string Command => "reload_room";
+    public override CommandType Type => CommandType.Chat;
+    public override string Usage => "/reload_room";
+    public override string Description => "Re-enter the current Cave Story room, resetting you and its entities.";
+
+    public override void Action(CommandCaller caller, string input, string[] args)
+    {
+        if (!CampaignRuntime.Active) { caller.Reply("The campaign is not running."); return; }
+        caller.Reply(CampaignRuntime.ReloadRoom() ? "Room reloaded." : "No room to reload.");
+    }
+}

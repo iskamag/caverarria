@@ -3,6 +3,7 @@
 - Scale inventory items correctly.
 - Change terrain persistence behaviour.
 - Add a /repair_room command.
+- Add a /reload_room command.
 - Improve performance when breaking terrain.
 
 0.3.3

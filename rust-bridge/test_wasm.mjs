@@ -228,8 +228,15 @@ if(process.env.CAVERARRIA_TERRAIN_TEST){
     e.cave_free(beforePolicy,encode.encode('/Terrain.json\0').length);
     let fresh=command({op:'new'});
     assert.equal(0,fresh.map.terrain_edits.length,'new game kept terrain edits');
+    // /reload_room rebuilds the room: same stage, entities reset, player kept.
+    const beforeReload=command({op:'snapshot'});
+    const beforeEpoch=beforeReload.epoch;
+    let reloaded=command({op:'reload_room'});
+    assert.equal(room,reloaded.stage.id,'reload_room changed the stage');
+    assert.equal(beforeEpoch+1,reloaded.epoch,'reload_room did not rebuild the scene');
+    assert.equal(true,reloaded.player.alive,'reload_room killed the player');
     e.cave_destroy(handle);
-    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,reject_stale:true,reject_bounds:true,session_reload:true,repair_room:true,session_commit:true,off_volatile:true,persistent_autosave:true,new_clears:true}));
+    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,reject_stale:true,reject_bounds:true,session_reload:true,repair_room:true,reload_room:true,session_commit:true,off_volatile:true,persistent_autosave:true,new_clears:true}));
     process.exit(0);
 }
 if(process.env.CAVERARRIA_SILENT_AUDIO_TEST){

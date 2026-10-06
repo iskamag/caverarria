@@ -18,7 +18,7 @@ internal static class CampaignFurniture
     private sealed record FurnitureFile(int Version, int Subdivisions, Furniture[] Objects);
     private static readonly Dictionary<(int stage, int x, int y), Furniture> furniture = new();
     private static string? loadedPath;
-    private static bool persistenceEnabled = true;
+    private static TerrainPersistence persistence = TerrainPersistence.Session;
     private static int Stage => CampaignRuntime.Snapshot.Field("stage").Integer("id");
     private static string MetadataPath => Path.Combine(CampaignBootstrap.SavePath, FileName);
     private static void EnsureLoaded()
@@ -39,20 +39,34 @@ internal static class CampaignFurniture
     }
     private static void Save(bool force = false)
     {
-        if (!force && !persistenceEnabled) return;
+        if (!force && persistence == TerrainPersistence.Off) return;
         Directory.CreateDirectory(CampaignBootstrap.SavePath);
         string temporary = MetadataPath + ".tmp";
         File.WriteAllText(temporary, JsonSerializer.Serialize(new FurnitureFile(2, 2, furniture.Values.ToArray())));
         File.Move(temporary, MetadataPath, true);
     }
-    public static void ClearSession() { furniture.Clear(); drawPieces.Clear(); loadedPath = null; persistenceEnabled = true; CampaignTilePixels.DisposeFrames(); }
+    public static void ClearSession() { furniture.Clear(); drawPieces.Clear(); loadedPath = null; persistence = TerrainPersistence.Session; CampaignTilePixels.DisposeFrames(); }
     public static void ClearNewGame() { EnsureLoaded(); furniture.Clear(); Save(force: true); }
     public static void ReloadSaved() { furniture.Clear(); loadedPath = null; EnsureLoaded(); }
-    public static void SyncPersistence(bool enabled)
+    public static void SyncPersistence(TerrainPersistence mode)
     {
-        if (persistenceEnabled == enabled) return;
-        persistenceEnabled = enabled;
-        if (enabled) { EnsureLoaded(); Refresh(); Save(); }
+        if (persistence == mode) return;
+        // Off blocks are never authoritative, so returning from Off reloads the file.
+        bool wasOff = persistence == TerrainPersistence.Off;
+        bool loaded = loadedPath != null;
+        persistence = mode;
+        if (mode == TerrainPersistence.Off) { loadedPath = null; furniture.Clear(); drawPieces.Clear(); }
+        else if (loaded && !wasOff) { Refresh(); Save(); }
+        else { loadedPath = null; furniture.Clear(); drawPieces.Clear(); EnsureLoaded(); Refresh(); }
+    }
+    /// <summary>Commits current furniture as the checkpoint baseline for Session mode.</summary>
+    public static void MarkSaved() { if (persistence == TerrainPersistence.Session) Save(force: true); }
+    /// <summary>Drops a stage's furniture after the engine restores its authored room.</summary>
+    public static void ForgetStage(int stage)
+    {
+        EnsureLoaded();
+        foreach (var key in furniture.Keys.Where(key => key.stage == stage).ToArray()) furniture.Remove(key);
+        Refresh(); Save(force: true);
     }
     private static int TileType(Furniture item) => item.TileName == null ? item.Tile
         : ModContent.TryFind<ModTile>(item.TileName, out var tile) ? tile.Type : -1;

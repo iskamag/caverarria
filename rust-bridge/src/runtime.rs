@@ -42,7 +42,10 @@ pub struct Runtime {
     map_hash: u64,
     terrain: BTreeMap<usize, BTreeMap<usize, u16>>,
     saved_terrain: BTreeMap<usize, BTreeMap<usize, u16>>,
-    terrain_persistent: bool,
+    // 0 = Persistent (auto-saved), 1 = Session (checkpointed only), 2 = Off.
+    terrain_persistence: u8,
+    terrain_dirty: bool,
+    terrain_saved_at: u64,
     force_position: bool,
     force_velocity: bool,
     life_delta: i32,
@@ -154,7 +157,9 @@ impl Runtime {
             map_hash: 0,
             saved_terrain: terrain.clone(),
             terrain,
-            terrain_persistent: true,
+            terrain_persistence: 1,
+            terrain_dirty: false,
+            terrain_saved_at: 0,
             force_position: true,
             force_velocity: true,
             life_delta: 0,
@@ -176,6 +181,43 @@ impl Runtime {
         file.write_all(&bytes).map_err(err)?;
         file.flush().map_err(err)?;
         self.saved_terrain = self.terrain.clone();
+        self.terrain_dirty = false;
+        self.terrain_saved_at = crate::cavebridge::portable::timestamp();
+        Ok(())
+    }
+    /// Persist a pending Persistent-mode edit at most once a second, so breaking
+    /// many blocks does not flush the save store on every block.
+    fn save_terrain(&mut self) -> Result<(), String> {
+        if self.terrain_persistence == 0 && self.terrain_dirty
+            && crate::cavebridge::portable::timestamp() != self.terrain_saved_at
+        {
+            self.persist_terrain()?;
+        }
+        Ok(())
+    }
+    /// Discard edits not committed to the last checkpoint. Used when a room
+    /// reloads (death, retry, room transfer) in Session or Off modes.
+    fn revert_terrain(&mut self) {
+        if self.terrain_persistence == 0 {
+            return;
+        }
+        self.terrain = self.saved_terrain.clone();
+        self.terrain_dirty = false;
+    }
+    /// Restore the authored room: drop all edits for the current stage.
+    fn repair_room(&mut self) -> Result<(), String> {
+        let stage = match downcast::Downcast::<GameScene>::downcast_ref(&*self.scene) {
+            Ok(game) => game.stage_id,
+            Err(_) => return Ok(()),
+        };
+        self.terrain.remove(&stage);
+        // Drop the checkpoint baseline too, so a later reload does not restore it.
+        self.saved_terrain.remove(&stage);
+        self.terrain_dirty = true;
+        self.apply_terrain();
+        if self.terrain_persistence == 0 {
+            self.persist_terrain()?;
+        }
         Ok(())
     }
     pub fn pixels(&self, layer: usize) -> *const u8 {
@@ -206,7 +248,12 @@ impl Runtime {
             self.map_hash = 0;
             changed = true;
         }
-        if changed { self.apply_terrain(); }
+        if changed {
+            // A room transfer is a reload: in Session/Off modes the new room
+            // starts from the last checkpoint, not the abandoned edits.
+            self.revert_terrain();
+            self.apply_terrain();
+        }
         Ok(changed)
     }
     pub fn command(&mut self, input: &str) -> Result<String, String> {
@@ -256,22 +303,37 @@ impl Runtime {
                 }
             }
             "new" => {
+                // A fresh campaign has no terrain edits; clear both the live
+                // edits and the checkpoint so the transition's revert cannot
+                // bring them back.
                 self.terrain.clear();
+                self.saved_terrain.clear();
+                self.terrain_dirty = false;
                 self.persist_terrain()?;
+                self.apply_terrain();
                 self.state.start_new_game(&mut self.ctx).map_err(err)?;
                 changed = self.transitions()?;
             }
             "load" | "retry" => {
-                if !self.terrain_persistent { self.terrain = self.saved_terrain.clone(); }
+                self.revert_terrain();
+                self.apply_terrain();
                 self.state.load_or_start_game(&mut self.ctx).map_err(err)?;
                 changed = self.transitions()?;
             }
             "save" => {
+                // A campaign save commits the room's terrain to the checkpoint
+                // in Session mode; Off never records it.
+                if self.terrain_persistence == 1 {
+                    self.persist_terrain()?;
+                }
                 let game = downcast::Downcast::<GameScene>::downcast_mut(&mut *self.scene)
                     .map_err(|_| "No game scene")?;
                 self.state
                     .save_game(game, &mut self.ctx, None)
                     .map_err(err)?;
+            }
+            "repair_room" => {
+                self.repair_room()?;
             }
             "hit" => {
                 if v["epoch"].as_u64().unwrap_or(self.epoch) == self.epoch {
@@ -291,9 +353,35 @@ impl Runtime {
                 }
             }
             "terrain_persistence" => {
-                let enabled = v["enabled"].as_bool().ok_or("Terrain persistence requires enabled")?;
-                if enabled && !self.terrain_persistent { self.persist_terrain()?; }
-                self.terrain_persistent = enabled;
+                // mode: 0 = Persistent, 1 = Session, 2 = Off.
+                let mode = v["mode"].as_u64().unwrap_or_else(|| v["enabled"].as_bool().map(|e| if e { 0 } else { 2 }).unwrap_or(1)) as u8;
+                if mode > 2 {
+                    return Err("Terrain persistence mode out of range".into());
+                }
+                let was_persistent = self.terrain_persistence == 0;
+                self.terrain_persistence = mode;
+                match mode {
+                    // Persistent commits the current edits; Session makes them
+                    // the checkpoint baseline; Off ignores saved terrain entirely.
+                    0 => {
+                        if !was_persistent {
+                            self.persist_terrain()?;
+                        }
+                    }
+                    1 => {
+                        self.saved_terrain = self.terrain.clone();
+                        self.terrain_dirty = false;
+                    }
+                    _ => {
+                        self.saved_terrain = BTreeMap::new();
+                        self.terrain = BTreeMap::new();
+                        self.terrain_dirty = false;
+                        // Drop stale saved terrain so a later return to
+                        // Persistent starts from the authored room.
+                        self.persist_terrain()?;
+                        self.apply_terrain();
+                    }
+                }
             }
             "terrain_edit" => {
                 let epoch = v["epoch"].as_u64().ok_or("Terrain edit requires epoch")?;
@@ -322,7 +410,7 @@ impl Runtime {
                         _ => return Err("Terrain subcell requires sub_x and sub_y in 0..2".into()),
                     };
                     self.terrain.entry(stage).or_default().insert(index, mask);
-                    if self.terrain_persistent { self.persist_terrain()?; }
+                    self.terrain_dirty = true;
                     self.apply_terrain();
                     terrain_accepted = true;
                 }
@@ -587,9 +675,13 @@ impl Runtime {
             draw_result.map_err(err)?;
         }
         let mut result = self.snapshot(changed)?;
+        // Batch the terrain write to one save per command instead of one per
+        // broken block.
+        self.save_terrain()?;
         result["hit_accepted"] = json!(hit_accepted);
         result["terrain_edit_accepted"] = json!(terrain_accepted);
-        result["terrain_persistent"] = json!(self.terrain_persistent);
+        result["terrain_persistence"] = json!(self.terrain_persistence);
+        result["terrain_dirty"] = json!(self.terrain_dirty);
         result["terrain_layout_version"] = json!(2);
         if op == "tile_hit" { result["tile_hit_flags"] = json!(tile_hit_flags); }
         Ok(result.to_string())

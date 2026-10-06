@@ -101,3 +101,18 @@ public sealed class CampaignCommand : ModCommand
         }
     }
 }
+
+/// <summary>Restores the authored current room, discarding its terrain edits.</summary>
+public sealed class RepairRoomCommand : ModCommand
+{
+    public override string Command => "repair_room";
+    public override CommandType Type => CommandType.Chat;
+    public override string Usage => "/repair_room";
+    public override string Description => "Restore the current Cave Story room to its authored terrain.";
+
+    public override void Action(CommandCaller caller, string input, string[] args)
+    {
+        if (!CampaignRuntime.Active) { caller.Reply("The campaign is not running."); return; }
+        caller.Reply(CampaignRuntime.RepairRoom() ? "Room repaired." : "No room to repair.");
+    }
+}

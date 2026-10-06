@@ -139,6 +139,8 @@ if(process.env.CAVERARRIA_MICRO_TERRAIN_TEST){
     assert.ok(command({op:'tile_hit',x:left+12,y:top+12,width:1,height:1}).tile_hit_flags&512,'bottom-right 2x2 subtile missed');
     assert.equal(0,command({op:'tile_hit',x:left+2,y:top+2,width:1,height:1}).tile_hit_flags&512,'removed subtile remained solid');
     assert.throws(()=>edit(x,y,true,{sub_x:2,sub_y:0}),/Terrain subcell/);
+    // Session mode commits to the checkpoint on a campaign save.
+    command({op:'save'});
     const terrainFile=string('/Terrain.json');
     const terrainDocument=JSON.parse(decode.decode(new Uint8Array(e.memory.buffer,e.cave_fs_get(terrainFile,1),e.cave_fs_len(terrainFile,1))));
     assert.equal(2,terrainDocument.version);assert.equal(2,terrainDocument.subdivisions);assert.equal(8,terrainDocument.stages[room][idx]);
@@ -171,19 +173,31 @@ if(process.env.CAVERARRIA_TERRAIN_TEST){
     assert.ok(idx>=0,'fixture room has no genuine solid cell');
     const x=idx%width,y=Math.floor(idx/width);
     const edit=(snapshot,solid,extra={})=>command({op:'terrain_edit',epoch:snapshot.epoch,stage:room,x,y,solid,...extra});
+    // Default is Session: edits live until the room reloads; a save commits them.
+    assert.equal(1,initial.terrain_persistence,'default mode is not Session');
+    // Session edits must not flush the save store (the freeze when breaking blocks).
+    const revisionBefore=e.cave_fs_revision(1);
     let mined=edit(initial,false);
+    const revisionAfter=e.cave_fs_revision(1);
+    assert.equal(revisionBefore,revisionAfter,'Session edit wrote to the save store');
     assert.equal(true,mined.terrain_edit_accepted);assert.equal(0,mined.map.cell_attributes[idx]);
-    let placed=edit(mined,true);
-    assert.equal(true,placed.terrain_edit_accepted);assert.equal(0x41,placed.map.cell_attributes[idx]);
-    assert.equal(false,edit(placed,false,{epoch:placed.epoch+1}).terrain_edit_accepted);
-    assert.equal(false,edit(placed,false,{stage:room+1}).terrain_edit_accepted);
-    assert.equal(false,edit(placed,false,{x:width}).terrain_edit_accepted);
+    assert.equal(false,edit(mined,false,{epoch:mined.epoch+1}).terrain_edit_accepted);
+    assert.equal(false,edit(mined,false,{stage:room+1}).terrain_edit_accepted);
+    assert.equal(false,edit(mined,false,{x:width}).terrain_edit_accepted);
     command({op:'warp',stage:(room+1)%95});
     let returned=command({op:'warp',stage:room});
-    assert.equal(0x41,returned.map.cell_attributes[idx]);
-    mined=edit(returned,false);command({op:'save'});
+    assert.equal(0x41,returned.map.cell_attributes[idx],'session edit survived a room reload');
+    // /repair_room restores the authored room and drops the checkpoint baseline.
+    let repaired=edit(returned,false);assert.equal(0,repaired.map.cell_attributes[idx]);
+    command({op:'save'});
+    command({op:'repair_room'});
+    returned=command({op:'retry'});
+    assert.equal(0x41,returned.map.cell_attributes[idx],'repair_room left a saved edit');
+    // A campaign save commits a Session edit.
+    mined=edit(returned,false);assert.equal(0,mined.map.cell_attributes[idx]);
+    command({op:'save'});
     let retried=command({op:'retry'});
-    assert.equal(room,retried.stage.id);assert.equal(0,retried.map.cell_attributes[idx]);
+    assert.equal(0,retried.map.cell_attributes[idx],'saved session edit did not survive reload');
     const list=JSON.parse(read(e.cave_fs_list(1)));
     assert.ok(list.includes('/terrain.json'));
     e.cave_destroy(handle);
@@ -191,26 +205,31 @@ if(process.env.CAVERARRIA_TERRAIN_TEST){
     assert.ok(handle,read(e.cave_last_error()));
     let recreated=command({op:'snapshot'});
     assert.equal(room,recreated.stage.id);assert.equal(0,recreated.map.cell_attributes[idx]);
-    assert.equal(false,command({op:'terrain_persistence',enabled:false}).terrain_persistent);
+    // Off never records terrain, even across a save.
+    assert.equal(2,command({op:'terrain_persistence',mode:2}).terrain_persistence,'Off mode not set');
     const beforePolicy=string('/Terrain.json');
     const persisted=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(beforePolicy,1),e.cave_fs_len(beforePolicy,1)));
-    placed=edit(recreated,true);assert.equal(0x41,placed.map.cell_attributes[idx]);
+    let placed=edit(recreated,true);assert.equal(0x41,placed.map.cell_attributes[idx]);
+    command({op:'save'});
     const volatileBytes=Buffer.from(new Uint8Array(e.memory.buffer,e.cave_fs_get(beforePolicy,1),e.cave_fs_len(beforePolicy,1)));
-    assert.deepEqual(persisted,volatileBytes,'disabled edit modified persistent terrain');
+    assert.deepEqual(persisted,volatileBytes,'Off-mode edit modified persistent terrain');
     command({op:'warp',stage:(room+1)%95});returned=command({op:'warp',stage:room});
-    assert.equal(0x41,returned.map.cell_attributes[idx]);
-    retried=command({op:'retry'});assert.equal(0,retried.map.cell_attributes[idx]);
-    placed=edit(retried,true);
-    assert.equal(true,command({op:'terrain_persistence',enabled:true}).terrain_persistent);
+    assert.equal(0x41,returned.map.cell_attributes[idx],'Off-mode edit survived a room reload');
+    retried=command({op:'retry'});assert.equal(0x41,retried.map.cell_attributes[idx]);
+    // Persistent auto-saves (throttled) and survives reloads.
+    assert.equal(0,command({op:'terrain_persistence',mode:0}).terrain_persistence,'Persistent mode not set');
+    placed=edit(retried,true);assert.equal(0x41,placed.map.cell_attributes[idx]);
+    e.cave_set_time(1790800100n); // advance the throttle window
+    command({op:'snapshot'});
     e.cave_destroy(handle);
     const again=string('');handle=e.cave_create(again,again,320,240);e.cave_free(again,1);
     assert.ok(handle,read(e.cave_last_error()));
-    assert.equal(0x41,command({op:'snapshot'}).map.cell_attributes[idx],'enabling persistence failed to save current edits');
+    assert.equal(0x41,command({op:'snapshot'}).map.cell_attributes[idx],'Persistent edit was not auto-saved');
     e.cave_free(beforePolicy,encode.encode('/Terrain.json\0').length);
     let fresh=command({op:'new'});
-    assert.equal(0,fresh.map.terrain_edits.length);
+    assert.equal(0,fresh.map.terrain_edits.length,'new game kept terrain edits');
     e.cave_destroy(handle);
-    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,placement:true,reject_stale:true,reject_bounds:true,room_transfer:true,retry:true,recreate:true,new_clears:true,volatile_room_transfer:true,volatile_retry_restores:true,reenable_saves:true}));
+    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,reject_stale:true,reject_bounds:true,session_reload:true,repair_room:true,session_commit:true,off_volatile:true,persistent_autosave:true,new_clears:true}));
     process.exit(0);
 }
 if(process.env.CAVERARRIA_SILENT_AUDIO_TEST){

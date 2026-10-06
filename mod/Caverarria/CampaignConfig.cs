@@ -42,11 +42,22 @@ public sealed class CampaignViewConfig : ModConfig
     [DefaultValue(false)]
     public bool TerrariaSizedBlocks;
 
-    [Header("Save"), DefaultValue(true)]
-    public bool PersistentTerrainEdits = true;
+    [Header("Save"), DefaultValue(TerrainPersistence.Session)]
+    public TerrainPersistence TerrainEdits = TerrainPersistence.Session;
 
     [JsonIgnore, ShowDespiteJsonIgnore, CustomModConfigItem(typeof(CampaignResetElement))]
     public bool ResetCurrentCampaign;
+}
+
+/// <summary>How mining, placed blocks and furniture survive room reloads and saves.</summary>
+public enum TerrainPersistence
+{
+    /// <summary>Auto-saved as you edit; survives everything.</summary>
+    Persistent,
+    /// <summary>Lasts until the room reloads; a campaign save commits it.</summary>
+    Session,
+    /// <summary>Never saved; reloading always restores the authored room.</summary>
+    Off,
 }
 
 /// <summary>An immediate action, never a saved configuration value.</summary>

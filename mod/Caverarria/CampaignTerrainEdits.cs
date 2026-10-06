@@ -21,21 +21,36 @@ internal static class CampaignTerrainEdits
     private static int[] currentCellAttributes = [];
     private static string? loadedPath;
     private static bool editing;
-    private static bool persistenceEnabled = true;
+    private static TerrainPersistence persistence = TerrainPersistence.Session;
     private static string MetadataPath => Path.Combine(CampaignBootstrap.SavePath, FileName);
     private static bool SmallBlocks => ModContent.GetInstance<CampaignViewConfig>().TerrariaSizedBlocks;
     private static int Stage => CampaignRuntime.Snapshot.Field("stage").Integer("id");
 
-    public static void ClearSession() { loadedPath = null; blocks.Clear(); activeSolid.Clear(); currentCellAttributes = []; editing = false; persistenceEnabled = true; }
+    public static void ClearSession() { loadedPath = null; blocks.Clear(); activeSolid.Clear(); currentCellAttributes = []; editing = false; persistence = TerrainPersistence.Session; }
     public static void ClearNewGame()
     {
         EnsureLoaded(); blocks.Clear(); activeSolid.Clear(); Save(force: true);
     }
-    public static void SyncPersistence(bool enabled)
+    public static void SyncPersistence(TerrainPersistence mode)
     {
-        if (persistenceEnabled == enabled) return;
-        persistenceEnabled = enabled;
-        if (enabled) { EnsureLoaded(); Save(); }
+        if (persistence == mode) return;
+        // Off blocks are never authoritative, so returning from Off reloads the
+        // file instead of committing them.
+        bool wasOff = persistence == TerrainPersistence.Off;
+        bool loaded = loadedPath != null;
+        persistence = mode;
+        if (mode == TerrainPersistence.Off) { loadedPath = null; blocks.Clear(); activeSolid.Clear(); }
+        else if (loaded && !wasOff) { Save(); }
+        else { loadedPath = null; blocks.Clear(); activeSolid.Clear(); EnsureLoaded(); }
+    }
+    /// <summary>Commits current edits as the checkpoint baseline for Session mode.</summary>
+    public static void MarkSaved() { if (persistence == TerrainPersistence.Session) Save(force: true); }
+    /// <summary>Drops a stage's edits after the engine restores its authored room.</summary>
+    public static void ForgetStage(int stage)
+    {
+        EnsureLoaded();
+        foreach (var key in blocks.Keys.Where(key => key.stage == stage).ToArray()) blocks.Remove(key);
+        Save(force: true);
     }
     public static void ReloadSaved()
     {
@@ -46,7 +61,7 @@ internal static class CampaignTerrainEdits
         string path = MetadataPath;
         if (loadedPath == path) return;
         blocks.Clear();
-        if (File.Exists(path))
+        if (persistence != TerrainPersistence.Off && File.Exists(path))
         {
             var file = JsonSerializer.Deserialize<TerrainFile>(File.ReadAllText(path))
                 ?? throw new InvalidDataException("Invalid terrain block file.");
@@ -63,7 +78,7 @@ internal static class CampaignTerrainEdits
     }
     private static void Save(bool force = false)
     {
-        if (!force && !persistenceEnabled) return;
+        if (!force && persistence == TerrainPersistence.Off) return;
         Directory.CreateDirectory(CampaignBootstrap.SavePath);
         string temporary = MetadataPath + ".tmp";
         File.WriteAllText(temporary, JsonSerializer.Serialize(new TerrainFile(LayoutVersion, Subdivisions, blocks.Values.ToArray())));

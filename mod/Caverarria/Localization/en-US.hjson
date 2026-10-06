@@ -56,6 +56,28 @@ Mods: {
 					Tooltip: When enabled, mining, placed blocks and furniture survive retry and re-entry. When disabled, new edits last only until retry or leaving the world; already saved edits are preserved. Enabling this saves your current edits.
 				}
 
+				TerrainEdits: {
+					Label: Terrain persistence
+					Tooltip: Persistent: edits are saved as you make them and survive everything. Session: edits last until the room reloads (death, retry, re-entry); a campaign save commits them. Off: edits are never saved, so reloading always restores the authored room.
+				}
+
+				TerrainPersistence: {
+					Persistent: {
+						Label: Persistent
+						Tooltip: Edits are saved immediately and survive reloads.
+					}
+
+					Session: {
+						Label: Session
+						Tooltip: Edits last until the room reloads; a campaign save commits them.
+					}
+
+					Off: {
+						Label: Off
+						Tooltip: Edits are never saved; reloading restores the authored room.
+					}
+				}
+
 				ResetCurrentCampaign: {
 					Label: Reset this world's Cave Story save
 					Tooltip: Restarts this world's campaign and backs up its checkpoint. Requires confirmation in a running Cave Story world.
@@ -74,6 +96,25 @@ Mods: {
 				PlayerBodyScale: {
 					Label: Player body size
 					Tooltip: Scales your character and body collision together. Terrain can be mined to open tight passages; world pixels stay on the campaign grid.
+				}
+			}
+
+			TerrainPersistence: {
+				Tooltip: ""
+
+				Persistent: {
+					Label: Persistent
+					Tooltip: ""
+				}
+
+				Session: {
+					Label: Session
+					Tooltip: ""
+				}
+
+				Off: {
+					Label: Off
+					Tooltip: ""
 				}
 			}
 		}

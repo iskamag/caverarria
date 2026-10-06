@@ -69,11 +69,12 @@ internal static class FurnitureChecks
             }
             check(dataLayout(path), "furniture save did not identify its host/native geometry version");
             check(!File.Exists(path + ".tmp"), "furniture atomic write left its temporary file");
-            CampaignFurniture.SyncPersistence(false);
+            CampaignFurniture.SyncPersistence(TerrainPersistence.Off);
             metadata.Clear();
             typeof(CampaignFurniture).GetMethod("Save", BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null, new object[] { false });
             check(JsonDocument.Parse(File.ReadAllText(path)).RootElement.GetProperty("Objects").GetArrayLength() == 2,
                 "volatile furniture changes replaced saved baseline");
+            CampaignFurniture.SyncPersistence(TerrainPersistence.Session);
             CampaignFurniture.ReloadSaved();
             check(metadata.Count == 2, "retry failed to restore saved furniture metadata");
             bool fail = false, noItem = false, effectOnly = false;
@@ -82,9 +83,9 @@ internal static class FurnitureChecks
                 "ordinary furniture mining modified guest terrain or suppressed vanilla item drop");
             // The fixture engine throws on Send: reaching here also proves cake
             // mining never issued a native terrain collision mutation.
-            metadata.Clear(); CampaignFurniture.SyncPersistence(true);
+            metadata.Clear(); CampaignFurniture.SyncPersistence(TerrainPersistence.Persistent);
             check(JsonDocument.Parse(File.ReadAllText(path)).RootElement.GetProperty("Objects").GetArrayLength() == 0, "enabling persistence failed to save current furniture state");
-            CampaignFurniture.ReloadSaved(); CampaignFurniture.SyncPersistence(false); CampaignFurniture.ClearNewGame();
+            CampaignFurniture.ReloadSaved(); CampaignFurniture.SyncPersistence(TerrainPersistence.Off); CampaignFurniture.ClearNewGame();
             check(JsonDocument.Parse(File.ReadAllText(path)).RootElement.GetProperty("Objects").GetArrayLength() == 0, "fresh campaign retained furniture from an old run");
             CampaignFurniture.ClearSession();
             File.WriteAllText(path, "[]");

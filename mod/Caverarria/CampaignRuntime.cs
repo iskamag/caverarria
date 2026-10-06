@@ -39,7 +39,7 @@ internal static class CampaignRuntime
     private static bool SeparateInterface => Snapshot.Integer("render_layers", 2) >= 3;
     private static bool imageDirty;
     private static float musicVolume = float.NaN, soundVolume = float.NaN;
-    private static bool? terrainPersistence;
+    private static TerrainPersistence? terrainPersistence;
     private static CampaignAudio? audio;
     public static bool HostAudioPlaying => audio?.Playing == true;
     public static long HostAudioFrames => audio?.SubmittedFrames ?? 0;
@@ -526,12 +526,12 @@ internal static class CampaignRuntime
     }
     private static void SyncTerrainPersistence()
     {
-        bool enabled = ModContent.GetInstance<CampaignViewConfig>().PersistentTerrainEdits;
-        if (terrainPersistence == enabled) return;
-        Snapshot = Engine!.Send(new { op = "terrain_persistence", enabled });
-        CampaignTerrainEdits.SyncPersistence(enabled);
-        CampaignFurniture.SyncPersistence(enabled);
-        terrainPersistence = enabled;
+        TerrainPersistence mode = ModContent.GetInstance<CampaignViewConfig>().TerrainEdits;
+        if (terrainPersistence == mode) return;
+        Snapshot = Engine!.Send(new { op = "terrain_persistence", mode = (int)mode });
+        CampaignTerrainEdits.SyncPersistence(mode);
+        CampaignFurniture.SyncPersistence(mode);
+        terrainPersistence = mode;
     }
 
     private static void SyncAudio()
@@ -569,6 +569,7 @@ internal static class CampaignRuntime
         if (Snapshot.Text("scene") == "game" && Snapshot.Field("player").Boolean("alive") && !Main.LocalPlayer.dead)
             Snapshot = Engine!.Send(new { op = "save" });
         Player.SavePlayer(Main.ActivePlayerFileData, true);
+        if (terrainPersistence == TerrainPersistence.Session) { CampaignTerrainEdits.MarkSaved(); CampaignFurniture.MarkSaved(); }
         WriteStatus();
     }
 
@@ -605,9 +606,19 @@ internal static class CampaignRuntime
     public static void Retry()
     {
         if (!Active) return;
-        if (terrainPersistence == false) { CampaignTerrainEdits.ReloadSaved(); CampaignFurniture.ReloadSaved(); }
+        if (terrainPersistence != TerrainPersistence.Persistent) { CampaignTerrainEdits.ReloadSaved(); CampaignFurniture.ReloadSaved(); }
         Snapshot = Engine!.Send(new { op = "retry" });
         ApplySnapshot(true, checkpointReload: true); imageDirty = true;
+    }
+    /// <summary>Restores the authored room, discarding edits to the current stage.</summary>
+    public static bool RepairRoom()
+    {
+        if (!Active) return false;
+        Snapshot = Engine!.Send(new { op = "repair_room" });
+        CampaignTerrainEdits.ForgetStage(Snapshot.Field("stage").Integer("id"));
+        CampaignFurniture.ForgetStage(Snapshot.Field("stage").Integer("id"));
+        ApplySnapshot(false); imageDirty = true;
+        return true;
     }
     public static void TestCommand(string command)
     {

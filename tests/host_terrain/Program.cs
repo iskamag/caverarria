@@ -108,26 +108,32 @@ try
     var dictionary = (System.Collections.IDictionary)typeof(CampaignTerrainEdits).GetField("blocks", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
     Check(dictionary.Values.Cast<object>().All(b => (int)b.GetType().GetProperty("SubX")!.GetValue(b)! == -1
         && (int)b.GetType().GetProperty("SubY")!.GetValue(b)! == -1), "version 2 whole-cell metadata has explicit whole-cell identity");
-    CampaignTerrainEdits.SyncPersistence(false);
+    CampaignTerrainEdits.SyncPersistence(TerrainPersistence.Off);
     dictionary.Clear(); // Represents mining saved placed blocks during a volatile session.
     typeof(CampaignTerrainEdits).GetMethod("Save", BindingFlags.Static | BindingFlags.NonPublic)!.Invoke(null, new object[] { false });
     using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
-        Check(data.RootElement.GetProperty("Blocks").GetArrayLength() == 2, "disabled persistence preserves saved metadata baseline");
+        Check(data.RootElement.GetProperty("Blocks").GetArrayLength() == 2, "Off mode preserves the saved metadata baseline");
+    // Off mode ignores saved terrain entirely on reload.
     CampaignTerrainEdits.ReloadSaved();
-    Check(dictionary.Count == 2, "retry restores saved metadata and discards volatile changes");
+    Check(dictionary.Count == 0, "Off mode reload ignores saved terrain");
+    // Session mode reloads the committed baseline and discards volatile changes.
+    CampaignTerrainEdits.SyncPersistence(TerrainPersistence.Session);
+    CampaignTerrainEdits.ReloadSaved();
+    Check(dictionary.Count == 2, "session reload restores saved metadata and discards volatile changes");
     dictionary.Clear();
-    CampaignTerrainEdits.SyncPersistence(true);
+    CampaignTerrainEdits.SyncPersistence(TerrainPersistence.Persistent);
     Check(File.ReadAllText(metadata) == Metadata("[]"), "enabling persistence saves current session changes");
     File.WriteAllText(metadata, Metadata("[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0}]"));
     CampaignTerrainEdits.ReloadSaved();
-    CampaignTerrainEdits.SyncPersistence(false);
-    Check(new CampaignViewConfig().PersistentTerrainEdits, "terrain persistence defaults enabled");
+    CampaignTerrainEdits.SyncPersistence(TerrainPersistence.Off);
+    Check(new CampaignViewConfig().TerrainEdits == TerrainPersistence.Session, "terrain persistence defaults to Session");
     CampaignTerrainEdits.ClearNewGame();
     Check(File.ReadAllText(metadata) == Metadata("[]"), "fresh campaign removes obsolete placed item metadata");
     File.WriteAllText(metadata, Metadata("[{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":1,\"Item\":1,\"Style\":0,\"FrameX\":18,\"FrameY\":0,\"SubX\":0,\"SubY\":1},{\"Stage\":3,\"X\":2,\"Y\":4,\"Tile\":0,\"Item\":2,\"Style\":0,\"FrameX\":0,\"FrameY\":0,\"SubX\":1,\"SubY\":1}]"));
+    CampaignTerrainEdits.SyncPersistence(TerrainPersistence.Session);
     CampaignTerrainEdits.ReloadSaved();
     Check(dictionary.Count == 2, "different small block item identities coexist in one native cell");
-    CampaignTerrainEdits.SyncPersistence(true);
+    CampaignTerrainEdits.SyncPersistence(TerrainPersistence.Persistent);
     using (var data = JsonDocument.Parse(File.ReadAllText(metadata)))
         Check(data.RootElement.GetProperty("Blocks")[0].GetProperty("SubX").GetInt32() != data.RootElement.GetProperty("Blocks")[1].GetProperty("SubX").GetInt32(),
             "small block subcell identities survive metadata round trip");

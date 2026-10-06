@@ -235,8 +235,37 @@ if(process.env.CAVERARRIA_TERRAIN_TEST){
     assert.equal(room,reloaded.stage.id,'reload_room changed the stage');
     assert.equal(beforeEpoch+1,reloaded.epoch,'reload_room did not rebuild the scene');
     assert.equal(true,reloaded.player.alive,'reload_room killed the player');
+    // Entities reset to their authored spawn, not the positions they drifted to.
+    const cave=initial.stages.findIndex(s=>s.map==='Cave');
+    let scene=command({op:'warp',stage:cave,x:10,y:10});
+    const spawned=scene.npcs.filter(n=>n.shootable);
+    assert.ok(spawned.length>0,'fixture room has no enemies');
+    // A kill-once enemy (like NPC 175) legitimately stays dead; use one that a
+    // real warp-away-and-back revives, so reload_room must match that.
+    let victim=null;
+    for(const cand of spawned){
+        command({op:'hit',id:cand.id,boss:false,generation:cand.generation,damage:32767});
+        command({op:'warp',stage:(cave+1)%95,x:10,y:10});
+        const re=command({op:'warp',stage:cave,x:10,y:10}).npcs.find(n=>n.id===cand.id);
+        if(re&&re.life>0){victim=cand;break;}
+    }
+    assert.ok(victim,'fixture room has no respawning enemy');
+    command({op:'hit',id:victim.id,boss:false,generation:victim.generation,damage:32767});
+    for(let i=0;i<60;i++)scene=command({op:'tick',controls:0,player:{x:10,y:10,vx:0,vy:0}});
+    let back=command({op:'reload_room'});
+    const revived=back.npcs.find(n=>n.id===victim.id);
+    assert.ok(revived&&revived.life>0,'reload_room did not revive a killed entity');
+    // A checkpoint load must not become the room entry for /reload_room.
+    command({op:'tick',controls:0,player:{x:50,y:50,vx:0,vy:0}});
+    command({op:'save'});
+    command({op:'tick',controls:0,player:{x:120,y:90,vx:0,vy:0}});
+    const door=command({op:'reload_room'}).player;
+    assert.equal(10,Math.round(door.x),'reload_room used the save X, not the door entry');
+    command({op:'retry'});
+    const afterRetry=command({op:'reload_room'}).player;
+    assert.equal(10,Math.round(afterRetry.x),'reload_room followed the checkpoint instead of the door');
     e.cave_destroy(handle);
-    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,reject_stale:true,reject_bounds:true,session_reload:true,repair_room:true,reload_room:true,session_commit:true,off_volatile:true,persistent_autosave:true,new_clears:true}));
+    console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,reject_stale:true,reject_bounds:true,session_reload:true,repair_room:true,reload_room:true,reload_entities:true,reload_door_entry:true,session_commit:true,off_volatile:true,persistent_autosave:true,new_clears:true}));
     process.exit(0);
 }
 if(process.env.CAVERARRIA_SILENT_AUDIO_TEST){

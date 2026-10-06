@@ -47,9 +47,10 @@ pub struct Runtime {
     terrain_persistence: u8,
     terrain_dirty: bool,
     terrain_saved_at: u64,
-    // Room entry point, recorded on each load, for /reload_room.
-    last_stage: usize,
-    last_entry: (i32, i32),
+    // Door entry per stage, for /reload_room. Only genuine room changes
+    // (a door transfer or the initial spawn) record here, never a save load.
+    entries: BTreeMap<usize, (i32, i32)>,
+    checkpoint_load: bool,
     force_position: bool,
     force_velocity: bool,
     life_delta: i32,
@@ -164,8 +165,8 @@ impl Runtime {
             terrain_persistence: 1,
             terrain_dirty: false,
             terrain_saved_at: 0,
-            last_stage: usize::MAX,
-            last_entry: (0, 0),
+            entries: BTreeMap::new(),
+            checkpoint_load: false,
             force_position: true,
             force_velocity: true,
             life_delta: 0,
@@ -226,11 +227,14 @@ impl Runtime {
         }
         Ok(())
     }
-    /// Remember where the current room was entered, for /reload_room.
+    /// Remember where a stage was entered, for /reload_room. A checkpoint load
+    /// restores the save position, which is not a door entry, so it is skipped.
     fn record_entry(&mut self) {
+        if self.checkpoint_load {
+            return;
+        }
         if let Ok(game) = downcast::Downcast::<GameScene>::downcast_ref(&*self.scene) {
-            self.last_stage = game.stage_id;
-            self.last_entry = (game.player1.x, game.player1.y);
+            self.entries.entry(game.stage_id).or_insert((game.player1.x, game.player1.y));
         }
     }
     /// Re-enter the current room as if arriving through its door: rebuild the
@@ -241,7 +245,7 @@ impl Runtime {
             Ok(game) => (game.stage_id, game.player1.clone(), game.inventory_player1.clone()),
             Err(_) => return Ok(()),
         };
-        let (entry_x, entry_y) = if self.last_stage == stage { self.last_entry } else { (player.x, player.y) };
+        let (entry_x, entry_y) = self.entries.get(&stage).copied().unwrap_or((player.x, player.y));
         let mut next = GameScene::new(&mut self.state, &mut self.ctx, stage).map_err(err)?;
         next.player1 = player;
         next.player1.x = entry_x;
@@ -353,13 +357,17 @@ impl Runtime {
                 self.persist_terrain()?;
                 self.apply_terrain();
                 self.state.start_new_game(&mut self.ctx).map_err(err)?;
+                self.checkpoint_load = true;
                 changed = self.transitions()?;
+                self.checkpoint_load = false;
             }
             "load" | "retry" => {
                 self.revert_terrain();
                 self.apply_terrain();
                 self.state.load_or_start_game(&mut self.ctx).map_err(err)?;
+                self.checkpoint_load = true;
                 changed = self.transitions()?;
+                self.checkpoint_load = false;
             }
             "save" => {
                 // A campaign save commits the room's terrain to the checkpoint

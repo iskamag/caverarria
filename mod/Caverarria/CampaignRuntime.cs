@@ -620,13 +620,26 @@ internal static class CampaignRuntime
         ApplySnapshot(false); imageDirty = true;
         return true;
     }
-    /// <summary>Re-enters the current room as if arriving through its door.</summary>
+    /// <summary>Rebuilds the current room so entities reset, then sends the player
+    /// to their recall spawn (Terraria's bed/world spawn), like a Recall Potion.</summary>
     public static bool ReloadRoom()
     {
         if (!Active) return false;
-        Snapshot = Engine!.Send(new { op = "reload_room" });
+        var spawn = RecallSpawn();
+        Vector2 cave = ToCave(spawn);
+        Snapshot = Engine!.Send(new { op = "reload_room", x = cave.X, y = cave.Y });
         ApplySnapshot(true); imageDirty = true;
         return true;
+    }
+
+    /// <summary>Terraria's spawn point: the player's bed spawn, else the world spawn.</summary>
+    private static Vector2 RecallSpawn()
+    {
+        Player player = Main.LocalPlayer;
+        int x = player.SpawnX, y = player.SpawnY;
+        if (x < 0 || y < 0) { x = Main.spawnTileX; y = Main.spawnTileY; }
+        // Center the player on the spawn tile, as Spawn() does.
+        return new Vector2(x * 16f + 8f, y * 16f + 8f - player.height / 2f);
     }
     public static void TestCommand(string command)
     {

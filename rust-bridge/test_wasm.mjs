@@ -264,6 +264,14 @@ if(process.env.CAVERARRIA_TERRAIN_TEST){
     command({op:'retry'});
     const afterRetry=command({op:'reload_room'}).player;
     assert.equal(10,Math.round(afterRetry.x),'reload_room followed the checkpoint instead of the door');
+    // Re-entering the same stage through a different door updates the entry.
+    command({op:'warp',stage:cave,x:40,y:8});
+    const newDoor=command({op:'reload_room'}).player;
+    assert.equal(40,Math.round(newDoor.x),'reload_room kept a stale door entry for the stage');
+    // A host-supplied recall target overrides the door entry.
+    const recalled=command({op:'reload_room',x:25,y:12}).player;
+    assert.equal(25,Math.round(recalled.x),'reload_room ignored the host recall target');
+    assert.equal(12,Math.round(recalled.y),'reload_room ignored the host recall target');
     e.cave_destroy(handle);
     console.log(JSON.stringify({module:modulePath,terrain_cell:{room,x,y},mining:true,reject_stale:true,reject_bounds:true,session_reload:true,repair_room:true,reload_room:true,reload_entities:true,reload_door_entry:true,session_commit:true,off_volatile:true,persistent_autosave:true,new_clears:true}));
     process.exit(0);

@@ -234,18 +234,20 @@ impl Runtime {
             return;
         }
         if let Ok(game) = downcast::Downcast::<GameScene>::downcast_ref(&*self.scene) {
-            self.entries.entry(game.stage_id).or_insert((game.player1.x, game.player1.y));
+            // Overwrite: re-entering the same stage through a different door
+            // must update its entry, not keep the first one.
+            self.entries.insert(game.stage_id, (game.player1.x, game.player1.y));
         }
     }
-    /// Re-enter the current room as if arriving through its door: rebuild the
-    /// stage so entities reset, keep the player and inventory, and place the
-    /// player back at the recorded entry.
-    fn reload_room(&mut self) -> Result<(), String> {
+    /// Rebuild the current room so its entities reset, keeping the player and
+    /// inventory. The host supplies the target position (its recall/spawn
+    /// point); without one, fall back to the recorded door entry.
+    fn reload_room(&mut self, target: Option<(i32, i32)>) -> Result<(), String> {
         let (stage, player, inventory) = match downcast::Downcast::<GameScene>::downcast_ref(&*self.scene) {
             Ok(game) => (game.stage_id, game.player1.clone(), game.inventory_player1.clone()),
             Err(_) => return Ok(()),
         };
-        let (entry_x, entry_y) = self.entries.get(&stage).copied().unwrap_or((player.x, player.y));
+        let (entry_x, entry_y) = target.unwrap_or_else(|| self.entries.get(&stage).copied().unwrap_or((player.x, player.y)));
         let mut next = GameScene::new(&mut self.state, &mut self.ctx, stage).map_err(err)?;
         next.player1 = player;
         next.player1.x = entry_x;
@@ -255,6 +257,11 @@ impl Runtime {
         next.player1.cond.set_alive(true);
         next.inventory_player1 = inventory;
         next.intro_mode = false;
+        // The host supplies the player position each tick (external kinematics),
+        // so tell it to snap to the recorded door entry instead.
+        next.player1.external_kinematics = true;
+        self.force_position = true;
+        self.force_velocity = true;
         // Neutral control state, like a fresh door arrival.
         self.state.control_flags.set_control_enabled(true);
         self.state.control_flags.set_interactions_disabled(false);
@@ -385,7 +392,11 @@ impl Runtime {
                 self.repair_room()?;
             }
             "reload_room" => {
-                self.reload_room()?;
+                let target = match (v["x"].as_f64(), v["y"].as_f64()) {
+                    (Some(x), Some(y)) => Some(((x * 512.0) as i32, (y * 512.0) as i32)),
+                    _ => None,
+                };
+                self.reload_room(target)?;
                 changed = true;
             }
             "hit" => {
